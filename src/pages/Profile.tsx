@@ -129,6 +129,13 @@ const Profile = () => {
                       <Button
                         size="sm"
                         className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
+                        onClick={() => {
+                          // TODO: Implement image upload
+                          toast({
+                            title: "Upload photo",
+                            description: "Photo upload feature coming soon!",
+                          });
+                        }}
                       >
                         <Camera className="w-4 h-4" />
                       </Button>

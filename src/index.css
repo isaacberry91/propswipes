@@ -15,20 +15,20 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 18%;
 
-    /* Primary - Vibrant teal for CTAs and highlights */
-    --primary: 176 70% 45%;
+    /* Primary - Modern purple for CTAs and highlights */
+    --primary: 260 84% 60%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 176 80% 60%;
+    --primary-glow: 280 84% 75%;
 
-    /* Secondary - Soft pink for accent elements */
-    --secondary: 340 75% 85%;
-    --secondary-foreground: 340 60% 25%;
+    /* Secondary - Cool blue for accent elements */
+    --secondary: 200 95% 92%;
+    --secondary-foreground: 215 25% 27%;
 
     --muted: 220 13% 95%;
     --muted-foreground: 220 13% 45%;
 
-    --accent: 176 30% 92%;
-    --accent-foreground: 176 70% 25%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 215 25% 27%;
 
     /* Love/Heart color for likes */
     --love: 348 83% 60%;
@@ -43,19 +43,21 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 96%;
-    --ring: 176 70% 45%;
+    --ring: 260 84% 60%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-primary: linear-gradient(135deg, hsl(260 84% 60%), hsl(280 84% 75%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.8), hsl(0 0% 100% / 0.4));
     --gradient-love: linear-gradient(135deg, hsl(348 83% 60%), hsl(348 93% 70%));
     --gradient-pass: linear-gradient(135deg, hsl(220 13% 60%), hsl(220 13% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(260 84% 60%), hsl(200 95% 85%));
 
     /* Shadows */
     --shadow-card: 0 8px 32px hsl(220 13% 18% / 0.08);
     --shadow-love: 0 4px 20px hsl(348 83% 60% / 0.3);
     --shadow-pass: 0 4px 20px hsl(220 13% 60% / 0.2);
-    --shadow-primary: 0 4px 20px hsl(var(--primary) / 0.3);
+    --shadow-primary: 0 4px 20px hsl(260 84% 60% / 0.25);
+    --shadow-glow: 0 0 40px hsl(280 84% 75% / 0.4);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

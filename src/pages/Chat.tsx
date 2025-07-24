@@ -3,7 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Send, Heart, Home, MapPin } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone } from "lucide-react";
 
 // Sample chat data
 const chatData = {
@@ -61,9 +64,37 @@ const Chat = () => {
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(chatData[1]?.messages || []);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showPropertyDetails, setShowPropertyDetails] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const match = chatData[1]?.match;
+
+  // Extended user profile data
+  const userProfile = {
+    ...match?.user,
+    company: "TechCorp Solutions",
+    position: "Senior Software Engineer",
+    email: "sarah.chen@techcorp.com",
+    phone: "+1 (206) 555-0123",
+    bio: "Experienced software engineer looking for my first home purchase. Interested in modern condos with good amenities and proximity to tech hubs.",
+    verified: true,
+    memberSince: "2024"
+  };
+
+  // Extended property details
+  const propertyDetails = {
+    ...match?.property,
+    bedrooms: 2,
+    bathrooms: 2,
+    sqft: 1200,
+    yearBuilt: 2019,
+    amenities: ["Gym", "Rooftop Deck", "Concierge", "In-unit Laundry"],
+    features: ["Floor-to-ceiling Windows", "Hardwood Floors", "Stainless Steel Appliances"],
+    hoaFees: "$350/month",
+    parking: "1 space included",
+    petPolicy: "Cats allowed"
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -106,14 +137,21 @@ const Chat = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           
-          <img 
-            src={match.user.avatar} 
-            alt={match.user.name}
-            className="w-10 h-10 object-cover rounded-full"
-          />
+          <Avatar 
+            className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+            onClick={() => setShowUserProfile(true)}
+          >
+            <AvatarImage src={match.user.avatar} />
+            <AvatarFallback>SC</AvatarFallback>
+          </Avatar>
           
           <div className="flex-1 min-w-0">
-            <h2 className="font-semibold text-foreground">{match.user.name}</h2>
+            <h2 
+              className="font-semibold text-foreground hover:text-primary cursor-pointer transition-colors"
+              onClick={() => setShowUserProfile(true)}
+            >
+              {match.user.name}
+            </h2>
             <p className="text-sm text-muted-foreground">{match.user.type}</p>
           </div>
           
@@ -124,15 +162,20 @@ const Chat = () => {
       {/* Property Info */}
       <div className="bg-accent/30 border-b border-border p-4">
         <div className="max-w-2xl mx-auto">
-          <Card className="p-3 bg-card border-0 shadow-sm">
+          <Card 
+            className="p-3 bg-card border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => setShowPropertyDetails(true)}
+          >
             <div className="flex gap-3">
               <img 
                 src={match.property.image} 
                 alt={match.property.title}
-                className="w-16 h-16 object-cover rounded-lg"
+                className="w-16 h-16 object-cover rounded-lg hover:scale-105 transition-transform"
               />
               <div className="flex-1">
-                <h3 className="font-semibold text-foreground text-sm">{match.property.title}</h3>
+                <h3 className="font-semibold text-foreground text-sm hover:text-primary transition-colors">
+                  {match.property.title}
+                </h3>
                 <div className="flex items-center text-xs text-muted-foreground mt-1">
                   <MapPin className="w-3 h-3 mr-1" />
                   <span>{match.property.location}</span>
@@ -180,6 +223,22 @@ const Chat = () => {
       <div className="border-t border-border bg-card p-4">
         <form onSubmit={handleSendMessage} className="max-w-2xl mx-auto">
           <div className="flex gap-2">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon"
+              className="shrink-0"
+            >
+              <Paperclip className="w-4 h-4" />
+            </Button>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon"
+              className="shrink-0"
+            >
+              <Image className="w-4 h-4" />
+            </Button>
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -192,6 +251,154 @@ const Chat = () => {
           </div>
         </form>
       </div>
+
+      {/* User Profile Dialog */}
+      <Dialog open={showUserProfile} onOpenChange={setShowUserProfile}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <Avatar className="w-12 h-12">
+                <AvatarImage src={userProfile.avatar} />
+                <AvatarFallback>SC</AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span>{userProfile.name}</span>
+                  {userProfile.verified && (
+                    <Badge variant="secondary" className="text-xs">Verified</Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground font-normal">{userProfile.type}</p>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <Building className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-medium">Company</span>
+                </div>
+                <p className="text-sm text-muted-foreground pl-6">{userProfile.company}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-medium">Position</span>
+                </div>
+                <p className="text-sm text-muted-foreground pl-6">{userProfile.position}</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Mail className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">Email</span>
+              </div>
+              <p className="text-sm text-muted-foreground pl-6">{userProfile.email}</p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Phone className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">Phone</span>
+              </div>
+              <p className="text-sm text-muted-foreground pl-6">{userProfile.phone}</p>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">About</h4>
+              <p className="text-sm text-muted-foreground">{userProfile.bio}</p>
+            </div>
+
+            <div className="text-xs text-muted-foreground pt-2 border-t">
+              Member since {userProfile.memberSince}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Property Details Dialog */}
+      <Dialog open={showPropertyDetails} onOpenChange={setShowPropertyDetails}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{propertyDetails.title}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <img 
+              src={propertyDetails.image} 
+              alt={propertyDetails.title}
+              className="w-full h-48 object-cover rounded-lg"
+            />
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <p className="text-lg font-semibold text-foreground">{propertyDetails.bedrooms}</p>
+                <p className="text-sm text-muted-foreground">Bedrooms</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-semibold text-foreground">{propertyDetails.bathrooms}</p>
+                <p className="text-sm text-muted-foreground">Bathrooms</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-semibold text-foreground">{propertyDetails.sqft}</p>
+                <p className="text-sm text-muted-foreground">Sq Ft</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-semibold text-foreground">{propertyDetails.yearBuilt}</p>
+                <p className="text-sm text-muted-foreground">Year Built</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2">Location & Price</h4>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                  <MapPin className="w-4 h-4" />
+                  {propertyDetails.location}
+                </div>
+                <p className="text-xl font-bold text-primary">{propertyDetails.price}</p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">Amenities</h4>
+                <div className="flex flex-wrap gap-2">
+                  {propertyDetails.amenities.map((amenity, index) => (
+                    <Badge key={index} variant="secondary">{amenity}</Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">Features</h4>
+                <div className="flex flex-wrap gap-2">
+                  {propertyDetails.features.map((feature, index) => (
+                    <Badge key={index} variant="outline">{feature}</Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">HOA Fees:</span>
+                  <span className="ml-2 text-muted-foreground">{propertyDetails.hoaFees}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Parking:</span>
+                  <span className="ml-2 text-muted-foreground">{propertyDetails.parking}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Pet Policy:</span>
+                  <span className="ml-2 text-muted-foreground">{propertyDetails.petPolicy}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

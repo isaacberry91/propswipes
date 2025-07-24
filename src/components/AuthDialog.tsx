@@ -36,14 +36,15 @@ interface UserProfile {
   email: string;
   phone: string;
   
+  // Professional Info
+  company: string;
+  position: string;
+  website: string;
+  
   // Core Preferences
   userType: string;
-  location: string;
+  address: string;
   propertyTypes: string[];
-  
-  // Goals & Bio
-  goals: string;
-  bio: string;
 }
 
 const AuthDialog = ({ children }: { children: React.ReactNode }) => {
@@ -57,14 +58,15 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
     lastName: '',
     email: '',
     phone: '',
+    company: '',
+    position: '',
+    website: '',
     userType: '',
-    location: '',
-    propertyTypes: [],
-    goals: '',
-    bio: ''
+    address: '',
+    propertyTypes: []
   });
 
-  const totalSteps = 3;
+  const totalSteps = 2;
   const stepProgress = (currentStep / totalSteps) * 100;
 
   const userTypes = [
@@ -154,9 +156,7 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
       case 1:
         return formData.firstName && formData.lastName && formData.email && formData.userType;
       case 2:
-        return formData.phone && formData.location && formData.propertyTypes.length > 0;
-      case 3:
-        return formData.goals && formData.bio;
+        return formData.phone && formData.address && formData.propertyTypes.length > 0 && formData.company;
       default:
         return false;
     }
@@ -288,8 +288,8 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
         return (
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <h3 className="text-2xl font-bold text-foreground">Location & Preferences</h3>
-              <p className="text-muted-foreground">Where are you looking?</p>
+              <h3 className="text-2xl font-bold text-foreground">Contact & Professional Info</h3>
+              <p className="text-muted-foreground">Complete your profile</p>
             </div>
             
             <div className="space-y-4">
@@ -307,22 +307,22 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="location">Where are you looking for properties?</Label>
+                <Label htmlFor="address">Full Address</Label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
                   <Input
-                    id="location"
-                    value={formData.location || locationSearch}
+                    id="address"
+                    value={formData.address || locationSearch}
                     onChange={(e) => {
                       const value = e.target.value;
                       setLocationSearch(value);
-                      handleInputChange('location', value);
+                      handleInputChange('address', value);
                       setShowLocationSuggestions(true);
                     }}
                     onFocus={() => setShowLocationSuggestions(true)}
-                    placeholder="Search any city, state, or neighborhood..."
+                    placeholder="123 Main St, Seattle, WA 98101"
                     className="pl-10"
                     required
                   />
@@ -333,7 +333,7 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                           key={location}
                           className="p-2 hover:bg-accent cursor-pointer text-sm"
                           onClick={() => {
-                            handleInputChange('location', location);
+                            handleInputChange('address', location);
                             setLocationSearch(location);
                             setShowLocationSuggestions(false);
                           }}
@@ -344,11 +344,56 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                       ))}
                       {filteredLocations.length === 0 && (
                         <div className="p-2 text-sm text-muted-foreground">
-                          No suggestions found. You can enter any location.
+                          No suggestions found. You can enter any address.
                         </div>
                       )}
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company</Label>
+                  <div className="relative">
+                    <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="company"
+                      value={formData.company}
+                      onChange={(e) => handleInputChange('company', e.target.value)}
+                      placeholder="Acme Corp"
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="position">Position</Label>
+                  <div className="relative">
+                    <Briefcase className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="position"
+                      value={formData.position}
+                      onChange={(e) => handleInputChange('position', e.target.value)}
+                      placeholder="Software Engineer"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="website">Website (Optional)</Label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="website"
+                    value={formData.website}
+                    onChange={(e) => handleInputChange('website', e.target.value)}
+                    placeholder="https://yourwebsite.com"
+                    className="pl-10"
+                  />
                 </div>
               </div>
               
@@ -374,80 +419,6 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                       </div>
                     </Card>
                   ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-        
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <h3 className="text-2xl font-bold text-foreground">Your Property Goals</h3>
-              <p className="text-muted-foreground">Help us understand what you're looking for</p>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="goals">Primary Goals</Label>
-                <Select value={formData.goals} onValueChange={(value) => handleInputChange('goals', value)}>
-                  <SelectTrigger>
-                    <Home className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="What's your main goal?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="first-home">🏠 First Time Home Buyer</SelectItem>
-                    <SelectItem value="upgrade">⬆️ Upgrading Current Home</SelectItem>
-                    <SelectItem value="investment">💰 Investment Property</SelectItem>
-                    <SelectItem value="downsize">⬇️ Downsizing</SelectItem>
-                    <SelectItem value="rental">🏢 Rental Property</SelectItem>
-                    <SelectItem value="flip">🔨 Fix & Flip</SelectItem>
-                    <SelectItem value="selling">📝 Selling Property</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="bio">Tell us more about yourself</Label>
-                <Textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) => handleInputChange('bio', e.target.value)}
-                  placeholder="Share your story, timeline, specific needs, or what makes your property search unique..."
-                  rows={4}
-                  className="resize-none"
-                  required
-                />
-                <div className="text-xs text-muted-foreground text-right">
-                  {formData.bio.length}/300 characters
-                </div>
-              </div>
-              
-              <div className="bg-gradient-to-r from-primary/10 to-purple-100/50 p-4 rounded-lg border border-primary/20">
-                <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-primary" />
-                  Profile Summary
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <strong>{formData.firstName} {formData.lastName}</strong>
-                    <Badge variant="secondary" className="text-xs">
-                      {userTypes.find(t => t.value === formData.userType)?.label}
-                    </Badge>
-                  </div>
-                  <div className="text-muted-foreground flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {formData.location}
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {formData.propertyTypes.slice(0, 3).map((type, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">{type}</Badge>
-                    ))}
-                    {formData.propertyTypes.length > 3 && (
-                      <Badge variant="outline" className="text-xs">+{formData.propertyTypes.length - 3} more</Badge>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
