@@ -25,12 +25,26 @@ const Profile = () => {
   
   // Mock user data - replace with real data from your auth system
   const [userData, setUserData] = useState({
-    name: "John Doe",
+    // Basic Info
+    firstName: "John",
+    lastName: "Doe", 
     email: "john.doe@example.com",
     phone: "+1 (555) 123-4567",
-    location: "New York, NY",
-    bio: "Real estate enthusiast looking for investment opportunities",
-    avatar: ""
+    location: "Seattle, WA",
+    avatar: "",
+    
+    // Professional Info
+    userType: "buyer",
+    company: "Tech Innovations Inc",
+    position: "Senior Software Engineer",
+    website: "https://johndoe.dev",
+    linkedinProfile: "https://linkedin.com/in/johndoe",
+    yearsExperience: "6-10 years",
+    
+    // Preferences
+    budgetRange: "$750K - $1M",
+    propertyTypes: ["Single Family Home", "Condo", "Townhouse"],
+    bio: "Software engineer turned real estate enthusiast. Looking for investment opportunities in the Seattle area. Particularly interested in properties with good rental potential and modern amenities."
   });
 
   // Mock subscription data - replace with real data
@@ -108,7 +122,7 @@ const Profile = () => {
                     <Avatar className="w-24 h-24">
                       <AvatarImage src={userData.avatar} />
                       <AvatarFallback className="text-xl">
-                        {userData.name.split(' ').map(n => n[0]).join('')}
+                        {userData.firstName?.[0]}{userData.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     {isEditing && (
@@ -121,12 +135,16 @@ const Profile = () => {
                     )}
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-foreground">{userData.name}</h2>
+                    <h2 className="text-2xl font-bold text-foreground">{userData.firstName} {userData.lastName}</h2>
                     <p className="text-muted-foreground">{userData.email}</p>
+                    <p className="text-sm text-muted-foreground">{userData.position} at {userData.company}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <Star className="w-3 h-3" />
                         {subscriptionData.plan}
+                      </Badge>
+                      <Badge variant="outline" className="capitalize">
+                        {userData.userType}
                       </Badge>
                     </div>
                   </div>
@@ -135,11 +153,21 @@ const Profile = () => {
                 {/* Profile Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="firstName">First Name</Label>
                     <Input
-                      id="name"
-                      value={userData.name}
-                      onChange={(e) => setUserData({...userData, name: e.target.value})}
+                      id="firstName"
+                      value={userData.firstName}
+                      onChange={(e) => setUserData({...userData, firstName: e.target.value})}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      value={userData.lastName}
+                      onChange={(e) => setUserData({...userData, lastName: e.target.value})}
                       disabled={!isEditing}
                     />
                   </div>
@@ -174,6 +202,66 @@ const Profile = () => {
                       disabled={!isEditing}
                     />
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="company">Company</Label>
+                    <Input
+                      id="company"
+                      value={userData.company}
+                      onChange={(e) => setUserData({...userData, company: e.target.value})}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="position">Position</Label>
+                    <Input
+                      id="position"
+                      value={userData.position}
+                      onChange={(e) => setUserData({...userData, position: e.target.value})}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      value={userData.website}
+                      onChange={(e) => setUserData({...userData, website: e.target.value})}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin">LinkedIn Profile</Label>
+                    <Input
+                      id="linkedin"
+                      value={userData.linkedinProfile}
+                      onChange={(e) => setUserData({...userData, linkedinProfile: e.target.value})}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="experience">Years of Experience</Label>
+                    <Input
+                      id="experience"
+                      value={userData.yearsExperience}
+                      onChange={(e) => setUserData({...userData, yearsExperience: e.target.value})}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="budget">Budget Range</Label>
+                    <Input
+                      id="budget"
+                      value={userData.budgetRange}
+                      onChange={(e) => setUserData({...userData, budgetRange: e.target.value})}
+                      disabled={!isEditing}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -187,7 +275,15 @@ const Profile = () => {
                     disabled={!isEditing}
                   />
                 </div>
-
+                
+                <div className="space-y-2">
+                  <Label htmlFor="propertyTypes">Property Types of Interest</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {userData.propertyTypes.map((type, index) => (
+                      <Badge key={index} variant="secondary">{type}</Badge>
+                    ))}
+                  </div>
+                </div>
                 {isEditing && (
                   <div className="flex gap-4">
                     <Button onClick={handleSave}>Save Changes</Button>
