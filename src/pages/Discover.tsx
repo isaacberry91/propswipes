@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, Home, MapPin, Bed, Bath, Square } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Heart, X, Home, MapPin, Bed, Bath, Square, ChevronDown, LogIn, UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AuthDialog from "@/components/AuthDialog";
 
 // Sample property data
 const sampleProperties = [
@@ -48,6 +50,8 @@ const Discover = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState("seattle");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { toast } = useToast();
 
   const handleSwipe = (direction: 'left' | 'right') => {
@@ -79,92 +83,183 @@ const Discover = () => {
 
   const currentProperty = sampleProperties[currentIndex];
 
-  return (
-    <div className="min-h-screen bg-background p-4 flex flex-col items-center justify-center max-w-md mx-auto">
-      <div className="relative w-full max-w-sm">
-        <Card className={`
-          relative overflow-hidden bg-card shadow-card rounded-2xl border-0
-          ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
-          ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
-        `}>
-          <div className="relative">
+  const locations = [
+    { value: "seattle", label: "Seattle, WA" },
+    { value: "bellevue", label: "Bellevue, WA" },
+    { value: "redmond", label: "Redmond, WA" },
+    { value: "tacoma", label: "Tacoma, WA" },
+    { value: "portland", label: "Portland, OR" },
+    { value: "vancouver", label: "Vancouver, WA" }
+  ];
+
+  // Show auth prompt for non-logged in users
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <div className="text-center space-y-6 max-w-sm">
+          <div className="flex items-center justify-center gap-3 mb-8">
             <img 
-              src={currentProperty.image} 
-              alt={currentProperty.title}
-              className="w-full h-96 object-cover"
+              src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
+              alt="PropSwipes" 
+              className="w-16 h-16"
             />
-            <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1">
-              <span className="text-sm font-semibold text-primary">{currentProperty.price}</span>
-            </div>
+            <h1 className="text-3xl font-bold text-primary">PropSwipes</h1>
           </div>
           
-          <div className="p-6 space-y-4">
-            <div>
-              <h3 className="text-xl font-bold text-foreground">{currentProperty.title}</h3>
-              <div className="flex items-center text-muted-foreground mt-1">
-                <MapPin className="w-4 h-4 mr-1" />
-                <span className="text-sm">{currentProperty.location}</span>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <div className="flex items-center">
-                <Bed className="w-4 h-4 mr-1" />
-                <span>{currentProperty.beds} beds</span>
-              </div>
-              <div className="flex items-center">
-                <Bath className="w-4 h-4 mr-1" />
-                <span>{currentProperty.baths} baths</span>
-              </div>
-              <div className="flex items-center">
-                <Square className="w-4 h-4 mr-1" />
-                <span>{currentProperty.sqft} sqft</span>
-              </div>
-            </div>
-            
-            <p className="text-muted-foreground text-sm">{currentProperty.description}</p>
-            
-            <div className="flex flex-wrap gap-2">
-              {currentProperty.tags.map((tag) => (
-                <span 
-                  key={tag}
-                  className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-foreground">Find Your Perfect Property</h2>
+            <p className="text-muted-foreground">
+              Swipe through properties like you're dating! Create an account to start matching with your dream home.
+            </p>
           </div>
-        </Card>
-        
-        {/* Action Buttons */}
-        <div className="flex justify-center gap-6 mt-6">
-          <Button
-            variant="pass"
-            size="icon-lg"
-            onClick={() => handleSwipe('left')}
-            disabled={isAnimating}
-            className="rounded-full"
-          >
-            <X className="w-6 h-6" />
-          </Button>
           
-          <Button
-            variant="love"
-            size="icon-lg"
-            onClick={() => handleSwipe('right')}
-            disabled={isAnimating}
-            className="rounded-full"
-          >
-            <Heart className="w-6 h-6" />
-          </Button>
+          <div className="space-y-3">
+            <AuthDialog>
+              <Button size="lg" className="w-full">
+                <UserPlus className="w-5 h-5 mr-2" />
+                Create Account
+              </Button>
+            </AuthDialog>
+            
+            <AuthDialog>
+              <Button variant="outline" size="lg" className="w-full">
+                <LogIn className="w-5 h-5 mr-2" />
+                Sign In
+              </Button>
+            </AuthDialog>
+            
+            <Button 
+              variant="ghost" 
+              onClick={() => setIsLoggedIn(true)}
+              className="w-full text-sm"
+            >
+              Continue as Guest
+            </Button>
+          </div>
         </div>
       </div>
-      
-      <div className="mt-6 text-center">
-        <p className="text-muted-foreground text-sm">
-          {sampleProperties.length - currentIndex - 1} more properties to explore
-        </p>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header with Logo and Location Selector */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="max-w-md mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <img 
+                src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
+                alt="PropSwipes" 
+                className="w-8 h-8"
+              />
+              <span className="text-lg font-bold text-primary">PropSwipes</span>
+            </div>
+            
+            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <SelectTrigger className="w-40">
+                <MapPin className="w-4 h-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map((location) => (
+                  <SelectItem key={location.value} value={location.value}>
+                    {location.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Property Cards */}
+      <div className="p-4 flex flex-col items-center justify-center max-w-md mx-auto pt-8">
+        <div className="relative w-full max-w-sm">
+          <Card className={`
+            relative overflow-hidden bg-card shadow-card rounded-2xl border-0
+            ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
+            ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
+          `}>
+            <div className="relative">
+              <img 
+                src={currentProperty.image} 
+                alt={currentProperty.title}
+                className="w-full h-96 object-cover"
+              />
+              <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1">
+                <span className="text-sm font-semibold text-primary">{currentProperty.price}</span>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <h3 className="text-xl font-bold text-foreground">{currentProperty.title}</h3>
+                <div className="flex items-center text-muted-foreground mt-1">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  <span className="text-sm">{currentProperty.location}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center">
+                  <Bed className="w-4 h-4 mr-1" />
+                  <span>{currentProperty.beds} beds</span>
+                </div>
+                <div className="flex items-center">
+                  <Bath className="w-4 h-4 mr-1" />
+                  <span>{currentProperty.baths} baths</span>
+                </div>
+                <div className="flex items-center">
+                  <Square className="w-4 h-4 mr-1" />
+                  <span>{currentProperty.sqft} sqft</span>
+                </div>
+              </div>
+              
+              <p className="text-muted-foreground text-sm">{currentProperty.description}</p>
+              
+              <div className="flex flex-wrap gap-2">
+                {currentProperty.tags.map((tag) => (
+                  <span 
+                    key={tag}
+                    className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </Card>
+          
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-6 mt-6">
+            <Button
+              variant="pass"
+              size="icon-lg"
+              onClick={() => handleSwipe('left')}
+              disabled={isAnimating}
+              className="rounded-full"
+            >
+              <X className="w-6 h-6" />
+            </Button>
+            
+            <Button
+              variant="love"
+              size="icon-lg"
+              onClick={() => handleSwipe('right')}
+              disabled={isAnimating}
+              className="rounded-full"
+            >
+              <Heart className="w-6 h-6" />
+            </Button>
+          </div>
+        </div>
+        
+        <div className="mt-6 text-center">
+          <p className="text-muted-foreground text-sm">
+            {sampleProperties.length - currentIndex - 1} more properties to explore
+          </p>
+        </div>
       </div>
     </div>
   );
