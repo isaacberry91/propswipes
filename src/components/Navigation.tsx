@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, Heart, Plus, MessageCircle } from "lucide-react";
+import { Home, Heart, Plus, User } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
@@ -10,6 +10,7 @@ const Navigation = () => {
     { path: "/discover", icon: Home, label: "Discover" },
     { path: "/matches", icon: Heart, label: "Matches" },
     { path: "/list", icon: Plus, label: "List" },
+    { path: "/profile", icon: User, label: "Profile" },
   ];
 
   // Don't show navigation on chat pages

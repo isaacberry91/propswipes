@@ -8,6 +8,8 @@ import Discover from "./pages/Discover";
 import ListProperty from "./pages/ListProperty";
 import Matches from "./pages/Matches";
 import Chat from "./pages/Chat";
+import Profile from "./pages/Profile";
+import Subscription from "./pages/Subscription";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +28,8 @@ const App = () => (
             <Route path="/list" element={<ListProperty />} />
             <Route path="/matches" element={<Matches />} />
             <Route path="/chat/:matchId" element={<Chat />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/subscription" element={<Subscription />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
