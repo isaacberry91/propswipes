@@ -88,8 +88,21 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
 
   const locationSuggestions = [
     "Seattle, WA", "Bellevue, WA", "Redmond, WA", "Tacoma, WA",
-    "Portland, OR", "Vancouver, WA", "Spokane, WA", "Olympia, WA"
+    "Portland, OR", "Vancouver, WA", "Spokane, WA", "Olympia, WA",
+    "San Francisco, CA", "Los Angeles, CA", "San Diego, CA", "Sacramento, CA",
+    "New York, NY", "Brooklyn, NY", "Manhattan, NY", "Queens, NY",
+    "Chicago, IL", "Houston, TX", "Phoenix, AZ", "Philadelphia, PA",
+    "San Antonio, TX", "Dallas, TX", "Austin, TX", "Jacksonville, FL",
+    "Fort Worth, TX", "Columbus, OH", "Charlotte, NC", "Indianapolis, IN",
+    "Denver, CO", "Boston, MA", "Nashville, TN", "Miami, FL"
   ];
+
+  const [locationSearch, setLocationSearch] = useState('');
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+
+  const filteredLocations = locationSuggestions.filter(location =>
+    location.toLowerCase().includes(locationSearch.toLowerCase())
+  ).slice(0, 6);
 
   const handleInputChange = (field: keyof UserProfile, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -296,18 +309,47 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="location">Preferred Location</Label>
-                <Select value={formData.location} onValueChange={(value) => handleInputChange('location', value)}>
-                  <SelectTrigger>
-                    <MapPin className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="Choose your preferred area" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locationSuggestions.map((location) => (
-                      <SelectItem key={location} value={location}>{location}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="location">Where are you looking for properties?</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                  <Input
+                    id="location"
+                    value={formData.location || locationSearch}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setLocationSearch(value);
+                      handleInputChange('location', value);
+                      setShowLocationSuggestions(true);
+                    }}
+                    onFocus={() => setShowLocationSuggestions(true)}
+                    placeholder="Search any city, state, or neighborhood..."
+                    className="pl-10"
+                    required
+                  />
+                  {showLocationSuggestions && locationSearch && (
+                    <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-20 max-h-40 overflow-y-auto">
+                      {filteredLocations.map((location) => (
+                        <div
+                          key={location}
+                          className="p-2 hover:bg-accent cursor-pointer text-sm"
+                          onClick={() => {
+                            handleInputChange('location', location);
+                            setLocationSearch(location);
+                            setShowLocationSuggestions(false);
+                          }}
+                        >
+                          <MapPin className="w-3 h-3 inline mr-2" />
+                          {location}
+                        </div>
+                      ))}
+                      {filteredLocations.length === 0 && (
+                        <div className="p-2 text-sm text-muted-foreground">
+                          No suggestions found. You can enter any location.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="space-y-3">

@@ -6,6 +6,7 @@ import { Heart, X, Home, MapPin, Bed, Bath, Square, ChevronDown, LogIn, UserPlus
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/AuthDialog";
 import SearchFilters from "@/components/SearchFilters";
+import LocationSearch from "@/components/LocationSearch";
 
 // Sample property data
 const sampleProperties = [
@@ -51,7 +52,7 @@ const Discover = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState("seattle");
+  const [selectedLocation, setSelectedLocation] = useState("Seattle, WA");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { toast } = useToast();
 
@@ -84,14 +85,15 @@ const Discover = () => {
 
   const currentProperty = sampleProperties[currentIndex];
 
-  const locations = [
-    { value: "seattle", label: "Seattle, WA" },
-    { value: "bellevue", label: "Bellevue, WA" },
-    { value: "redmond", label: "Redmond, WA" },
-    { value: "tacoma", label: "Tacoma, WA" },
-    { value: "portland", label: "Portland, OR" },
-    { value: "vancouver", label: "Vancouver, WA" }
-  ];
+  // Mock function to get properties for selected location
+  const getPropertiesForLocation = (location: string) => {
+    // In a real app, this would fetch properties from an API based on location
+    console.log(`Fetching properties for: ${location}`);
+    toast({
+      title: "Location Updated! 📍",
+      description: `Now showing properties in ${location}`,
+    });
+  };
 
   // Show auth prompt for non-logged in users
   if (!isLoggedIn) {
@@ -144,9 +146,9 @@ const Discover = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Logo and Location Selector */}
+      {/* Header with Logo and Location Search */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-3">
+        <div className="max-w-md mx-auto px-4 py-3 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img 
@@ -157,21 +159,19 @@ const Discover = () => {
               <span className="text-lg font-bold text-primary">PropSwipes</span>
             </div>
             
-            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-              <SelectTrigger className="w-40">
-                <MapPin className="w-4 h-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map((location) => (
-                  <SelectItem key={location.value} value={location.value}>
-                    {location.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
             <SearchFilters />
+          </div>
+          
+          {/* Location Search */}
+          <div className="w-full">
+            <LocationSearch
+              value={selectedLocation}
+              onChange={(location) => {
+                setSelectedLocation(location);
+                getPropertiesForLocation(location);
+              }}
+              placeholder="Search properties anywhere..."
+            />
           </div>
         </div>
       </div>
@@ -258,9 +258,12 @@ const Discover = () => {
           </div>
         </div>
         
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-y-2">
           <p className="text-muted-foreground text-sm">
-            {sampleProperties.length - currentIndex - 1} more properties to explore
+            {sampleProperties.length - currentIndex - 1} more properties in {selectedLocation}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Switch locations anytime to explore different areas
           </p>
         </div>
       </div>
