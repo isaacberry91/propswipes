@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -51,6 +52,14 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				love: {
+					DEFAULT: 'hsl(var(--love))',
+					foreground: 'hsl(var(--love-foreground))'
+				},
+				pass: {
+					DEFAULT: 'hsl(var(--pass))',
+					foreground: 'hsl(var(--pass-foreground))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -84,11 +93,53 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'swipe-left': {
+					from: {
+						transform: 'translateX(0) rotate(0deg)',
+						opacity: '1'
+					},
+					to: {
+						transform: 'translateX(-100vw) rotate(-30deg)',
+						opacity: '0'
+					}
+				},
+				'swipe-right': {
+					from: {
+						transform: 'translateX(0) rotate(0deg)',
+						opacity: '1'
+					},
+					to: {
+						transform: 'translateX(100vw) rotate(30deg)',
+						opacity: '0'
+					}
+				},
+				'love-pulse': {
+					'0%, 100%': {
+						transform: 'scale(1)',
+						boxShadow: '0 0 0 0 hsl(var(--love) / 0.4)'
+					},
+					'50%': {
+						transform: 'scale(1.1)',
+						boxShadow: '0 0 0 20px hsl(var(--love) / 0)'
+					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0px)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'swipe-left': 'swipe-left 0.3s ease-in-out',
+				'swipe-right': 'swipe-right 0.3s ease-in-out',
+				'love-pulse': 'love-pulse 2s infinite',
+				'float': 'float 3s ease-in-out infinite'
 			}
 		}
 	},
