@@ -78,7 +78,20 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+}
+
+/* Animation Utilities */
+.hover-scale {
+  @apply transition-transform duration-200 hover:scale-105;
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.scale-in {
+  animation: scale-in 0.2s ease-out;
+}
 
   .dark {
     --background: 222.2 84% 4.9%;

@@ -2,9 +2,10 @@ import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Heart, X, Home, MapPin, Bed, Bath, Square, ChevronDown, LogIn, UserPlus } from "lucide-react";
+import { Heart, X, Home, MapPin, Bed, Bath, Square, ChevronDown, LogIn, UserPlus, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AuthDialog from "@/components/AuthDialog";
+import SearchFilters from "@/components/SearchFilters";
 
 // Sample property data
 const sampleProperties = [
@@ -169,6 +170,8 @@ const Discover = () => {
                 ))}
               </SelectContent>
             </Select>
+            
+            <SearchFilters />
           </div>
         </div>
       </div>
