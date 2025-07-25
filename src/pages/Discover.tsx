@@ -145,11 +145,11 @@ const Discover = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header with Logo and Location Search */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-3 space-y-3">
-          <div className="flex items-center justify-between">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
+      {/* Fixed Header */}
+      <div className="flex-shrink-0 bg-background border-b border-border">
+        <div className="max-w-md mx-auto px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <img 
                 src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
@@ -158,71 +158,67 @@ const Discover = () => {
               />
               <span className="text-lg font-bold text-primary">PropSwipes</span>
             </div>
-            
             <SearchFilters />
           </div>
           
-          {/* Location Search */}
-          <div className="w-full">
-            <LocationSearch
-              value={selectedLocation}
-              onChange={(location) => {
-                setSelectedLocation(location);
-                getPropertiesForLocation(location);
-              }}
-              placeholder="Search properties anywhere..."
-            />
-          </div>
+          <LocationSearch
+            value={selectedLocation}
+            onChange={(location) => {
+              setSelectedLocation(location);
+              getPropertiesForLocation(location);
+            }}
+            placeholder="Search properties anywhere..."
+          />
         </div>
       </div>
 
-      {/* Property Cards */}
-      <div className="p-4 flex flex-col items-center justify-center max-w-md mx-auto pt-8">
-        <div className="relative w-full max-w-sm">
+      {/* Main Content Area - Scrollable */}
+      <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden">
+        <div className="max-w-sm w-full">
           <Card className={`
-            relative overflow-hidden bg-card shadow-card rounded-2xl border-0
+            relative overflow-hidden bg-card shadow-card rounded-2xl border-0 h-[500px]
             ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
             ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
           `}>
-            <div className="relative">
+            <div className="relative h-64">
               <img 
                 src={currentProperty.image} 
                 alt={currentProperty.title}
-                className="w-full h-96 object-cover"
+                className="w-full h-full object-cover"
               />
               <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1">
                 <span className="text-sm font-semibold text-primary">{currentProperty.price}</span>
               </div>
             </div>
             
-            <div className="p-6 space-y-4">
-              <div>
-                <h3 className="text-xl font-bold text-foreground">{currentProperty.title}</h3>
-                <div className="flex items-center text-muted-foreground mt-1">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span className="text-sm">{currentProperty.location}</span>
+            <div className="p-4 h-[236px] flex flex-col">
+              <div className="mb-3">
+                <h3 className="text-lg font-bold text-foreground truncate">{currentProperty.title}</h3>
+                <div className="flex items-center text-muted-foreground">
+                  <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                  <span className="text-sm truncate">{currentProperty.location}</span>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
                 <div className="flex items-center">
                   <Bed className="w-4 h-4 mr-1" />
-                  <span>{currentProperty.beds} beds</span>
+                  <span>{currentProperty.beds}</span>
                 </div>
                 <div className="flex items-center">
                   <Bath className="w-4 h-4 mr-1" />
-                  <span>{currentProperty.baths} baths</span>
+                  <span>{currentProperty.baths}</span>
                 </div>
                 <div className="flex items-center">
                   <Square className="w-4 h-4 mr-1" />
-                  <span>{currentProperty.sqft} sqft</span>
+                  <span>{currentProperty.sqft}</span>
                 </div>
               </div>
               
-              <p className="text-muted-foreground text-sm">{currentProperty.description}</p>
+              <p className="text-muted-foreground text-sm mb-3 line-clamp-2 flex-1">{currentProperty.description}</p>
               
-              <div className="flex flex-wrap gap-2">
-                {currentProperty.tags.map((tag) => (
+              <div className="flex flex-wrap gap-1">
+                {currentProperty.tags.slice(0, 3).map((tag) => (
                   <span 
                     key={tag}
                     className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs"
@@ -235,7 +231,7 @@ const Discover = () => {
           </Card>
           
           {/* Action Buttons */}
-          <div className="flex justify-center gap-6 mt-6">
+          <div className="flex justify-center gap-6 mt-4">
             <Button
               variant="pass"
               size="icon-lg"
@@ -256,15 +252,12 @@ const Discover = () => {
               <Heart className="w-6 h-6" />
             </Button>
           </div>
-        </div>
-        
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-muted-foreground text-sm">
-            {sampleProperties.length - currentIndex - 1} more properties in {selectedLocation}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Switch locations anytime to explore different areas
-          </p>
+          
+          <div className="mt-4 text-center">
+            <p className="text-muted-foreground text-sm">
+              {sampleProperties.length - currentIndex - 1} more in {selectedLocation}
+            </p>
+          </div>
         </div>
       </div>
     </div>
