@@ -362,6 +362,7 @@ const ListProperty = () => {
         <h3 className="text-lg font-semibold mb-4">Property Details</h3>
       </div>
 
+      {/* Residential Properties */}
       {isResidential && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -447,6 +448,86 @@ const ListProperty = () => {
         </div>
       )}
 
+      {/* Commercial Properties */}
+      {isCommercial && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Year Built</Label>
+              <Input
+                placeholder="2020"
+                value={formData.yearBuilt}
+                onChange={(e) => setFormData(prev => ({ ...prev, yearBuilt: e.target.value }))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Parking Spaces</Label>
+              <Input
+                placeholder="50"
+                value={formData.parkingSpaces}
+                onChange={(e) => setFormData(prev => ({ ...prev, parkingSpaces: e.target.value }))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Lot Size</Label>
+              <Input
+                placeholder="2.5 acres"
+                value={formData.lotSize}
+                onChange={(e) => setFormData(prev => ({ ...prev, lotSize: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Annual Gross Income</Label>
+              <Input
+                placeholder="120,000"
+                value={formData.grossIncome}
+                onChange={(e) => setFormData(prev => ({ ...prev, grossIncome: e.target.value }))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Annual Expenses</Label>
+              <Input
+                placeholder="45,000"
+                value={formData.expenses}
+                onChange={(e) => setFormData(prev => ({ ...prev, expenses: e.target.value }))}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Land Properties */}
+      {formData.propertyType === "land" && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Lot Size</Label>
+              <Input
+                placeholder="5 acres or 217,800 sq ft"
+                value={formData.lotSize}
+                onChange={(e) => setFormData(prev => ({ ...prev, lotSize: e.target.value }))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Zoning</Label>
+              <Input
+                placeholder="Residential, Commercial, Agricultural"
+                value={formData.features.join(", ")}
+                onChange={(e) => setFormData(prev => ({ ...prev, features: e.target.value.split(", ") }))}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rental-specific fields (for any property type that's for rent) */}
       {isRental && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -494,6 +575,7 @@ const ListProperty = () => {
         <h3 className="text-lg font-semibold mb-4">Features & Amenities</h3>
       </div>
 
+      {/* Residential Features */}
       {isResidential && (
         <>
           <div className="space-y-3">
@@ -550,6 +632,68 @@ const ListProperty = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Commercial Features */}
+      {isCommercial && (
+        <>
+          <div className="space-y-3">
+            <Label>Building Features</Label>
+            <div className="flex flex-wrap gap-2">
+              {["Elevator", "Loading Dock", "Security System", "HVAC", "High Ceilings", "Open Floor Plan", "Conference Rooms", "Kitchen/Break Room"].map((feature) => (
+                <Button
+                  key={feature}
+                  type="button"
+                  variant={formData.features.includes(feature) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleArrayField('features', feature)}
+                  className="rounded-full"
+                >
+                  {feature}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Amenities</Label>
+            <div className="flex flex-wrap gap-2">
+              {["Parking", "Reception Area", "Handicap Accessible", "Fiber Internet", "Backup Generator", "Sprinkler System", "24/7 Access", "On-site Management"].map((amenity) => (
+                <Button
+                  key={amenity}
+                  type="button"
+                  variant={formData.amenities.includes(amenity) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleArrayField('amenities', amenity)}
+                  className="rounded-full"
+                >
+                  {amenity}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Land Features */}
+      {formData.propertyType === "land" && (
+        <div className="space-y-3">
+          <Label>Land Features</Label>
+          <div className="flex flex-wrap gap-2">
+            {["Utilities Available", "Road Access", "Buildable", "Wooded", "Waterfront", "Agricultural", "Mineral Rights", "Survey Available"].map((feature) => (
+              <Button
+                key={feature}
+                type="button"
+                variant={formData.features.includes(feature) ? "default" : "outline"}
+                size="sm"
+                onClick={() => toggleArrayField('features', feature)}
+                className="rounded-full"
+              >
+                {feature}
+              </Button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
