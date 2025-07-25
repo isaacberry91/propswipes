@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Camera, MapPin, Home, Plus, X, Upload, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 const ListProperty = () => {
   const [formData, setFormData] = useState({
@@ -49,9 +52,13 @@ const ListProperty = () => {
     features: [] as string[],
   });
   
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Sample images for demo
   const sampleImages = [
@@ -83,9 +90,18 @@ const ListProperty = () => {
   const isCommercial = ["office", "retail", "warehouse", "industrial"].includes(formData.propertyType);
   const isRental = formData.listingType === "for-rent";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to list a property.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Validation
     if (!formData.title || !formData.propertyType || !formData.address || !formData.price) {
       toast({
@@ -104,45 +120,124 @@ const ListProperty = () => {
       });
       return;
     }
+
+    setIsSubmitting(true);
     
-    toast({
-      title: "Property Listed Successfully! 🏠",
-      description: "Your property is now live and ready to match with interested buyers!",
-    });
-    
-    console.log('Property Data:', { ...formData, images });
-    
-    // Reset form
-    setFormData({
-      title: "",
-      propertyType: "",
-      listingType: "for-sale",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      price: "",
-      squareFeet: "",
-      description: "",
-      bedrooms: "",
-      bathrooms: "",
-      parkingSpaces: "",
-      yearBuilt: "",
-      lotSize: "",
-      hoaFees: "",
-      grossIncome: "",
-      expenses: "",
-      capRate: "",
-      monthlyRent: "",
-      leaseTerm: "",
-      securityDeposit: "",
-      availableDate: "",
-      amenities: [],
-      appliances: [],
-      features: [],
-    });
-    setImages([]);
-    setCurrentStep(1);
+    try {
+      // Get user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile) {
+        throw new Error('Profile not found');
+      }
+
+      // Upload images first
+      const uploadedImageUrls: string[] = [];
+      
+      for (let i = 0; i < images.length; i++) {
+        const file = images[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { error: uploadError, data } = await supabase.storage
+          .from('property-images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('property-images')
+          .getPublicUrl(filePath);
+        
+        uploadedImageUrls.push(publicUrl);
+      }
+
+      // Create property record
+      const propertyData = {
+        owner_id: profile.id,
+        title: formData.title,
+        property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio",
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip_code: formData.zipCode,
+        price: parseFloat(formData.price.replace(/,/g, '')),
+        square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
+        description: formData.description,
+        bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
+        bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
+        amenities: [...formData.amenities, ...formData.appliances, ...formData.features],
+        images: uploadedImageUrls,
+        status: 'pending' as const
+      };
+
+      const { error: insertError } = await supabase
+        .from('properties')
+        .insert(propertyData);
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      toast({
+        title: "Property Listed Successfully! 🏠",
+        description: "Your property is pending approval and will be live soon!",
+      });
+
+      // Reset form
+      setFormData({
+        title: "",
+        propertyType: "",
+        listingType: "for-sale",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        price: "",
+        squareFeet: "",
+        description: "",
+        bedrooms: "",
+        bathrooms: "",
+        parkingSpaces: "",
+        yearBuilt: "",
+        lotSize: "",
+        hoaFees: "",
+        grossIncome: "",
+        expenses: "",
+        capRate: "",
+        monthlyRent: "",
+        leaseTerm: "",
+        securityDeposit: "",
+        availableDate: "",
+        amenities: [],
+        appliances: [],
+        features: [],
+      });
+      setImages([]);
+      setImageUrls([]);
+      setCurrentStep(1);
+
+      // Navigate to profile or discover
+      navigate('/discover');
+
+    } catch (error: any) {
+      console.error('Error creating property:', error);
+      toast({
+        title: "Error creating property",
+        description: error.message || "Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,15 +252,23 @@ const ListProperty = () => {
       return;
     }
 
-    Array.from(files).forEach(file => {
+    const newFiles = Array.from(files);
+    const newImageUrls: string[] = [];
+
+    newFiles.forEach(file => {
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
-          setImages(prev => [...prev, e.target.result as string]);
+          newImageUrls.push(e.target.result as string);
+          if (newImageUrls.length === newFiles.length) {
+            setImageUrls(prev => [...prev, ...newImageUrls]);
+          }
         }
       };
       reader.readAsDataURL(file);
     });
+
+    setImages(prev => [...prev, ...newFiles]);
   };
 
   const addSampleImage = () => {
@@ -177,11 +280,12 @@ const ListProperty = () => {
       return;
     }
     const randomImage = sampleImages[Math.floor(Math.random() * sampleImages.length)];
-    setImages(prev => [...prev, randomImage]);
+    setImageUrls(prev => [...prev, randomImage]);
   };
 
   const removeImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+    setImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
   const toggleArrayField = (field: 'amenities' | 'appliances' | 'features', item: string) => {
@@ -201,7 +305,7 @@ const ListProperty = () => {
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {images.map((image, index) => (
+        {imageUrls.map((image, index) => (
           <div key={index} className="relative group">
             <img 
               src={image} 
@@ -253,7 +357,7 @@ const ListProperty = () => {
       </div>
       
       <p className="text-xs text-muted-foreground">
-        {images.length}/10 photos uploaded. First photo will be the main listing image.
+        {imageUrls.length}/10 photos uploaded. First photo will be the main listing image.
       </p>
     </div>
   );

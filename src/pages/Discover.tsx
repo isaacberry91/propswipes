@@ -144,11 +144,14 @@ const Discover = () => {
     setLoading(true);
     
     try {
+      // Extract city from location string (e.g., "Seattle, WA" -> "Seattle")
+      const cityName = location.split(',')[0].trim();
+      
       const { data, error } = await supabase
         .from('properties')
         .select('*')
         .eq('status', 'approved')
-        .ilike('city', `%${location.split(',')[0]}%`)
+        .or(`city.ilike.%${cityName}%,state.ilike.%${cityName}%`)
         .limit(20);
 
       if (error) throw error;
