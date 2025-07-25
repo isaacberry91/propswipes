@@ -36,11 +36,11 @@ interface SearchFilters {
 const SearchFilters = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
-    priceRange: [300000, 1500000],
+    priceRange: [200000, 2000000],
     bedrooms: 'any',
     bathrooms: 'any',
     propertyType: 'any',
-    sqftRange: [500, 5000],
+    sqftRange: [500, 15000],
     yearBuilt: [1950, 2024],
     features: [],
     sortBy: 'relevant'
@@ -57,11 +57,13 @@ const SearchFilters = () => {
 
   const bedroomOptions = [
     { value: 'any', label: 'Any' },
+    { value: 'studio', label: 'Studio' },
     { value: '1', label: '1+' },
     { value: '2', label: '2+' },
     { value: '3', label: '3+' },
     { value: '4', label: '4+' },
-    { value: '5', label: '5+' }
+    { value: '5', label: '5+' },
+    { value: '6', label: '6+' }
   ];
 
   const bathroomOptions = [
@@ -70,7 +72,10 @@ const SearchFilters = () => {
     { value: '1.5', label: '1.5+' },
     { value: '2', label: '2+' },
     { value: '2.5', label: '2.5+' },
-    { value: '3', label: '3+' }
+    { value: '3', label: '3+' },
+    { value: '3.5', label: '3.5+' },
+    { value: '4', label: '4+' },
+    { value: '5', label: '5+' }
   ];
 
   const features = [
@@ -79,13 +84,19 @@ const SearchFilters = () => {
     { name: 'Fireplace', icon: '🔥' },
     { name: 'Garden', icon: '🌸' },
     { name: 'Balcony', icon: '🏞️' },
-    { name: 'Gym', icon: '💪' },
+    { name: 'Gym/Fitness', icon: '💪' },
     { name: 'Pet-Friendly', icon: '🐕' },
     { name: 'Updated Kitchen', icon: '👨‍🍳' },
     { name: 'Hardwood Floors', icon: '🪵' },
     { name: 'AC/Heating', icon: '❄️' },
-    { name: 'Laundry', icon: '👕' },
-    { name: 'Parking', icon: '🅿️' }
+    { name: 'In-Unit Laundry', icon: '👕' },
+    { name: 'Parking', icon: '🅿️' },
+    { name: 'Walk-in Closet', icon: '👔' },
+    { name: 'Stainless Steel Appliances', icon: '🔧' },
+    { name: 'High Ceilings', icon: '📏' },
+    { name: 'Open Floor Plan', icon: '🏗️' },
+    { name: 'Master Suite', icon: '🛏️' },
+    { name: 'Rooftop Access', icon: '🏢' }
   ];
 
   const sortOptions = [
@@ -118,11 +129,11 @@ const SearchFilters = () => {
 
   const resetFilters = () => {
     setFilters({
-      priceRange: [300000, 1500000],
+      priceRange: [200000, 2000000],
       bedrooms: 'any',
       bathrooms: 'any',
       propertyType: 'any',
-      sqftRange: [500, 5000],
+      sqftRange: [500, 15000],
       yearBuilt: [1950, 2024],
       features: [],
       sortBy: 'relevant'
@@ -140,8 +151,8 @@ const SearchFilters = () => {
     if (filters.bathrooms !== 'any') count++;
     if (filters.propertyType !== 'any') count++;
     if (filters.features.length > 0) count++;
-    if (filters.priceRange[0] !== 300000 || filters.priceRange[1] !== 1500000) count++;
-    if (filters.sqftRange[0] !== 500 || filters.sqftRange[1] !== 5000) count++;
+    if (filters.priceRange[0] !== 200000 || filters.priceRange[1] !== 2000000) count++;
+    if (filters.sqftRange[0] !== 500 || filters.sqftRange[1] !== 15000) count++;
     if (filters.yearBuilt[0] !== 1950 || filters.yearBuilt[1] !== 2024) count++;
     return count;
   };
@@ -187,8 +198,8 @@ const SearchFilters = () => {
               <Slider
                 value={filters.priceRange}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value as [number, number] }))}
-                min={100000}
-                max={3000000}
+                min={50000}
+                max={5000000}
                 step={25000}
                 className="w-full"
               />
@@ -271,7 +282,7 @@ const SearchFilters = () => {
                 value={filters.sqftRange}
                 onValueChange={(value) => setFilters(prev => ({ ...prev, sqftRange: value as [number, number] }))}
                 min={200}
-                max={8000}
+                max={25000}
                 step={100}
                 className="w-full"
               />
@@ -307,7 +318,7 @@ const SearchFilters = () => {
           {/* Features */}
           <div className="space-y-3">
             <Label>Features & Amenities</Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {features.map((feature) => (
                 <Card
                   key={feature.name}
@@ -347,7 +358,7 @@ const SearchFilters = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
-            <Button onClick={applyFilters} className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700">
+            <Button onClick={applyFilters} className="flex-1">
               <Search className="w-4 h-4 mr-2" />
               Apply Filters ({activeFiltersCount()})
             </Button>

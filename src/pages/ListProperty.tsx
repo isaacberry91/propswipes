@@ -62,18 +62,21 @@ const ListProperty = () => {
   ];
 
   const amenitiesList = [
-    "Pool", "Gym", "Parking", "Laundry", "Storage", "Garden",
-    "Balcony", "Patio", "Fireplace", "Air Conditioning", "Heating", "Elevator"
+    "Swimming Pool", "Fitness Center", "Parking Garage", "In-Unit Laundry", "Storage Unit", "Garden/Landscaping",
+    "Balcony/Patio", "Fireplace", "Central Air/Heat", "Elevator", "Concierge", "Rooftop Access",
+    "Tennis Court", "Business Center", "Conference Room", "Security System", "Doorman", "Bike Storage"
   ];
 
   const appliancesList = [
-    "Dishwasher", "Microwave", "Refrigerator", "Washer/Dryer", 
-    "Oven", "Garbage Disposal", "Wine Cooler", "Ice Maker"
+    "Dishwasher", "Microwave", "Refrigerator", "Washer/Dryer Unit", "Gas Range/Oven", "Garbage Disposal", 
+    "Wine Cooler", "Ice Maker", "Stainless Steel Appliances", "Energy Star Appliances", "Double Oven", "Gas Cooktop"
   ];
 
   const featuresList = [
-    "Hardwood Floors", "Tile Floors", "Carpet", "High Ceilings",
-    "Crown Molding", "Walk-in Closet", "Master Suite", "Open Floor Plan"
+    "Hardwood Floors", "Tile Flooring", "Carpet", "High Ceilings (9ft+)", "Vaulted Ceilings",
+    "Crown Molding", "Walk-in Closets", "Master Suite", "Open Floor Plan", "Updated Kitchen",
+    "Granite Countertops", "Stainless Steel Appliances", "Recently Renovated", "New Paint",
+    "Energy Efficient Windows", "Skylight", "Bay Windows", "French Doors"
   ];
 
   const isResidential = ["house", "condo", "townhouse", "apartment"].includes(formData.propertyType);
@@ -142,6 +145,29 @@ const ListProperty = () => {
     setCurrentStep(1);
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    if (images.length + files.length > 10) {
+      toast({
+        title: "Maximum photos reached",
+        description: "You can upload up to 10 photos total.",
+      });
+      return;
+    }
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setImages(prev => [...prev, e.target.result as string]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const addSampleImage = () => {
     if (images.length >= 10) {
       toast({
@@ -198,17 +224,31 @@ const ListProperty = () => {
         ))}
         
         {images.length < 10 && (
-          <Button
-            type="button"
-            variant="outline"
-            className="h-32 border-2 border-dashed border-border hover:border-primary"
-            onClick={addSampleImage}
-          >
-            <div className="text-center">
-              <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Add Photo</span>
-            </div>
-          </Button>
+          <div className="space-y-2">
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                capture="environment"
+              />
+              <div className="h-32 border-2 border-dashed border-border hover:border-primary rounded-lg flex flex-col items-center justify-center bg-background hover:bg-accent/20 transition-colors">
+                <Camera className="w-6 h-6 mb-2 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground text-center">Upload Photos<br />from Camera Roll</span>
+              </div>
+            </label>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={addSampleImage}
+              className="w-full text-xs"
+            >
+              Add Sample Photo
+            </Button>
+          </div>
         )}
       </div>
       
@@ -699,7 +739,7 @@ const ListProperty = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/10 to-accent/5 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <Home className="w-12 h-12 text-primary mx-auto mb-4" />
@@ -707,7 +747,7 @@ const ListProperty = () => {
           <p className="text-muted-foreground">Create a professional listing to attract the right buyers</p>
         </div>
 
-        <Card className="p-8 shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+        <Card className="p-8 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="space-y-8">
             {renderPhotosSection()}
             
@@ -727,7 +767,7 @@ const ListProperty = () => {
               <Button 
                 type="submit" 
                 size="lg" 
-                className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700"
+                className="w-full"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 List Property
