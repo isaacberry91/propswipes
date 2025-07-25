@@ -8,16 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, Heart, Users, MapPin, Phone, Mail, Lock, User } from "lucide-react";
+import { Phone, Mail, Lock, User, MapPin, Users, ArrowLeft } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
   const [userType, setUserType] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,6 +40,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      const displayName = `${firstName} ${lastName}`.trim();
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -44,6 +48,9 @@ const Auth = () => {
           emailRedirectTo: `${window.location.origin}/discover`,
           data: {
             display_name: displayName,
+            first_name: firstName,
+            last_name: lastName,
+            username: username,
             phone: phone,
             location: location,
             user_type: userType,
@@ -112,17 +119,112 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) {
+        toast({
+          title: "Reset failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Reset email sent! 📧",
+          description: "Check your email for password reset instructions.",
+        });
+        setShowForgotPassword(false);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8 animate-fade-in">
+            <img 
+              src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
+              alt="PropSwipes Logo" 
+              className="h-24 w-24 mx-auto mb-4 object-contain"
+            />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Reset Password
+            </h1>
+          </div>
+
+          <Card className="backdrop-blur-sm bg-card/95 border border-border/50 shadow-xl animate-scale-in">
+            <CardHeader className="text-center">
+              <CardTitle>Forgot your password?</CardTitle>
+              <CardDescription>
+                Enter your email to receive reset instructions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email" className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email Address
+                  </Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]" 
+                  disabled={loading}
+                >
+                  {loading ? "Sending..." : "Send Reset Email"}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full h-11 font-semibold transition-all" 
+                  onClick={() => setShowForgotPassword(false)}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Sign In
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
       <div className="w-full max-w-md">
         {/* Logo and Branding */}
         <div className="text-center mb-8 animate-fade-in">
-          <div className="flex items-center justify-center mb-4">
-            <div className="relative">
-              <Home className="h-12 w-12 text-primary animate-pulse" />
-              <Heart className="h-6 w-6 text-pink-500 absolute -top-1 -right-1" />
-            </div>
-          </div>
+          <img 
+            src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
+            alt="PropSwipes Logo" 
+            className="h-32 w-32 mx-auto mb-4 object-contain hover:scale-105 transition-transform duration-300"
+          />
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
             PropSwipes
           </h1>
@@ -184,6 +286,14 @@ const Auth = () => {
                   >
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    className="w-full text-sm text-muted-foreground hover:text-primary transition-colors" 
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Forgot your password?
+                  </Button>
                 </form>
               </TabsContent>
               
@@ -191,16 +301,65 @@ const Auth = () => {
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-name" className="flex items-center gap-2">
+                      <Label htmlFor="signup-firstname" className="flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        Full Name
+                        First Name
                       </Label>
                       <Input
-                        id="signup-name"
+                        id="signup-firstname"
                         type="text"
-                        placeholder="John Doe"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="John"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-lastname" className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Last Name
+                      </Label>
+                      <Input
+                        id="signup-lastname"
+                        type="text"
+                        placeholder="Doe"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-username" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      Username
+                    </Label>
+                    <Input
+                      id="signup-username"
+                      type="text"
+                      placeholder="johndoe123"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email" className="flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email
+                      </Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="john@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="transition-all focus:ring-2 focus:ring-primary/20"
                         required
                       />
@@ -223,22 +382,6 @@ const Auth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      Email Address
-                    </Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="transition-all focus:ring-2 focus:ring-primary/20"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="signup-location" className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       Location
@@ -246,7 +389,7 @@ const Auth = () => {
                     <Input
                       id="signup-location"
                       type="text"
-                      placeholder="City, State"
+                      placeholder="New York, NY"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       className="transition-all focus:ring-2 focus:ring-primary/20"
@@ -257,17 +400,19 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
-                      I'm looking to...
+                      I am a...
                     </Label>
                     <Select value={userType} onValueChange={setUserType} required>
                       <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
-                        <SelectValue placeholder="Select your goal" />
+                        <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="buyer">Buy a property 🏠</SelectItem>
-                        <SelectItem value="seller">Sell my property 💰</SelectItem>
-                        <SelectItem value="renter">Rent a property 🔑</SelectItem>
-                        <SelectItem value="landlord">Rent out my property 🏢</SelectItem>
+                        <SelectItem value="buyer">Buyer - Looking to purchase 🏠</SelectItem>
+                        <SelectItem value="seller">Seller - Selling my property 💰</SelectItem>
+                        <SelectItem value="broker">Broker - Real estate professional 🤝</SelectItem>
+                        <SelectItem value="investor">Investor - Investment opportunities 📈</SelectItem>
+                        <SelectItem value="renter">Renter - Looking to rent 🔑</SelectItem>
+                        <SelectItem value="landlord">Landlord - Renting out property 🏢</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -280,10 +425,11 @@ const Auth = () => {
                     <Input
                       id="signup-password"
                       type="password"
-                      placeholder="Create a strong password"
+                      placeholder="Create a strong password (8+ characters)"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="transition-all focus:ring-2 focus:ring-primary/20"
+                      minLength={8}
                       required
                     />
                   </div>
