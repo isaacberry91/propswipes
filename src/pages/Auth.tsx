@@ -108,7 +108,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-secondary/20">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Welcome to PropSwipe</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to PropSwipes</CardTitle>
           <CardDescription>
             Find your perfect property match
           </CardDescription>
