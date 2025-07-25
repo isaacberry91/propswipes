@@ -5,223 +5,254 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Camera, MapPin, Home, Plus, Building, Warehouse, Store, Briefcase } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Camera, MapPin, Home, Plus, X, Upload, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const ListProperty = () => {
   const [formData, setFormData] = useState({
-    // General Fields
-    listingType: "",
+    // Required Core Fields
+    title: "",
     propertyType: "",
+    listingType: "for-sale",
     address: "",
     city: "",
     state: "",
-    squareFeet: "",
-    yearBuilt: "",
-    lotSize: "",
-    annualTaxes: "",
-    keyFeatures: "",
-    
-    // Basic Details
-    title: "",
+    zipCode: "",
     price: "",
+    squareFeet: "",
     description: "",
     
-    // Residential Fields
+    // Residential Specific
     bedrooms: "",
     bathrooms: "",
     parkingSpaces: "",
+    yearBuilt: "",
+    lotSize: "",
     hoaFees: "",
-    amenities: [] as string[],
-    interiorFeatures: [] as string[],
-    exteriorFeatures: [] as string[],
     
-    // Commercial Industrial
-    propertySubtype: "",
-    clearHeight: "",
-    dockDoors: "",
-    powerSupply: "",
-    zoningType: "",
-    loadingType: "",
-    ceilingHeight: "",
-    sprinklerSystem: "",
-    columnSpacing: "",
-    buildingClass: "",
-    lotCoverage: "",
-    
-    // Commercial Retail
-    frontage: "",
-    parkingRatio: "",
-    signageAvailability: "",
-    footTraffic: "",
-    visibility: "",
-    
-    // Commercial Office
-    officeClass: "",
-    layout: "",
-    floor: "",
-    elevatorAccess: "",
-    conferenceRooms: "",
-    itInfrastructure: "",
-    security: "",
-    
-    // Multi-Family
-    totalUnits: "",
-    unitMix: "",
-    occupancyRate: "",
+    // Commercial/Investment Specific
+    grossIncome: "",
+    expenses: "",
     capRate: "",
-    grossRentMultiplier: "",
-    laundryFacilities: "",
-    commonAreas: "",
     
-    // Rentals
+    // Rental Specific
     monthlyRent: "",
     leaseTerm: "",
     securityDeposit: "",
-    utilitiesIncluded: "",
     availableDate: "",
-    petPolicy: "",
-    furnished: "",
+    
+    // Features
+    amenities: [] as string[],
+    appliances: [] as string[],
+    features: [] as string[],
   });
   
   const [images, setImages] = useState<string[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
 
+  // Sample images for demo
+  const sampleImages = [
+    "https://images.unsplash.com/photo-1721322800607-8c38375eef04?w=600&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=600&h=400&fit=crop",
+    "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop"
+  ];
+
   const amenitiesList = [
-    "Pool", "Gym", "Doorman", "Balcony", "In-unit Laundry", "Elevator",
-    "Parking", "Garden", "Rooftop Access", "Concierge", "Storage", "Pet-Friendly"
+    "Pool", "Gym", "Parking", "Laundry", "Storage", "Garden",
+    "Balcony", "Patio", "Fireplace", "Air Conditioning", "Heating", "Elevator"
   ];
 
-  const interiorFeaturesList = [
-    "Hardwood Floors", "Central AC/Heat", "Fireplace", "Stainless Steel Appliances",
-    "Granite Countertops", "Walk-in Closet", "High Ceilings", "Crown Molding"
+  const appliancesList = [
+    "Dishwasher", "Microwave", "Refrigerator", "Washer/Dryer", 
+    "Oven", "Garbage Disposal", "Wine Cooler", "Ice Maker"
   ];
 
-  const exteriorFeaturesList = [
-    "Patio", "Yard", "Garage", "Fenced", "Deck", "Balcony", "Garden", "Driveway"
+  const featuresList = [
+    "Hardwood Floors", "Tile Floors", "Carpet", "High Ceilings",
+    "Crown Molding", "Walk-in Closet", "Master Suite", "Open Floor Plan"
   ];
+
+  const isResidential = ["house", "condo", "townhouse", "apartment"].includes(formData.propertyType);
+  const isCommercial = ["office", "retail", "warehouse", "industrial"].includes(formData.propertyType);
+  const isRental = formData.listingType === "for-rent";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validation
+    if (!formData.title || !formData.propertyType || !formData.address || !formData.price) {
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in all required information.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (images.length === 0) {
+      toast({
+        title: "Add photos",
+        description: "Please add at least one photo of your property.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     toast({
-      title: "Property Listed! 🏠",
-      description: "Your property is now live with all details!",
+      title: "Property Listed Successfully! 🏠",
+      description: "Your property is now live and ready to match with interested buyers!",
     });
+    
+    console.log('Property Data:', { ...formData, images });
     
     // Reset form
     setFormData({
-      listingType: "",
+      title: "",
       propertyType: "",
+      listingType: "for-sale",
       address: "",
       city: "",
       state: "",
-      squareFeet: "",
-      yearBuilt: "",
-      lotSize: "",
-      annualTaxes: "",
-      keyFeatures: "",
-      title: "",
+      zipCode: "",
       price: "",
+      squareFeet: "",
       description: "",
       bedrooms: "",
       bathrooms: "",
       parkingSpaces: "",
+      yearBuilt: "",
+      lotSize: "",
       hoaFees: "",
-      amenities: [],
-      interiorFeatures: [],
-      exteriorFeatures: [],
-      propertySubtype: "",
-      clearHeight: "",
-      dockDoors: "",
-      powerSupply: "",
-      zoningType: "",
-      loadingType: "",
-      ceilingHeight: "",
-      sprinklerSystem: "",
-      columnSpacing: "",
-      buildingClass: "",
-      lotCoverage: "",
-      frontage: "",
-      parkingRatio: "",
-      signageAvailability: "",
-      footTraffic: "",
-      visibility: "",
-      officeClass: "",
-      layout: "",
-      floor: "",
-      elevatorAccess: "",
-      conferenceRooms: "",
-      itInfrastructure: "",
-      security: "",
-      totalUnits: "",
-      unitMix: "",
-      occupancyRate: "",
+      grossIncome: "",
+      expenses: "",
       capRate: "",
-      grossRentMultiplier: "",
-      laundryFacilities: "",
-      commonAreas: "",
       monthlyRent: "",
       leaseTerm: "",
       securityDeposit: "",
-      utilitiesIncluded: "",
       availableDate: "",
-      petPolicy: "",
-      furnished: "",
+      amenities: [],
+      appliances: [],
+      features: [],
     });
     setImages([]);
-  };
-
-  const toggleArrayField = (field: string, item: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: (prev[field as keyof typeof prev] as string[]).includes(item) 
-        ? (prev[field as keyof typeof prev] as string[]).filter(i => i !== item)
-        : [...(prev[field as keyof typeof prev] as string[]), item]
-    }));
+    setCurrentStep(1);
   };
 
   const addSampleImage = () => {
-    const sampleImages = [
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop",
-      "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=400&h=300&fit=crop",
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=300&fit=crop"
-    ];
+    if (images.length >= 10) {
+      toast({
+        title: "Maximum photos reached",
+        description: "You can upload up to 10 photos.",
+      });
+      return;
+    }
     const randomImage = sampleImages[Math.floor(Math.random() * sampleImages.length)];
     setImages(prev => [...prev, randomImage]);
   };
 
-  const renderGeneralFields = () => (
+  const removeImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const toggleArrayField = (field: 'amenities' | 'appliances' | 'features', item: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].includes(item) 
+        ? prev[field].filter(i => i !== item)
+        : [...prev[field], item]
+    }));
+  };
+
+  const renderPhotosSection = () => (
+    <div className="space-y-4">
+      <div>
+        <Label className="text-base font-semibold">Property Photos *</Label>
+        <p className="text-sm text-muted-foreground">Add high-quality photos to attract more interest</p>
+      </div>
+      
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {images.map((image, index) => (
+          <div key={index} className="relative group">
+            <img 
+              src={image} 
+              alt={`Property ${index + 1}`}
+              className="w-full h-32 object-cover rounded-lg border"
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 p-0"
+              onClick={() => removeImage(index)}
+            >
+              <X className="w-3 h-3" />
+            </Button>
+            {index === 0 && (
+              <Badge className="absolute bottom-2 left-2 text-xs">Main Photo</Badge>
+            )}
+          </div>
+        ))}
+        
+        {images.length < 10 && (
+          <Button
+            type="button"
+            variant="outline"
+            className="h-32 border-2 border-dashed border-border hover:border-primary"
+            onClick={addSampleImage}
+          >
+            <div className="text-center">
+              <Upload className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Add Photo</span>
+            </div>
+          </Button>
+        )}
+      </div>
+      
+      <p className="text-xs text-muted-foreground">
+        {images.length}/10 photos uploaded. First photo will be the main listing image.
+      </p>
+    </div>
+  );
+
+  const renderBasicInfo = () => (
     <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Listing Type</Label>
+          <Label>Listing Type *</Label>
           <Select value={formData.listingType} onValueChange={(value) => setFormData(prev => ({ ...prev, listingType: value }))}>
             <SelectTrigger>
-              <SelectValue placeholder="For Sale / For Lease" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="for-sale">For Sale</SelectItem>
-              <SelectItem value="for-lease">For Lease</SelectItem>
+              <SelectItem value="for-rent">For Rent</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
         <div className="space-y-2">
-          <Label>Property Type</Label>
+          <Label>Property Type *</Label>
           <Select value={formData.propertyType} onValueChange={(value) => setFormData(prev => ({ ...prev, propertyType: value }))}>
             <SelectTrigger>
-              <SelectValue placeholder="Select Type" />
+              <SelectValue placeholder="Select property type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="house">House</SelectItem>
               <SelectItem value="condo">Condo</SelectItem>
+              <SelectItem value="townhouse">Townhouse</SelectItem>
               <SelectItem value="apartment">Apartment</SelectItem>
-              <SelectItem value="industrial">Industrial</SelectItem>
+              <SelectItem value="office">Office</SelectItem>
               <SelectItem value="retail">Retail</SelectItem>
-              <SelectItem value="mixed-use">Mixed-Use</SelectItem>
+              <SelectItem value="warehouse">Warehouse</SelectItem>
+              <SelectItem value="industrial">Industrial</SelectItem>
               <SelectItem value="land">Land</SelectItem>
             </SelectContent>
           </Select>
@@ -229,39 +260,80 @@ const ListProperty = () => {
       </div>
 
       <div className="space-y-2">
-        <Label>Property Address</Label>
+        <Label>Property Title *</Label>
         <Input
-          placeholder="123 Main Street"
-          value={formData.address}
-          onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+          placeholder="e.g., Beautiful Modern Home with City Views"
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
           required
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>City</Label>
-          <Input
-            placeholder="Seattle"
-            value={formData.city}
-            onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>State</Label>
-          <Input
-            placeholder="WA"
-            value={formData.state}
-            onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-            required
-          />
+      <div className="space-y-4">
+        <Label className="text-base font-medium">Address *</Label>
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <Label>Street Address</Label>
+            <Input
+              placeholder="123 Main Street"
+              value={formData.address}
+              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+              required
+            />
+          </div>
+          
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-2">
+              <Label>City</Label>
+              <Input
+                placeholder="Seattle"
+                value={formData.city}
+                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>State</Label>
+              <Input
+                placeholder="WA"
+                value={formData.state}
+                onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>ZIP Code</Label>
+              <Input
+                placeholder="98101"
+                value={formData.zipCode}
+                onChange={(e) => setFormData(prev => ({ ...prev, zipCode: e.target.value }))}
+                required
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Square Feet</Label>
+          <Label>{isRental ? "Monthly Rent *" : "Price *"}</Label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={isRental ? "2,500" : "850,000"}
+              value={isRental ? formData.monthlyRent : formData.price}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                [isRental ? 'monthlyRent' : 'price']: e.target.value 
+              }))}
+              className="pl-10"
+              required
+            />
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label>Square Feet *</Label>
           <Input
             placeholder="1,200"
             value={formData.squareFeet}
@@ -269,427 +341,254 @@ const ListProperty = () => {
             required
           />
         </div>
-        <div className="space-y-2">
-          <Label>Year Built</Label>
-          <Input
-            placeholder="2020"
-            value={formData.yearBuilt}
-            onChange={(e) => setFormData(prev => ({ ...prev, yearBuilt: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Lot Size</Label>
-          <Input
-            placeholder="0.25 acres"
-            value={formData.lotSize}
-            onChange={(e) => setFormData(prev => ({ ...prev, lotSize: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Annual Taxes</Label>
-          <Input
-            placeholder="$12,000"
-            value={formData.annualTaxes}
-            onChange={(e) => setFormData(prev => ({ ...prev, annualTaxes: e.target.value }))}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Property Title</Label>
-          <Input
-            placeholder="Modern Downtown Condo"
-            value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            required
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label>Price</Label>
-          <Input
-            placeholder="$850,000"
-            value={formData.price}
-            onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-            required
-          />
-        </div>
       </div>
 
       <div className="space-y-2">
-        <Label>Key Features</Label>
+        <Label>Description *</Label>
         <Textarea
-          placeholder="Updated kitchen, natural light, corner unit..."
-          value={formData.keyFeatures}
-          onChange={(e) => setFormData(prev => ({ ...prev, keyFeatures: e.target.value }))}
-          rows={2}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Description</Label>
-        <Textarea
-          placeholder="Beautiful modern property with..."
+          placeholder="Describe your property's best features, location benefits, and what makes it special..."
           value={formData.description}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          rows={3}
+          rows={4}
           required
         />
       </div>
     </div>
   );
 
-  const renderResidentialFields = () => (
+  const renderPropertyDetails = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="space-y-2">
-          <Label>Bedrooms</Label>
-          <Input
-            placeholder="3"
-            value={formData.bedrooms}
-            onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Bathrooms</Label>
-          <Input
-            placeholder="2.5"
-            value={formData.bathrooms}
-            onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Parking Spaces</Label>
-          <Input
-            placeholder="2"
-            value={formData.parkingSpaces}
-            onChange={(e) => setFormData(prev => ({ ...prev, parkingSpaces: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>HOA Fees (Monthly)</Label>
-          <Input
-            placeholder="$350"
-            value={formData.hoaFees}
-            onChange={(e) => setFormData(prev => ({ ...prev, hoaFees: e.target.value }))}
-          />
-        </div>
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Property Details</h3>
       </div>
 
-      <div className="space-y-3">
-        <Label>Amenities</Label>
-        <div className="flex flex-wrap gap-2">
-          {amenitiesList.map((amenity) => (
-            <Button
-              key={amenity}
-              type="button"
-              variant={formData.amenities.includes(amenity) ? "default" : "outline"}
-              size="sm"
-              onClick={() => toggleArrayField('amenities', amenity)}
-              className="rounded-full"
-            >
-              {amenity}
-            </Button>
-          ))}
-        </div>
-      </div>
+      {isResidential && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label>Bedrooms</Label>
+              <Select value={formData.bedrooms} onValueChange={(value) => setFormData(prev => ({ ...prev, bedrooms: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Beds" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="studio">Studio</SelectItem>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="5+">5+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Bathrooms</Label>
+              <Select value={formData.bathrooms} onValueChange={(value) => setFormData(prev => ({ ...prev, bathrooms: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Baths" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="1.5">1.5</SelectItem>
+                  <SelectItem value="2">2</SelectItem>
+                  <SelectItem value="2.5">2.5</SelectItem>
+                  <SelectItem value="3">3</SelectItem>
+                  <SelectItem value="3.5">3.5</SelectItem>
+                  <SelectItem value="4+">4+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Parking</Label>
+              <Select value={formData.parkingSpaces} onValueChange={(value) => setFormData(prev => ({ ...prev, parkingSpaces: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Spaces" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">None</SelectItem>
+                  <SelectItem value="1">1 Space</SelectItem>
+                  <SelectItem value="2">2 Spaces</SelectItem>
+                  <SelectItem value="3+">3+ Spaces</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Year Built</Label>
+              <Input
+                placeholder="2020"
+                value={formData.yearBuilt}
+                onChange={(e) => setFormData(prev => ({ ...prev, yearBuilt: e.target.value }))}
+              />
+            </div>
+          </div>
 
-      <div className="space-y-3">
-        <Label>Interior Features</Label>
-        <div className="flex flex-wrap gap-2">
-          {interiorFeaturesList.map((feature) => (
-            <Button
-              key={feature}
-              type="button"
-              variant={formData.interiorFeatures.includes(feature) ? "default" : "outline"}
-              size="sm"
-              onClick={() => toggleArrayField('interiorFeatures', feature)}
-              className="rounded-full"
-            >
-              {feature}
-            </Button>
-          ))}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Lot Size</Label>
+              <Input
+                placeholder="0.25 acres or 7,500 sq ft"
+                value={formData.lotSize}
+                onChange={(e) => setFormData(prev => ({ ...prev, lotSize: e.target.value }))}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>HOA Fees (Monthly)</Label>
+              <Input
+                placeholder="350"
+                value={formData.hoaFees}
+                onChange={(e) => setFormData(prev => ({ ...prev, hoaFees: e.target.value }))}
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="space-y-3">
-        <Label>Exterior Features</Label>
-        <div className="flex flex-wrap gap-2">
-          {exteriorFeaturesList.map((feature) => (
-            <Button
-              key={feature}
-              type="button"
-              variant={formData.exteriorFeatures.includes(feature) ? "default" : "outline"}
-              size="sm"
-              onClick={() => toggleArrayField('exteriorFeatures', feature)}
-              className="rounded-full"
-            >
-              {feature}
-            </Button>
-          ))}
+      {isRental && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Lease Term</Label>
+              <Select value={formData.leaseTerm} onValueChange={(value) => setFormData(prev => ({ ...prev, leaseTerm: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select term" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="month-to-month">Month to Month</SelectItem>
+                  <SelectItem value="6-months">6 Months</SelectItem>
+                  <SelectItem value="12-months">12 Months</SelectItem>
+                  <SelectItem value="24-months">24 Months</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Security Deposit</Label>
+              <Input
+                placeholder="2500"
+                value={formData.securityDeposit}
+                onChange={(e) => setFormData(prev => ({ ...prev, securityDeposit: e.target.value }))}
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Available Date</Label>
+            <Input
+              type="date"
+              value={formData.availableDate}
+              onChange={(e) => setFormData(prev => ({ ...prev, availableDate: e.target.value }))}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
-  const renderCommercialIndustrialFields = () => (
+  const renderFeatures = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Property Subtype</Label>
-          <Select value={formData.propertySubtype} onValueChange={(value) => setFormData(prev => ({ ...prev, propertySubtype: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Subtype" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="warehouse">Warehouse</SelectItem>
-              <SelectItem value="flex-space">Flex Space</SelectItem>
-              <SelectItem value="distribution">Distribution</SelectItem>
-              <SelectItem value="manufacturing">Manufacturing</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label>Clear Height (feet)</Label>
-          <Input
-            placeholder="24"
-            value={formData.clearHeight}
-            onChange={(e) => setFormData(prev => ({ ...prev, clearHeight: e.target.value }))}
-          />
-        </div>
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Features & Amenities</h3>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label>Dock High Doors</Label>
-          <Input
-            placeholder="4"
-            value={formData.dockDoors}
-            onChange={(e) => setFormData(prev => ({ ...prev, dockDoors: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Power Supply</Label>
-          <Input
-            placeholder="3 Phase, 480V"
-            value={formData.powerSupply}
-            onChange={(e) => setFormData(prev => ({ ...prev, powerSupply: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Zoning Type</Label>
-          <Input
-            placeholder="M1, I-2"
-            value={formData.zoningType}
-            onChange={(e) => setFormData(prev => ({ ...prev, zoningType: e.target.value }))}
-          />
-        </div>
-      </div>
-    </div>
-  );
+      {isResidential && (
+        <>
+          <div className="space-y-3">
+            <Label>Amenities</Label>
+            <div className="flex flex-wrap gap-2">
+              {amenitiesList.map((amenity) => (
+                <Button
+                  key={amenity}
+                  type="button"
+                  variant={formData.amenities.includes(amenity) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleArrayField('amenities', amenity)}
+                  className="rounded-full"
+                >
+                  {amenity}
+                </Button>
+              ))}
+            </div>
+          </div>
 
-  const renderCommercialRetailFields = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label>Frontage (ft)</Label>
-          <Input
-            placeholder="150"
-            value={formData.frontage}
-            onChange={(e) => setFormData(prev => ({ ...prev, frontage: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Parking Ratio</Label>
-          <Input
-            placeholder="4 per 1,000 sq ft"
-            value={formData.parkingRatio}
-            onChange={(e) => setFormData(prev => ({ ...prev, parkingRatio: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Signage Available</Label>
-          <Select value={formData.signageAvailability} onValueChange={(value) => setFormData(prev => ({ ...prev, signageAvailability: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Yes/No" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="yes">Yes</SelectItem>
-              <SelectItem value="no">No</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+          <div className="space-y-3">
+            <Label>Appliances</Label>
+            <div className="flex flex-wrap gap-2">
+              {appliancesList.map((appliance) => (
+                <Button
+                  key={appliance}
+                  type="button"
+                  variant={formData.appliances.includes(appliance) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleArrayField('appliances', appliance)}
+                  className="rounded-full"
+                >
+                  {appliance}
+                </Button>
+              ))}
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Visibility</Label>
-          <Select value={formData.visibility} onValueChange={(value) => setFormData(prev => ({ ...prev, visibility: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Visibility" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="street-level">Street-Level</SelectItem>
-              <SelectItem value="highway">Highway</SelectItem>
-              <SelectItem value="corner-lot">Corner Lot</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label>Foot Traffic Data</Label>
-          <Input
-            placeholder="High, Medium, Low"
-            value={formData.footTraffic}
-            onChange={(e) => setFormData(prev => ({ ...prev, footTraffic: e.target.value }))}
-          />
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderRentalFields = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label>Monthly Rent</Label>
-          <Input
-            placeholder="$2,500"
-            value={formData.monthlyRent}
-            onChange={(e) => setFormData(prev => ({ ...prev, monthlyRent: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Lease Term</Label>
-          <Input
-            placeholder="12 months"
-            value={formData.leaseTerm}
-            onChange={(e) => setFormData(prev => ({ ...prev, leaseTerm: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Security Deposit</Label>
-          <Input
-            placeholder="$2,500"
-            value={formData.securityDeposit}
-            onChange={(e) => setFormData(prev => ({ ...prev, securityDeposit: e.target.value }))}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Available Date</Label>
-          <Input
-            type="date"
-            value={formData.availableDate}
-            onChange={(e) => setFormData(prev => ({ ...prev, availableDate: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Pet Policy</Label>
-          <Select value={formData.petPolicy} onValueChange={(value) => setFormData(prev => ({ ...prev, petPolicy: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Policy" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="yes">Pets Allowed</SelectItem>
-              <SelectItem value="no">No Pets</SelectItem>
-              <SelectItem value="restrictions">With Restrictions</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+          <div className="space-y-3">
+            <Label>Interior Features</Label>
+            <div className="flex flex-wrap gap-2">
+              {featuresList.map((feature) => (
+                <Button
+                  key={feature}
+                  type="button"
+                  variant={formData.features.includes(feature) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleArrayField('features', feature)}
+                  className="rounded-full"
+                >
+                  {feature}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <Home className="w-12 h-12 text-primary mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-foreground mb-2">List Your Property</h1>
-          <p className="text-muted-foreground">Complete property listing with all details</p>
+          <p className="text-muted-foreground">Create a professional listing to attract the right buyers</p>
         </div>
 
-        <Card className="p-6 shadow-card border-0 bg-white/80 backdrop-blur-sm">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Property Images */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Property Photos</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {images.map((image, index) => (
-                  <div key={index} className="relative">
-                    <img 
-                      src={image} 
-                      alt={`Property ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="floating"
-                  className="h-32 border-2 border-dashed border-border hover:border-primary"
-                  onClick={addSampleImage}
-                >
-                  <div className="text-center">
-                    <Camera className="w-6 h-6 mx-auto mb-2 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Add Photo</span>
-                  </div>
-                </Button>
-              </div>
+        <Card className="p-8 shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {renderPhotosSection()}
+            
+            <Separator />
+            
+            {renderBasicInfo()}
+            
+            <Separator />
+            
+            {renderPropertyDetails()}
+            
+            <Separator />
+            
+            {renderFeatures()}
+            
+            <div className="pt-6">
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                List Property
+              </Button>
             </div>
-
-            <Tabs defaultValue="general" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="general">
-                  <Home className="w-4 h-4 mr-2" />
-                  General
-                </TabsTrigger>
-                <TabsTrigger value="residential">
-                  <Building className="w-4 h-4 mr-2" />
-                  Residential
-                </TabsTrigger>
-                <TabsTrigger value="commercial">
-                  <Warehouse className="w-4 h-4 mr-2" />
-                  Industrial
-                </TabsTrigger>
-                <TabsTrigger value="retail">
-                  <Store className="w-4 h-4 mr-2" />
-                  Retail
-                </TabsTrigger>
-                <TabsTrigger value="rental">
-                  <Briefcase className="w-4 h-4 mr-2" />
-                  Rental
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="general">
-                {renderGeneralFields()}
-              </TabsContent>
-
-              <TabsContent value="residential">
-                {renderResidentialFields()}
-              </TabsContent>
-
-              <TabsContent value="commercial">
-                {renderCommercialIndustrialFields()}
-              </TabsContent>
-
-              <TabsContent value="retail">
-                {renderCommercialRetailFields()}
-              </TabsContent>
-
-              <TabsContent value="rental">
-                {renderRentalFields()}
-              </TabsContent>
-            </Tabs>
-
-            <Button type="submit" variant="gradient" size="lg" className="w-full">
-              <Plus className="w-4 h-4 mr-2" />
-              List Property
-            </Button>
           </form>
         </Card>
       </div>
