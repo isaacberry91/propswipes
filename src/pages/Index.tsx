@@ -58,19 +58,19 @@ const Index = () => {
             <Button 
               variant="gradient" 
               size="xl"
-              onClick={() => navigate('/discover')}
+              onClick={() => navigate('/auth')}
               className="text-lg"
             >
-              Start Swiping
+              Get Started
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button 
               variant="outline" 
               size="xl"
-              onClick={() => navigate('/list')}
+              onClick={() => navigate('/auth')}
               className="text-lg"
             >
-              List Property
+              Sign In
             </Button>
           </div>
         </div>
@@ -119,7 +119,7 @@ const Index = () => {
           <Button 
             variant="gradient" 
             size="xl"
-            onClick={() => navigate('/discover')}
+            onClick={() => navigate('/auth')}
             className="text-lg"
           >
             <Heart className="w-5 h-5 mr-2" />
