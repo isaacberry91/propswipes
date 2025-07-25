@@ -12,6 +12,7 @@ import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import Subscription from "./pages/Subscription";
 import Auth from "./pages/Auth";
+import Admin from "./pages/Admin";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -29,6 +30,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin-dashboard" element={<Admin />} />
               <Route path="/discover" element={
                 <ProtectedRoute>
                   <Discover />

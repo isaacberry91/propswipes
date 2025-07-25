@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   Users, 
   Home, 
@@ -16,104 +17,187 @@ import {
   Search,
   Filter,
   BarChart3,
-  Settings
+  Settings,
+  Check,
+  X,
+  Eye
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import AdminAuth from "@/components/AdminAuth";
 
 const Admin = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalProperties: 0,
+    pendingProperties: 0,
+    totalMatches: 0
+  });
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - replace with real data
-  const users = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      status: "active",
-      type: "buyer",
-      joinDate: "2024-01-15",
-      reportCount: 0
-    },
-    {
-      id: 2,
-      name: "Sarah Chen",
-      email: "sarah@example.com",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b429?w=100&h=100&fit=crop&crop=face",
-      status: "active",
-      type: "seller",
-      joinDate: "2024-02-10",
-      reportCount: 2
+  useEffect(() => {
+    // Check if admin is already authenticated
+    const isAdminAuth = localStorage.getItem("admin-authenticated") === "true";
+    if (isAdminAuth) {
+      setIsAuthenticated(true);
+      loadData();
+    } else {
+      setLoading(false);
     }
-  ];
+  }, []);
 
-  const properties = [
-    {
-      id: 1,
-      title: "Modern Downtown Condo",
-      owner: "John Doe",
-      price: "$850,000",
-      status: "active",
-      reports: 0,
-      views: 245
-    },
-    {
-      id: 2,
-      title: "Luxury Penthouse",
-      owner: "Sarah Chen", 
-      price: "$1,200,000",
-      status: "pending",
-      reports: 1,
-      views: 189
+  const loadData = async () => {
+    try {
+      // Load users
+      const { data: usersData } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      // Load properties
+      const { data: propertiesData } = await supabase
+        .from('properties')
+        .select(`
+          *,
+          profiles!properties_owner_id_fkey(display_name)
+        `)
+        .order('created_at', { ascending: false });
+
+      // Load stats
+      const { count: userCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: propertyCount } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: pendingCount } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+      const { count: matchCount } = await supabase
+        .from('matches')
+        .select('*', { count: 'exact', head: true });
+
+      setUsers(usersData || []);
+      setProperties(propertiesData || []);
+      setStats({
+        totalUsers: userCount || 0,
+        totalProperties: propertyCount || 0,
+        pendingProperties: pendingCount || 0,
+        totalMatches: matchCount || 0
+      });
+    } catch (error) {
+      console.error('Error loading admin data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load admin data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  const reports = [
-    {
-      id: 1,
-      reporter: "Alice Smith",
-      reported: "Bob Wilson",
-      reason: "Inappropriate behavior",
-      date: "2024-07-20",
-      status: "pending"
-    },
-    {
-      id: 2,
-      reporter: "Mike Johnson",
-      reported: "Sarah Chen",
-      reason: "Fake listing",
-      date: "2024-07-18",
-      status: "resolved"
-    }
-  ];
-
-  const handleBlockUser = (userId: number) => {
-    toast({
-      title: "User blocked",
-      description: "User has been blocked successfully",
-    });
   };
 
-  const handleDeleteUser = (userId: number) => {
-    toast({
-      title: "Account deleted",
-      description: "User account and all data have been permanently deleted",
-    });
+  const handleAuthenticated = () => {
+    setIsAuthenticated(true);
+    loadData();
   };
 
-  const handleDeleteProperty = (propertyId: number) => {
-    toast({
-      title: "Property deleted",
-      description: "Property listing has been removed",
-    });
+  if (!isAuthenticated) {
+    return <AdminAuth onAuthenticated={handleAuthenticated} />;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleApproveProperty = async (propertyId: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ status: 'approved' })
+        .eq('id', propertyId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Property approved",
+        description: "Property has been approved and is now visible to users",
+      });
+      loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to approve property",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleResolveReport = (reportId: number) => {
-    toast({
-      title: "Report resolved",
-      description: "Report has been marked as resolved",
-    });
+  const handleRejectProperty = async (propertyId: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ status: 'rejected' })
+        .eq('id', propertyId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Property rejected",
+        description: "Property has been rejected",
+      });
+      loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reject property",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteProperty = async (propertyId: string) => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', propertyId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Property deleted",
+        description: "Property listing has been permanently deleted",
+      });
+      loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete property",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("admin-authenticated");
+    setIsAuthenticated(false);
   };
 
   return (
@@ -124,10 +208,15 @@ const Admin = () => {
             <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
             <p className="text-muted-foreground">Manage users, properties, and reports</p>
           </div>
-          <Badge variant="secondary" className="flex items-center gap-2">
-            <Shield className="w-4 h-4" />
-            Admin Access
-          </Badge>
+          <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Admin Access
+            </Badge>
+            <Button variant="outline" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -138,7 +227,7 @@ const Admin = () => {
                 <Users className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">1,247</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalUsers}</p>
                 <p className="text-sm text-muted-foreground">Total Users</p>
               </div>
             </div>
@@ -150,7 +239,7 @@ const Admin = () => {
                 <Home className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">892</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalProperties}</p>
                 <p className="text-sm text-muted-foreground">Properties</p>
               </div>
             </div>
@@ -162,8 +251,8 @@ const Admin = () => {
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">23</p>
-                <p className="text-sm text-muted-foreground">Pending Reports</p>
+                <p className="text-2xl font-bold text-foreground">{stats.pendingProperties}</p>
+                <p className="text-sm text-muted-foreground">Pending Properties</p>
               </div>
             </div>
           </Card>
@@ -174,26 +263,26 @@ const Admin = () => {
                 <BarChart3 className="w-6 h-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">$2.4M</p>
-                <p className="text-sm text-muted-foreground">Total Volume</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalMatches}</p>
+                <p className="text-sm text-muted-foreground">Total Matches</p>
               </div>
             </div>
           </Card>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
+        <Tabs defaultValue="properties" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="users">
-              <Users className="w-4 h-4 mr-2" />
-              Users
-            </TabsTrigger>
             <TabsTrigger value="properties">
               <Home className="w-4 h-4 mr-2" />
               Properties
             </TabsTrigger>
-            <TabsTrigger value="reports">
-              <AlertTriangle className="w-4 h-4 mr-2" />
-              Reports
+            <TabsTrigger value="users">
+              <Users className="w-4 h-4 mr-2" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="analytics">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="settings">
               <Settings className="w-4 h-4 mr-2" />
@@ -201,10 +290,137 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
 
+          {/* Properties Tab */}
+          <TabsContent value="properties">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold">Property Management</h3>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">
+                    {stats.pendingProperties} pending approval
+                  </Badge>
+                </div>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Property</TableHead>
+                    <TableHead>Owner</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {properties.map((property) => (
+                    <TableRow key={property.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          {property.images && property.images.length > 0 && (
+                            <img 
+                              src={property.images[0]} 
+                              alt={property.title}
+                              className="w-16 h-12 object-cover rounded"
+                            />
+                          )}
+                          <div>
+                            <p className="font-medium">{property.title}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {property.city}, {property.state}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-medium">{property.profiles?.display_name || 'Unknown'}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-semibold">${property.price?.toLocaleString()}</p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={
+                            property.status === 'approved' ? 'secondary' :
+                            property.status === 'pending' ? 'default' : 'destructive'
+                          }
+                        >
+                          {property.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(property.created_at).toLocaleDateString()}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {property.status === 'pending' && (
+                            <>
+                              <Button 
+                                size="sm" 
+                                variant="default"
+                                onClick={() => handleApproveProperty(property.id)}
+                              >
+                                <Check className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => handleRejectProperty(property.id)}
+                              >
+                                <X className="w-4 h-4 mr-1" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => window.open(`/property/${property.id}`, '_blank')}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button size="sm" variant="ghost">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will permanently delete "{property.title}" and all associated data. This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteProperty(property.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete Forever
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
           {/* Users Tab */}
           <TabsContent value="users">
             <Card className="p-6">
               <div className="flex items-center gap-4 mb-6">
+                <h3 className="text-lg font-semibold">User Management</h3>
                 <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -214,149 +430,113 @@ const Admin = () => {
                     className="pl-10"
                   />
                 </div>
-                <Button variant="outline">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filters
-                </Button>
               </div>
 
-              <div className="space-y-4">
-                {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src={user.avatar} />
-                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{user.name}</h3>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-xs">{user.type}</Badge>
-                          <Badge 
-                            variant={user.status === 'active' ? 'secondary' : 'destructive'} 
-                            className="text-xs"
-                          >
-                            {user.status}
-                          </Badge>
-                          {user.reportCount > 0 && (
-                            <Badge variant="destructive" className="text-xs">
-                              {user.reportCount} reports
-                            </Badge>
-                          )}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Joined</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users
+                    .filter(user => 
+                      user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      user.bio?.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                    .map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage src={user.avatar_url} />
+                            <AvatarFallback>
+                              {user.display_name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{user.display_name || 'Unknown'}</p>
+                            <p className="text-sm text-muted-foreground">{user.phone || 'No phone'}</p>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleBlockUser(user.id)}>
-                        <Ban className="w-4 h-4 mr-2" />
-                        Block
-                      </Button>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete User Account</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently delete {user.name}'s account and all associated data including listings, messages, and profile information. This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteUser(user.id)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                              Delete Forever
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </TabsContent>
-
-          {/* Properties Tab */}
-          <TabsContent value="properties">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Property Listings</h3>
-              <div className="space-y-4">
-                {properties.map((property) => (
-                  <div key={property.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                    <div>
-                      <h4 className="font-semibold text-foreground">{property.title}</h4>
-                      <p className="text-sm text-muted-foreground">Owner: {property.owner}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="font-semibold text-primary">{property.price}</span>
-                        <Badge variant="outline" className="text-xs">{property.status}</Badge>
-                        <span className="text-xs text-muted-foreground">{property.views} views</span>
-                        {property.reports > 0 && (
-                          <Badge variant="destructive" className="text-xs">
-                            {property.reports} reports
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => handleDeleteProperty(property.id)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </TabsContent>
-
-          {/* Reports Tab */}
-          <TabsContent value="reports">
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">User Reports</h3>
-              <div className="space-y-4">
-                {reports.map((report) => (
-                  <div key={report.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                    <div>
-                      <h4 className="font-semibold text-foreground">Report #{report.id}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {report.reporter} reported {report.reported}
-                      </p>
-                      <p className="text-sm text-foreground mt-1">Reason: {report.reason}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Badge 
-                          variant={report.status === 'pending' ? 'destructive' : 'secondary'} 
-                          className="text-xs"
-                        >
-                          {report.status}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {user.user_type || 'buyer'}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">{report.date}</span>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm">{user.location || 'Not specified'}</p>
+                      </TableCell>
+                      <TableCell>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </p>
+                      </TableCell>
+                      <TableCell>
+                        <Button size="sm" variant="outline">
+                          View Profile
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-6">Platform Analytics</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <Card className="p-4">
+                  <h4 className="font-medium mb-2">User Growth</h4>
+                  <p className="text-2xl font-bold text-primary">{stats.totalUsers}</p>
+                  <p className="text-sm text-muted-foreground">Total registered users</p>
+                </Card>
+                
+                <Card className="p-4">
+                  <h4 className="font-medium mb-2">Property Listings</h4>
+                  <p className="text-2xl font-bold text-green-600">{stats.totalProperties}</p>
+                  <p className="text-sm text-muted-foreground">Properties listed</p>
+                </Card>
+                
+                <Card className="p-4">
+                  <h4 className="font-medium mb-2">Pending Approvals</h4>
+                  <p className="text-2xl font-bold text-orange-600">{stats.pendingProperties}</p>
+                  <p className="text-sm text-muted-foreground">Awaiting review</p>
+                </Card>
+                
+                <Card className="p-4">
+                  <h4 className="font-medium mb-2">Total Matches</h4>
+                  <p className="text-2xl font-bold text-purple-600">{stats.totalMatches}</p>
+                  <p className="text-sm text-muted-foreground">Successful connections</p>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Recent Activity</h4>
+                <div className="space-y-2">
+                  {properties.slice(0, 5).map((property) => (
+                    <div key={property.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div>
+                        <p className="font-medium">{property.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Listed by {property.profiles?.display_name || 'Unknown'}
+                        </p>
                       </div>
+                      <Badge variant="outline">
+                        {new Date(property.created_at).toLocaleDateString()}
+                      </Badge>
                     </div>
-                    
-                    {report.status === 'pending' && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleResolveReport(report.id)}
-                      >
-                        Resolve
-                      </Button>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </Card>
           </TabsContent>
