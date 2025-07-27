@@ -11,6 +11,7 @@ import Matches from "./pages/Matches";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import Subscription from "./pages/Subscription";
+import TestSubscription from "./pages/TestSubscription";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import Navigation from "./components/Navigation";
@@ -56,11 +57,16 @@ const App = () => (
                   <Profile />
                 </ProtectedRoute>
               } />
-              <Route path="/subscription" element={
-                <ProtectedRoute>
-                  <Subscription />
-                </ProtectedRoute>
-              } />
+               <Route path="/subscription" element={
+                 <ProtectedRoute>
+                   <Subscription />
+                 </ProtectedRoute>
+               } />
+               <Route path="/test-subscription" element={
+                 <ProtectedRoute>
+                   <TestSubscription />
+                 </ProtectedRoute>
+               } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
