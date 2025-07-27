@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, MapPin, Bed, Bath, Square } from "lucide-react";
+import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import SearchFilters from "@/components/SearchFilters";
 import LocationSearch from "@/components/LocationSearch";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface Property {
   id: string;
@@ -32,8 +33,10 @@ const Discover = () => {
   const [selectedLocation, setSelectedLocation] = useState("Seattle, WA");
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { subscription, hasUnlimitedLikes } = useSubscription();
 
   useEffect(() => {
     if (user) {
@@ -52,6 +55,26 @@ const Discover = () => {
       .single();
     
     setUserProfile(data);
+    
+    // Check daily likes usage
+    if (data) {
+      const today = new Date().toDateString();
+      const resetDate = data.daily_likes_reset_date ? new Date(data.daily_likes_reset_date).toDateString() : null;
+      
+      if (resetDate !== today) {
+        // Reset daily likes if it's a new day
+        await supabase
+          .from('profiles')
+          .update({ 
+            daily_likes_used: 0, 
+            daily_likes_reset_date: new Date().toISOString().split('T')[0]
+          })
+          .eq('user_id', user.id);
+        setDailyLikesUsed(0);
+      } else {
+        setDailyLikesUsed(data.daily_likes_used || 0);
+      }
+    }
   };
 
   const fetchProperties = async () => {
@@ -86,6 +109,16 @@ const Discover = () => {
   const handleSwipe = async (direction: 'left' | 'right') => {
     if (isAnimating || !user || !userProfile) return;
     
+    // Check like limits for non-subscribers
+    if (direction === 'right' && !hasUnlimitedLikes() && dailyLikesUsed >= 10) {
+      toast({
+        title: "Daily Like Limit Reached! 💎",
+        description: "Upgrade to Buyer Pro for unlimited daily likes and premium features.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsAnimating(true);
     setSwipeDirection(direction);
     
@@ -102,6 +135,17 @@ const Discover = () => {
         });
 
       if (direction === 'right') {
+        // Update daily likes counter for non-subscribers
+        if (!hasUnlimitedLikes()) {
+          const newLikesUsed = dailyLikesUsed + 1;
+          setDailyLikesUsed(newLikesUsed);
+          
+          await supabase
+            .from('profiles')
+            .update({ daily_likes_used: newLikesUsed })
+            .eq('user_id', user.id);
+        }
+        
         toast({
           title: "Property Liked! 💕",
           description: `You liked ${property.title}. Looking for matches...`,
@@ -188,8 +232,18 @@ const Discover = () => {
                 className="w-8 h-8"
               />
               <span className="text-lg font-bold text-primary">PropSwipes</span>
+              {subscription.isActive && (
+                <Crown className="w-4 h-4 text-amber-500" />
+              )}
             </div>
-            <SearchFilters />
+            <div className="flex items-center gap-2">
+              {!hasUnlimitedLikes() && (
+                <div className="bg-accent px-2 py-1 rounded-full text-xs">
+                  {10 - dailyLikesUsed} likes left
+                </div>
+              )}
+              <SearchFilters />
+            </div>
           </div>
           
           <LocationSearch
@@ -313,10 +367,17 @@ const Discover = () => {
                 variant="outline"
                 size="icon"
                 onClick={() => handleSwipe('right')}
-                disabled={isAnimating}
-                className="rounded-full w-14 h-14 border-2 hover:bg-green-50 hover:border-green-300"
+                disabled={isAnimating || (!hasUnlimitedLikes() && dailyLikesUsed >= 10)}
+                className={`
+                  rounded-full w-14 h-14 border-2 hover:bg-green-50 hover:border-green-300
+                  ${!hasUnlimitedLikes() && dailyLikesUsed >= 10 ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
               >
-                <Heart className="w-6 h-6 text-green-500" />
+                {!hasUnlimitedLikes() && dailyLikesUsed >= 10 ? (
+                  <Lock className="w-6 h-6 text-gray-400" />
+                ) : (
+                  <Heart className="w-6 h-6 text-green-500" />
+                )}
               </Button>
             </div>
             

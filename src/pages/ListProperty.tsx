@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Camera, MapPin, Home, Plus, X, Upload, DollarSign } from "lucide-react";
+import { Camera, MapPin, Home, Plus, X, Upload, DollarSign, Crown, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const ListProperty = () => {
   const [formData, setFormData] = useState({
@@ -59,6 +60,8 @@ const ListProperty = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { subscription, canListProperties } = useSubscription();
+  const [currentPropertyCount, setCurrentPropertyCount] = useState(0);
 
   // Sample images for demo
   const sampleImages = [
@@ -99,6 +102,21 @@ const ListProperty = () => {
         description: "Please log in to list a property.",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Check subscription limits
+    if (!canListProperties(currentPropertyCount)) {
+      const upgradeMessage = subscription.isActive 
+        ? "You've reached your listing limit. Upgrade to a higher tier for more listings."
+        : "Upgrade to a seller plan to list more properties and access professional tools.";
+        
+      toast({
+        title: "Listing Limit Reached 🏠",
+        description: upgradeMessage,
+        variant: "destructive"
+      });
+      navigate('/subscription');
       return;
     }
 
@@ -185,6 +203,18 @@ const ListProperty = () => {
 
       if (insertError) {
         throw insertError;
+      }
+
+      // Update property count in profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          properties_listed: currentPropertyCount + 1 
+        })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        console.error('Error updating property count:', updateError);
       }
 
       toast({
@@ -846,9 +876,28 @@ const ListProperty = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/10 to-accent/5 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <Home className="w-12 h-12 text-primary mx-auto mb-4" />
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Home className="w-12 h-12 text-primary" />
+            {subscription.isActive && subscription.tier?.startsWith('seller') && (
+              <Crown className="w-6 h-6 text-amber-500" />
+            )}
+          </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">List Your Property</h1>
           <p className="text-muted-foreground">Create a professional listing to attract the right buyers</p>
+          
+          {!subscription.isActive && (
+            <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <div>
+                  <h3 className="font-semibold text-amber-800 dark:text-amber-200">Free Tier Limits</h3>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    You can list 1 property for free. Upgrade to a seller plan for unlimited listings and professional tools.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <Card className="p-8 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
@@ -872,10 +921,28 @@ const ListProperty = () => {
                 type="submit" 
                 size="lg" 
                 className="w-full"
+                disabled={!canListProperties(currentPropertyCount) || isSubmitting}
               >
-                <Plus className="w-5 h-5 mr-2" />
-                List Property
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                    Creating Listing...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-5 h-5 mr-2" />
+                    List Property
+                  </>
+                )}
               </Button>
+              
+              {!canListProperties(currentPropertyCount) && (
+                <p className="text-center text-sm text-muted-foreground mt-2">
+                  <Button variant="link" onClick={() => navigate('/subscription')} className="p-0 h-auto text-primary">
+                    Upgrade your plan
+                  </Button> to list more properties
+                </p>
+              )}
             </div>
           </form>
         </Card>

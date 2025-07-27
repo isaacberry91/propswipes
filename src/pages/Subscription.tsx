@@ -5,10 +5,12 @@ import { Check, Star, Building, Crown, Users, Smartphone, AlertCircle } from "lu
 import { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { iapService, PRODUCT_IDS } from "@/services/iapService";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Subscription = () => {
   const [isNative, setIsNative] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const { subscription, fetchSubscription } = useSubscription();
 
   useEffect(() => {
     const initializeIAP = async () => {
@@ -123,7 +125,10 @@ const Subscription = () => {
       console.log(`Starting native IAP for plan: ${planId}`);
       const purchase = await iapService.purchaseProduct(planId);
       console.log('Purchase successful:', purchase);
-      // TODO: Verify purchase with backend
+      
+      // Refresh subscription status
+      await fetchSubscription();
+      
       alert("Purchase successful! Your subscription is now active.");
     } catch (error) {
       console.error("IAP Error:", error);
