@@ -41,7 +41,7 @@ const Auth = () => {
 
     try {
       const displayName = `${firstName} ${lastName}`.trim();
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -73,10 +73,19 @@ const Auth = () => {
           });
         }
       } else {
-        toast({
-          title: "Welcome to PropSwipes! 🎉",
-          description: "Check your email to confirm your account and start swiping!",
-        });
+        // Check if user is immediately signed in (auto-confirm enabled)
+        if (data.user && data.session) {
+          toast({
+            title: "Welcome to PropSwipes! 🎉",
+            description: "Account created successfully! Let's start swiping!",
+          });
+          navigate('/discover');
+        } else {
+          toast({
+            title: "Welcome to PropSwipes! 🎉",
+            description: "Check your email to confirm your account and start swiping!",
+          });
+        }
       }
     } catch (error) {
       toast({
