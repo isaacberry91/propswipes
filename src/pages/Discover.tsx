@@ -175,60 +175,9 @@ const Discover = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading properties...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (properties.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center space-y-6 max-w-sm">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">No Properties Available</h2>
-            <p className="text-muted-foreground">
-              There are no approved properties in the database yet. Properties need to be added and approved by admins before they appear here.
-            </p>
-          </div>
-          
-          <Button onClick={fetchProperties} variant="outline">
-            Refresh
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (currentIndex >= properties.length) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="text-center space-y-6 max-w-sm">
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold text-foreground">You've seen them all!</h2>
-            <p className="text-muted-foreground">
-              You've viewed all available properties in {selectedLocation}. Try searching in a different location or check back later for new listings.
-            </p>
-          </div>
-          
-          <Button onClick={() => setCurrentIndex(0)} variant="outline">
-            Start Over
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const currentProperty = properties[currentIndex];
-
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Fixed Header */}
+      {/* Fixed Header - Always Visible */}
       <div className="flex-shrink-0 bg-background border-b border-border">
         <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between mb-3">
@@ -253,98 +202,131 @@ const Discover = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden">
-        <div className="max-w-sm w-full">
-          <Card className={`
-            relative overflow-hidden bg-card shadow-card rounded-2xl border-0 h-[500px]
-            ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
-            ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
-          `}>
-            <div className="relative h-64">
-              <img 
-                src={currentProperty.images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=600&fit=crop"} 
-                alt={currentProperty.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1">
-                <span className="text-sm font-semibold text-primary">{formatPrice(currentProperty.price)}</span>
-              </div>
-            </div>
-            
-            <div className="p-4 h-[236px] flex flex-col">
-              <div className="mb-3">
-                <h3 className="text-lg font-bold text-foreground truncate">{currentProperty.title}</h3>
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-                  <span className="text-sm truncate">{currentProperty.city}, {currentProperty.state}</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                <div className="flex items-center">
-                  <Bed className="w-4 h-4 mr-1" />
-                  <span>{currentProperty.bedrooms}</span>
-                </div>
-                <div className="flex items-center">
-                  <Bath className="w-4 h-4 mr-1" />
-                  <span>{currentProperty.bathrooms}</span>
-                </div>
-                <div className="flex items-center">
-                  <Square className="w-4 h-4 mr-1" />
-                  <span>{formatSquareFeet(currentProperty.square_feet)} sqft</span>
-                </div>
-              </div>
-              
-              <p className="text-muted-foreground text-sm mb-3 line-clamp-2 flex-1">
-                {currentProperty.description || "No description available."}
+        {loading ? (
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">Loading properties...</p>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="text-center space-y-6 max-w-sm">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-foreground">No Properties Available</h2>
+              <p className="text-muted-foreground">
+                There are no approved properties in the database yet. Properties need to be added and approved by admins before they appear here.
               </p>
-              
-              <div className="flex flex-wrap gap-1">
-                {currentProperty.amenities?.slice(0, 3).map((amenity) => (
-                  <span 
-                    key={amenity}
-                    className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs"
-                  >
-                    {amenity}
-                  </span>
-                ))}
-                {(!currentProperty.amenities || currentProperty.amenities.length === 0) && (
-                  <span className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs">
-                    {currentProperty.property_type}
-                  </span>
-                )}
-              </div>
             </div>
-          </Card>
-          
-          {/* Action Buttons */}
-          <div className="flex justify-center gap-6 mt-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleSwipe('left')}
-              disabled={isAnimating}
-              className="rounded-full w-14 h-14 border-2 hover:bg-red-50 hover:border-red-300"
-            >
-              <X className="w-6 h-6 text-red-500" />
-            </Button>
             
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => handleSwipe('right')}
-              disabled={isAnimating}
-              className="rounded-full w-14 h-14 border-2 hover:bg-green-50 hover:border-green-300"
-            >
-              <Heart className="w-6 h-6 text-green-500" />
+            <Button onClick={fetchProperties} variant="outline">
+              Refresh
             </Button>
           </div>
-          
-          <div className="mt-4 text-center">
-            <p className="text-muted-foreground text-sm">
-              {properties.length - currentIndex - 1} more in {selectedLocation}
-            </p>
+        ) : currentIndex >= properties.length ? (
+          <div className="text-center space-y-6 max-w-sm">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-foreground">You've seen them all!</h2>
+              <p className="text-muted-foreground">
+                You've viewed all available properties in {selectedLocation}. Try searching in a different location or check back later for new listings.
+              </p>
+            </div>
+            
+            <Button onClick={() => setCurrentIndex(0)} variant="outline">
+              Start Over
+            </Button>
           </div>
-        </div>
+        ) : (
+          <div className="max-w-sm w-full">
+            <Card className={`
+              relative overflow-hidden bg-card shadow-card rounded-2xl border-0 h-[500px]
+              ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
+              ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
+            `}>
+              <div className="relative h-64">
+                <img 
+                  src={properties[currentIndex].images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=600&fit=crop"} 
+                  alt={properties[currentIndex].title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1">
+                  <span className="text-sm font-semibold text-primary">{formatPrice(properties[currentIndex].price)}</span>
+                </div>
+              </div>
+              
+              <div className="p-4 h-[236px] flex flex-col">
+                <div className="mb-3">
+                  <h3 className="text-lg font-bold text-foreground truncate">{properties[currentIndex].title}</h3>
+                  <div className="flex items-center text-muted-foreground">
+                    <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                    <span className="text-sm truncate">{properties[currentIndex].city}, {properties[currentIndex].state}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                  <div className="flex items-center">
+                    <Bed className="w-4 h-4 mr-1" />
+                    <span>{properties[currentIndex].bedrooms}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Bath className="w-4 h-4 mr-1" />
+                    <span>{properties[currentIndex].bathrooms}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Square className="w-4 h-4 mr-1" />
+                    <span>{formatSquareFeet(properties[currentIndex].square_feet)} sqft</span>
+                  </div>
+                </div>
+                
+                <p className="text-muted-foreground text-sm mb-3 line-clamp-2 flex-1">
+                  {properties[currentIndex].description || "No description available."}
+                </p>
+                
+                <div className="flex flex-wrap gap-1">
+                  {properties[currentIndex].amenities?.slice(0, 3).map((amenity) => (
+                    <span 
+                      key={amenity}
+                      className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs"
+                    >
+                      {amenity}
+                    </span>
+                  ))}
+                  {(!properties[currentIndex].amenities || properties[currentIndex].amenities.length === 0) && (
+                    <span className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs">
+                      {properties[currentIndex].property_type}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </Card>
+            
+            {/* Action Buttons */}
+            <div className="flex justify-center gap-6 mt-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleSwipe('left')}
+                disabled={isAnimating}
+                className="rounded-full w-14 h-14 border-2 hover:bg-red-50 hover:border-red-300"
+              >
+                <X className="w-6 h-6 text-red-500" />
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => handleSwipe('right')}
+                disabled={isAnimating}
+                className="rounded-full w-14 h-14 border-2 hover:bg-green-50 hover:border-green-300"
+              >
+                <Heart className="w-6 h-6 text-green-500" />
+              </Button>
+            </div>
+            
+            <div className="mt-4 text-center">
+              <p className="text-muted-foreground text-sm">
+                {properties.length - currentIndex - 1} more in {selectedLocation}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
