@@ -2,10 +2,10 @@ import { Capacitor } from '@capacitor/core';
 
 // Product IDs for Apple App Store and Google Play Store
 export const PRODUCT_IDS = {
-  BUYER_PRO: 'buyer_pro_monthly',
-  SELLER_BASIC: 'seller_basic_monthly', 
-  SELLER_PROFESSIONAL: 'seller_professional_monthly',
-  SELLER_ENTERPRISE: 'seller_enterprise_monthly'
+  BUYER_PRO: 'com.propswipes.subscription.buyer_pro',
+  SELLER_BASIC: 'com.propswipes.seller_basic', 
+  SELLER_PROFESSIONAL: 'com.propswipes.seller_professional',
+  SELLER_ENTERPRISE: 'com.propswipes.seller_enterprise'
 };
 
 export interface IAPProduct {
