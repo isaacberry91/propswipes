@@ -36,23 +36,19 @@ class IAPService {
     }
 
     try {
-      // Try to dynamically import IAP plugin
-      try {
-        // Check if running in actual mobile environment
-        if (typeof window !== 'undefined' && (window as any).Capacitor) {
-          // For now, we'll skip the actual plugin import since it's not available in the package registry
-          // This will be replaced with the actual plugin in the native build
-          console.log('IAP: Native platform detected, plugin will be available in built app');
-        }
-        this.isInitialized = true;
-        return true;
-      } catch (importError) {
-        console.log('IAP: Plugin not available, continuing with mock service');
-        this.isInitialized = true;
-        return true;
-      }
+      // Dynamically import the native purchases plugin
+      // @ts-ignore - Plugin is only available in native build
+      const { NativePurchases } = await import('@capgo/native-purchases');
+      this.iapPlugin = NativePurchases;
+      
+      // Initialize the plugin
+      await this.iapPlugin.initialize();
+      
+      console.log('IAP: Native purchases plugin initialized successfully');
+      this.isInitialized = true;
+      return true;
     } catch (error) {
-      console.error('IAP: Failed to initialize', error);
+      console.log('IAP: Plugin not available, continuing with mock service. Error:', error);
       this.isInitialized = true;
       return true;
     }
