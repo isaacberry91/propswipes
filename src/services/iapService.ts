@@ -37,9 +37,10 @@ class IAPService {
     try {
       // Dynamic import of IAP plugin when available
       try {
-        // @ts-ignore - Plugin may not be installed during development
-        const { InAppPurchases } = await import('@capacitor-community/in-app-purchases');
-        this.iapPlugin = InAppPurchases;
+        // Use eval to prevent Vite from detecting the import during build
+        const moduleName = '@capacitor-community/in-app-purchases';
+        const module = await eval(`import('${moduleName}')`);
+        this.iapPlugin = module.InAppPurchases;
         
         // Initialize the plugin
         await this.iapPlugin.restorePurchases();
