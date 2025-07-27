@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import SearchFilters from "@/components/SearchFilters";
 import LocationSearch from "@/components/LocationSearch";
+import SubscriptionPrompt from "@/components/SubscriptionPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
 
 interface Property {
@@ -34,6 +35,7 @@ const Discover = () => {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
+  const [showLikePrompt, setShowLikePrompt] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const { subscription, hasUnlimitedLikes } = useSubscription();
@@ -111,11 +113,7 @@ const Discover = () => {
     
     // Check like limits for non-subscribers
     if (direction === 'right' && !hasUnlimitedLikes() && dailyLikesUsed >= 10) {
-      toast({
-        title: "Daily Like Limit Reached! 💎",
-        description: "Upgrade to Buyer Pro for unlimited daily likes and premium features.",
-        variant: "destructive",
-      });
+      setShowLikePrompt(true);
       return;
     }
     
@@ -256,6 +254,17 @@ const Discover = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden">
+        {/* Subscription Prompt for Likes */}
+        {showLikePrompt && (
+          <div className="max-w-sm w-full mb-4">
+            <SubscriptionPrompt 
+              feature="likes"
+              variant="banner"
+              onDismiss={() => setShowLikePrompt(false)}
+            />
+          </div>
+        )}
+        
         {loading ? (
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
