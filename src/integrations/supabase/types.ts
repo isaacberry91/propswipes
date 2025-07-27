@@ -104,10 +104,13 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          daily_likes_reset_date: string | null
+          daily_likes_used: number | null
           display_name: string | null
           id: string
           location: string | null
           phone: string | null
+          properties_listed: number | null
           updated_at: string
           user_id: string
           user_type: Database["public"]["Enums"]["user_type"] | null
@@ -116,10 +119,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          daily_likes_reset_date?: string | null
+          daily_likes_used?: number | null
           display_name?: string | null
           id?: string
           location?: string | null
           phone?: string | null
+          properties_listed?: number | null
           updated_at?: string
           user_id: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
@@ -128,10 +134,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          daily_likes_reset_date?: string | null
+          daily_likes_used?: number | null
           display_name?: string | null
           id?: string
           location?: string | null
           phone?: string | null
+          properties_listed?: number | null
           updated_at?: string
           user_id?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
@@ -254,16 +263,95 @@ export type Database = {
           },
         ]
       }
+      subscribers: {
+        Row: {
+          apple_receipt_data: string | null
+          apple_transaction_id: string | null
+          auto_renew: boolean | null
+          created_at: string
+          id: string
+          profile_id: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          subscription_end: string
+          subscription_start: string
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          apple_receipt_data?: string | null
+          apple_transaction_id?: string | null
+          auto_renew?: boolean | null
+          created_at?: string
+          id?: string
+          profile_id: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          subscription_end: string
+          subscription_start?: string
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          apple_receipt_data?: string | null
+          apple_transaction_id?: string | null
+          auto_renew?: boolean | null
+          created_at?: string
+          id?: string
+          profile_id?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          subscription_end?: string
+          subscription_start?: string
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscribers_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_subscription_tier: {
+        Args: { user_uuid: string }
+        Returns: Database["public"]["Enums"]["subscription_tier"]
+      }
+      has_active_subscription: {
+        Args: {
+          user_uuid: string
+          tier: Database["public"]["Enums"]["subscription_tier"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       property_status: "pending" | "approved" | "rejected"
-      property_type: "house" | "apartment" | "condo" | "townhouse" | "studio"
+      property_type:
+        | "house"
+        | "apartment"
+        | "condo"
+        | "townhouse"
+        | "studio"
+        | "office"
+        | "retail"
+        | "warehouse"
+        | "industrial"
+        | "land"
+      subscription_status: "active" | "expired" | "cancelled" | "pending"
+      subscription_tier:
+        | "buyer_pro"
+        | "seller_basic"
+        | "seller_professional"
+        | "seller_enterprise"
       user_type: "buyer" | "seller" | "agent"
     }
     CompositeTypes: {
@@ -393,7 +481,25 @@ export const Constants = {
   public: {
     Enums: {
       property_status: ["pending", "approved", "rejected"],
-      property_type: ["house", "apartment", "condo", "townhouse", "studio"],
+      property_type: [
+        "house",
+        "apartment",
+        "condo",
+        "townhouse",
+        "studio",
+        "office",
+        "retail",
+        "warehouse",
+        "industrial",
+        "land",
+      ],
+      subscription_status: ["active", "expired", "cancelled", "pending"],
+      subscription_tier: [
+        "buyer_pro",
+        "seller_basic",
+        "seller_professional",
+        "seller_enterprise",
+      ],
       user_type: ["buyer", "seller", "agent"],
     },
   },
