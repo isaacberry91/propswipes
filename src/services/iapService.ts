@@ -36,15 +36,21 @@ class IAPService {
     }
 
     try {
-      // Dynamically import the native purchases plugin
-      // @ts-ignore - Plugin is only available in native build
-      const { NativePurchases } = await import('@capgo/native-purchases');
-      this.iapPlugin = NativePurchases;
+      // Only try to import in actual native environment
+      if (typeof window !== 'undefined' && (window as any).Capacitor?.Plugins) {
+        // Construct the import path dynamically to avoid Vite resolution
+        const moduleName = '@capgo/native-purchases';
+        const { NativePurchases } = await import(/* @vite-ignore */ moduleName);
+        this.iapPlugin = NativePurchases;
+        
+        // Initialize the plugin
+        await this.iapPlugin.initialize();
+        
+        console.log('IAP: Native purchases plugin initialized successfully');
+      } else {
+        console.log('IAP: Capacitor plugins not available, using mock service');
+      }
       
-      // Initialize the plugin
-      await this.iapPlugin.initialize();
-      
-      console.log('IAP: Native purchases plugin initialized successfully');
       this.isInitialized = true;
       return true;
     } catch (error) {
