@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     openAppButton.addEventListener('click', function() {
         // Open the PropSwipes web app
         browser.tabs.create({
-            url: 'https://your-app-url.com' // Replace with your actual app URL
+            url: 'https://propswipes.lovable.app' // Your PropSwipes app URL
         });
         
         // Close the popup

@@ -1,4 +1,4 @@
-// Content script for SwipesChats Safari Extension
+// Content script for PropSwipes Safari Extension
 
 // This script runs on all web pages
 console.log('PropSwipes extension loaded');

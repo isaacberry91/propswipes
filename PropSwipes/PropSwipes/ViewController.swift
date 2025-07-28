@@ -8,10 +8,10 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.title = "SwipesChats Extension"
+        self.title = "PropSwipes Extension"
         
         // Load your web app
-        if let url = URL(string: "https://your-app-url.com") {
+        if let url = URL(string: "https://propswipes.lovable.app") {
             let request = URLRequest(url: url)
             webView.load(request)
         }

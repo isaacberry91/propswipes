@@ -1,4 +1,4 @@
-// Background script for SwipesChats Safari Extension
+// Background script for PropSwipes Safari Extension
 
 // Listen for extension installation
 browser.runtime.onInstalled.addListener(function(details) {
@@ -11,7 +11,7 @@ browser.runtime.onInstalled.addListener(function(details) {
 browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.action === 'openApp') {
         browser.tabs.create({
-            url: 'https://your-app-url.com' // Replace with your actual app URL
+            url: 'https://propswipes.lovable.app' // Your PropSwipes app URL
         });
     }
     
