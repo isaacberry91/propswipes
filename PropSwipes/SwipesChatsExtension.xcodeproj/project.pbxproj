@@ -20,7 +20,7 @@
 		A1234567890123456789015C /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015D /* background.js */; };
 		A1234567890123456789015E /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015F /* manifest.json */; };
 		A1234567890123456789016A /* images in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789016B /* images */; };
-		A1234567890123456789018F /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789018E /* Icon.png */; };
+		
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,7 +66,7 @@
 		A1234567890123456789016B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		A1234567890123456789017D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1234567890123456789017E /* PropSwipes_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes_Extension.entitlements; sourceTree = "<group>"; };
-		A1234567890123456789018E /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,7 +106,7 @@
 				A1234567890123456789013D /* LaunchScreen.storyboard */,
 				A1234567890123456789017B /* Info.plist */,
 				A1234567890123456789017C /* PropSwipes.entitlements */,
-				A1234567890123456789018E /* Icon.png */,
+				
 			);
 			path = PropSwipes;
 			sourceTree = "<group>";
@@ -228,7 +228,7 @@
 				A1234567890123456789013C /* LaunchScreen.storyboard in Resources */,
 				A1234567890123456789013A /* Assets.xcassets in Resources */,
 				A1234567890123456789012E /* Main.storyboard in Resources */,
-				A1234567890123456789018F /* Icon.png in Resources */,
+				
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
