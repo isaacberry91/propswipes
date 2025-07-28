@@ -17,7 +17,7 @@
                BlueprintIdentifier = "A1234567890123456789012C"
                BuildableName = "PropSwipes.app"
                BlueprintName = "PropSwipes"
-               ReferencedContainer = "container:SwipesChatsExtension.xcodeproj">
+               ReferencedContainer = "container:PropSwipesExtension.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,7 +47,7 @@
             BlueprintIdentifier = "A1234567890123456789012C"
             BuildableName = "PropSwipes.app"
             BlueprintName = "PropSwipes"
-            ReferencedContainer = "container:SwipesChatsExtension.xcodeproj">
+            ReferencedContainer = "container:PropSwipesExtension.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -64,7 +64,7 @@
             BlueprintIdentifier = "A1234567890123456789012C"
             BuildableName = "PropSwipes.app"
             BlueprintName = "PropSwipes"
-            ReferencedContainer = "container:SwipesChatsExtension.xcodeproj">
+            ReferencedContainer = "container:PropSwipesExtension.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

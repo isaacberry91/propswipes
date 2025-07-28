@@ -200,7 +200,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A100000000000000000000A9 /* Build configuration list for PBXProject "SwipesChatsExtension" */;
+			buildConfigurationList = A100000000000000000000A9 /* Build configuration list for PBXProject "PropSwipesExtension" */;
 			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -522,7 +522,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A100000000000000000000A9 /* Build configuration list for PBXProject "SwipesChatsExtension" */ = {
+		A100000000000000000000A9 /* Build configuration list for PBXProject "PropSwipesExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A100000000000000000000B3 /* Debug */,

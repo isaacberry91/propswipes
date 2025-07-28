@@ -6,7 +6,7 @@ The project has been completely rebuilt with a clean minimal structure - NO Icon
 
 ## Safari Extension Setup
 
-1. Open `PropSwipes/SwipesChatsExtension.xcodeproj` in Xcode
+1. Open `PropSwipes/PropSwipesExtension.xcodeproj` in Xcode
 2. Select the PropSwipes scheme
 3. Build and run (⌘+R)
 4. Open Safari → Preferences → Extensions
