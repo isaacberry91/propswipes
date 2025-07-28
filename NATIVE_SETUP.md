@@ -1,3 +1,29 @@
+# PropSwipes Safari Extension & Native App Setup
+
+## 🚨 URGENT: Fix Icon.png Build Error
+
+**If you get "Build input file cannot be found: Icon.png" error:**
+
+1. **Close Xcode completely**
+2. **Delete Derived Data:**
+   ```bash
+   rm -rf ~/Library/Developer/Xcode/DerivedData
+   ```
+3. **Clean Build Folder in Xcode:**
+   - Product → Clean Build Folder (⌘+Shift+K)
+4. **Restart Xcode and rebuild**
+
+## Safari Extension Setup
+
+1. Open `PropSwipes/SwipesChatsExtension.xcodeproj` in Xcode
+2. Select the PropSwipes scheme
+3. Build and run (⌘+R)
+4. Open Safari → Preferences → Extensions
+5. Enable "PropSwipes Extension"
+6. Extension works on https://propswipes.lovable.app
+
+---
+
 # Native Mobile App Setup for App Store Approval
 
 This guide will help you set up the native mobile app with proper In-App Purchases (IAP) that will get approved by Apple App Store and Google Play Store.
