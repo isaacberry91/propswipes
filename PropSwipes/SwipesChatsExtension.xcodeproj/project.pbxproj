@@ -54,7 +54,7 @@
 		A1234567890123456789013B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1234567890123456789013D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A1234567890123456789017B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A1234567890123456789017C /* SwipesChatsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwipesChatsExtension.entitlements; sourceTree = "<group>"; };
+		A1234567890123456789017C /* PropSwipes.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes.entitlements; sourceTree = "<group>"; };
 		A1234567890123456789013F /* SwipesChatsExtension Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "SwipesChatsExtension Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1234567890123456789014B /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
 		A1234567890123456789014D /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = popup.html; sourceTree = "<group>"; };
@@ -64,7 +64,7 @@
 		A1234567890123456789015F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		A1234567890123456789016B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		A1234567890123456789017D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A1234567890123456789017E /* SwipesChatsExtension_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwipesChatsExtension_Extension.entitlements; sourceTree = "<group>"; };
+		A1234567890123456789017E /* PropSwipes_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes_Extension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,13 +88,13 @@
 		A1234567890123456789018B = {
 			isa = PBXGroup;
 			children = (
-				A1234567890123456789018C /* SwipesChatsExtension */,
-				A1234567890123456789018D /* SwipesChatsExtension Extension */,
+				A1234567890123456789018C /* PropSwipes */,
+				A1234567890123456789018D /* PropSwipes Extension */,
 				A1234567890123456789018E /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A1234567890123456789018C /* SwipesChatsExtension */ = {
+		A1234567890123456789018C /* PropSwipes */ = {
 			isa = PBXGroup;
 			children = (
 				A1234567890123456789012B /* AppDelegate.swift */,
@@ -103,20 +103,20 @@
 				A1234567890123456789013B /* Assets.xcassets */,
 				A1234567890123456789013D /* LaunchScreen.storyboard */,
 				A1234567890123456789017B /* Info.plist */,
-				A1234567890123456789017C /* SwipesChatsExtension.entitlements */,
+				A1234567890123456789017C /* PropSwipes.entitlements */,
 			);
-			path = SwipesChatsExtension;
+			path = PropSwipes;
 			sourceTree = "<group>";
 		};
-		A1234567890123456789018D /* SwipesChatsExtension Extension */ = {
+		A1234567890123456789018D /* PropSwipes Extension */ = {
 			isa = PBXGroup;
 			children = (
 				A1234567890123456789018F /* Resources */,
 				A1234567890123456789014B /* SafariWebExtensionHandler.swift */,
 				A1234567890123456789017D /* Info.plist */,
-				A1234567890123456789017E /* SwipesChatsExtension_Extension.entitlements */,
+				A1234567890123456789017E /* PropSwipes_Extension.entitlements */,
 			);
-			path = "SwipesChatsExtension Extension";
+			path = "PropSwipes Extension";
 			sourceTree = "<group>";
 		};
 		A1234567890123456789018E /* Products */ = {
@@ -414,15 +414,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SwipesChatsExtension/SwipesChatsExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = PropSwipes/PropSwipes.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SwipesChatsExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SwipesChatsExtension;
+				INFOPLIST_FILE = PropSwipes/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PropSwipes;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -444,15 +444,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = SwipesChatsExtension/SwipesChatsExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = PropSwipes/PropSwipes.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = SwipesChatsExtension/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = SwipesChatsExtension;
+				INFOPLIST_FILE = PropSwipes/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PropSwipes;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -472,14 +472,14 @@
 		A123456789012345678901A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "SwipesChatsExtension Extension/SwipesChatsExtension_Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/PropSwipes_Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "SwipesChatsExtension Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "SwipesChatsExtension Extension";
+				INFOPLIST_FILE = "PropSwipes Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "PropSwipes Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -502,14 +502,14 @@
 		A123456789012345678901AA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "SwipesChatsExtension Extension/SwipesChatsExtension_Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/PropSwipes_Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "SwipesChatsExtension Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "SwipesChatsExtension Extension";
+				INFOPLIST_FILE = "PropSwipes Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "PropSwipes Extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
