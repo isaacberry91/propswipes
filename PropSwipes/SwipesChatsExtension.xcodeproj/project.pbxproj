@@ -20,7 +20,6 @@
 		A1000000000000000000003C /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003D /* background.js */; };
 		A1000000000000000000003E /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003F /* manifest.json */; };
 		A1000000000000000000004A /* images in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000004B /* images */; };
-		A1000000000000000000004C /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000004D /* Icon.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,7 +63,7 @@
 		A1000000000000000000003D /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
 		A1000000000000000000003F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		A1000000000000000000004B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
-		A1000000000000000000004D /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = Resources/Icon.png; sourceTree = "<group>"; };
+		A1000000000000000000005D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000000000000000000005E /* SwipesChatsExtension_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwipesChatsExtension_Extension.entitlements; sourceTree = "<group>"; };
 		A100000000000000000000B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A100000000000000000000B2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -116,7 +115,6 @@
 				A100000000000000000000DD /* LaunchScreen.storyboard */,
 				A1000000000000000000005B /* Info.plist */,
 				A1000000000000000000005C /* PropSwipes.entitlements */,
-				A1000000000000000000004D /* Icon.png */,
 			);
 			path = PropSwipes;
 			sourceTree = "<group>";
@@ -229,7 +227,6 @@
 				A100000000000000000000CC /* LaunchScreen.storyboard in Resources */,
 				A100000000000000000000AA /* Assets.xcassets in Resources */,
 				A1000000000000000000001E /* Main.storyboard in Resources */,
-				A1000000000000000000004C /* Icon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
