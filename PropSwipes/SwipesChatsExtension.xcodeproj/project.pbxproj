@@ -3,44 +3,43 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1234567890123456789012A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789012B /* AppDelegate.swift */; };
-		A1234567890123456789012C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789012D /* ViewController.swift */; };
-		A1234567890123456789012E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789012F /* Main.storyboard */; };
-		A1234567890123456789013A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013B /* Assets.xcassets */; };
-		A1234567890123456789013C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013D /* LaunchScreen.storyboard */; };
-		A1234567890123456789013E /* SwipesChatsExtension Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013F /* SwipesChatsExtension Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		A1234567890123456789014A /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789014B /* SafariWebExtensionHandler.swift */; };
-		A1234567890123456789014C /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789014D /* popup.html */; };
-		A1234567890123456789014E /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789014F /* popup.js */; };
-		A1234567890123456789015A /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015B /* content.js */; };
-		A1234567890123456789015C /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015D /* background.js */; };
-		A1234567890123456789015E /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015F /* manifest.json */; };
-		A1234567890123456789016A /* images in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789016B /* images */; };
-		
+		A1000000000000000000001A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001B /* AppDelegate.swift */; };
+		A1000000000000000000001C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001D /* ViewController.swift */; };
+		A1000000000000000000001E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001F /* Main.storyboard */; };
+		A100000000000000000000AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000BB /* Assets.xcassets */; };
+		A100000000000000000000CC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000DD /* LaunchScreen.storyboard */; };
+		A100000000000000000000EE /* PropSwipes Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A100000000000000000000FF /* PropSwipes Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1000000000000000000002A /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002B /* SafariWebExtensionHandler.swift */; };
+		A1000000000000000000002C /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002D /* popup.html */; };
+		A1000000000000000000002E /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002F /* popup.js */; };
+		A1000000000000000000003A /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003B /* content.js */; };
+		A1000000000000000000003C /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003D /* background.js */; };
+		A1000000000000000000003E /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003F /* manifest.json */; };
+		A1000000000000000000004A /* images in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000004B /* images */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		A1234567890123456789016C /* PBXContainerItemProxy */ = {
+		A100000000000000000000FA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = A1234567890123456789016D /* Project object */;
+			containerPortal = A100000000000000000000FB /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = A1234567890123456789016E;
-			remoteInfo = "SwipesChatsExtension Extension";
+			remoteGlobalIDString = A100000000000000000000FC;
+			remoteInfo = "PropSwipes Extension";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		A1234567890123456789016F /* Embed Foundation Extensions */ = {
+		A100000000000000000000FD /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				A1234567890123456789013E /* SwipesChatsExtension Extension.appex in Embed Foundation Extensions */,
+				A100000000000000000000EE /* PropSwipes Extension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -48,36 +47,37 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		A1234567890123456789017A /* SwipesChatsExtension.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwipesChatsExtension.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1234567890123456789012B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		A1234567890123456789012D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		A1234567890123456789012F /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		A1234567890123456789013B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A1234567890123456789013D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		A1234567890123456789017B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A1234567890123456789017C /* PropSwipes.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes.entitlements; sourceTree = "<group>"; };
-		A1234567890123456789013F /* SwipesChatsExtension Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "SwipesChatsExtension Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1234567890123456789014B /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
-		A1234567890123456789014D /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = popup.html; sourceTree = "<group>"; };
-		A1234567890123456789014F /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = popup.js; sourceTree = "<group>"; };
-		A1234567890123456789015B /* content.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = content.js; sourceTree = "<group>"; };
-		A1234567890123456789015D /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
-		A1234567890123456789015F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
-		A1234567890123456789016B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
-		A1234567890123456789017D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A1234567890123456789017E /* PropSwipes_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes_Extension.entitlements; sourceTree = "<group>"; };
-		
+		A1000000000000000000005A /* PropSwipes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PropSwipes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1000000000000000000001B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A1000000000000000000001D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		A1000000000000000000001F /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		A100000000000000000000BB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A100000000000000000000DD /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		A1000000000000000000005B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1000000000000000000005C /* PropSwipes.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes.entitlements; sourceTree = "<group>"; };
+		A100000000000000000000FF /* PropSwipes Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "PropSwipes Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1000000000000000000002B /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		A1000000000000000000002D /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = popup.html; sourceTree = "<group>"; };
+		A1000000000000000000002F /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = popup.js; sourceTree = "<group>"; };
+		A1000000000000000000003B /* content.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = content.js; sourceTree = "<group>"; };
+		A1000000000000000000003D /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
+		A1000000000000000000003F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
+		A1000000000000000000004B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
+		A1000000000000000000005D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1000000000000000000005E /* SwipesChatsExtension_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwipesChatsExtension_Extension.entitlements; sourceTree = "<group>"; };
+		A100000000000000000000B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		A100000000000000000000B2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A1234567890123456789017F /* Frameworks */ = {
+		A1000000000000000000006A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A1234567890123456789018A /* Frameworks */ = {
+		A1000000000000000000006B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -87,59 +87,58 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A1234567890123456789018B = {
+		A1000000000000000000007A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A1234567890123456789018C /* PropSwipes */,
-				A1234567890123456789018D /* PropSwipes Extension */,
-				A1234567890123456789018E /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		A1234567890123456789018C /* PropSwipes */ = {
-			isa = PBXGroup;
-			children = (
-				A1234567890123456789012B /* AppDelegate.swift */,
-				A1234567890123456789012D /* ViewController.swift */,
-				A1234567890123456789012F /* Main.storyboard */,
-				A1234567890123456789013B /* Assets.xcassets */,
-				A1234567890123456789013D /* LaunchScreen.storyboard */,
-				A1234567890123456789017B /* Info.plist */,
-				A1234567890123456789017C /* PropSwipes.entitlements */,
-				
-			);
-			path = PropSwipes;
-			sourceTree = "<group>";
-		};
-		A1234567890123456789018D /* PropSwipes Extension */ = {
-			isa = PBXGroup;
-			children = (
-				A1234567890123456789018F /* Resources */,
-				A1234567890123456789014B /* SafariWebExtensionHandler.swift */,
-				A1234567890123456789017D /* Info.plist */,
-				A1234567890123456789017E /* PropSwipes_Extension.entitlements */,
-			);
-			path = "PropSwipes Extension";
-			sourceTree = "<group>";
-		};
-		A1234567890123456789018E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A1234567890123456789017A /* SwipesChatsExtension.app */,
-				A1234567890123456789013F /* SwipesChatsExtension Extension.appex */,
+				A1000000000000000000005A /* PropSwipes.app */,
+				A100000000000000000000FF /* PropSwipes Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A1234567890123456789018F /* Resources */ = {
+		A1000000000000000000007B = {
 			isa = PBXGroup;
 			children = (
-				A1234567890123456789015F /* manifest.json */,
-				A1234567890123456789015D /* background.js */,
-				A1234567890123456789015B /* content.js */,
-				A1234567890123456789014D /* popup.html */,
-				A1234567890123456789014F /* popup.js */,
-				A1234567890123456789016B /* images */,
+				A1000000000000000000007C /* PropSwipes */,
+				A1000000000000000000007D /* PropSwipes Extension */,
+				A1000000000000000000007A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A1000000000000000000007C /* PropSwipes */ = {
+			isa = PBXGroup;
+			children = (
+				A1000000000000000000001B /* AppDelegate.swift */,
+				A1000000000000000000001D /* ViewController.swift */,
+				A1000000000000000000001F /* Main.storyboard */,
+				A100000000000000000000BB /* Assets.xcassets */,
+				A100000000000000000000DD /* LaunchScreen.storyboard */,
+				A1000000000000000000005B /* Info.plist */,
+				A1000000000000000000005C /* PropSwipes.entitlements */,
+			);
+			path = PropSwipes;
+			sourceTree = "<group>";
+		};
+		A1000000000000000000007D /* PropSwipes Extension */ = {
+			isa = PBXGroup;
+			children = (
+				A1000000000000000000007F /* Resources */,
+				A1000000000000000000002B /* SafariWebExtensionHandler.swift */,
+				A1000000000000000000005D /* Info.plist */,
+				A1000000000000000000005E /* SwipesChatsExtension_Extension.entitlements */,
+			);
+			path = "PropSwipes Extension";
+			sourceTree = "<group>";
+		};
+		A1000000000000000000007F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A1000000000000000000003F /* manifest.json */,
+				A1000000000000000000003D /* background.js */,
+				A1000000000000000000003B /* content.js */,
+				A1000000000000000000002D /* popup.html */,
+				A1000000000000000000002F /* popup.js */,
+				A1000000000000000000004B /* images */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -147,147 +146,146 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A1234567890123456789019A /* SwipesChatsExtension */ = {
+		A100000000000000000000FC /* PropSwipes */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A1234567890123456789019B /* Build configuration list for PBXNativeTarget "SwipesChatsExtension" */;
+			buildConfigurationList = A100000000000000000000A1 /* Build configuration list for PBXNativeTarget "PropSwipes" */;
 			buildPhases = (
-				A1234567890123456789019C /* Sources */,
-				A1234567890123456789017F /* Frameworks */,
-				A1234567890123456789019D /* Resources */,
-				A1234567890123456789016F /* Embed Foundation Extensions */,
+				A100000000000000000000A2 /* Sources */,
+				A1000000000000000000006A /* Frameworks */,
+				A100000000000000000000A3 /* Resources */,
+				A100000000000000000000FD /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				A1234567890123456789019E /* PBXTargetDependency */,
+				A100000000000000000000A4 /* PBXTargetDependency */,
 			);
-			name = SwipesChatsExtension;
-			productName = SwipesChatsExtension;
-			productReference = A1234567890123456789017A /* SwipesChatsExtension.app */;
+			name = PropSwipes;
+			productName = PropSwipes;
+			productReference = A1000000000000000000005A /* PropSwipes.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A1234567890123456789016E /* SwipesChatsExtension Extension */ = {
+		A100000000000000000000A5 /* PropSwipes Extension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A1234567890123456789019F /* Build configuration list for PBXNativeTarget "SwipesChatsExtension Extension" */;
+			buildConfigurationList = A100000000000000000000A6 /* Build configuration list for PBXNativeTarget "PropSwipes Extension" */;
 			buildPhases = (
-				A123456789012345678901A0 /* Sources */,
-				A1234567890123456789018A /* Frameworks */,
-				A123456789012345678901A1 /* Resources */,
+				A100000000000000000000A7 /* Sources */,
+				A1000000000000000000006B /* Frameworks */,
+				A100000000000000000000A8 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "SwipesChatsExtension Extension";
-			productName = "SwipesChatsExtension Extension";
-			productReference = A1234567890123456789013F /* SwipesChatsExtension Extension.appex */;
+			name = "PropSwipes Extension";
+			productName = "PropSwipes Extension";
+			productReference = A100000000000000000000FF /* PropSwipes Extension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A1234567890123456789016D /* Project object */ = {
+		A100000000000000000000FB /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					A1234567890123456789019A = {
+					A100000000000000000000FC = {
 						CreatedOnToolsVersion = 15.0;
 					};
-					A1234567890123456789016E = {
+					A100000000000000000000A5 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = A123456789012345678901A2 /* Build configuration list for PBXProject "SwipesChatsExtension" */;
-			compatibilityVersion = "Xcode 14.0";
+			buildConfigurationList = A100000000000000000000A9 /* Build configuration list for PBXProject "SwipesChatsExtension" */;
+			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = A1234567890123456789018B;
-			productRefGroup = A1234567890123456789018E /* Products */;
+			mainGroup = A1000000000000000000007B;
+			productRefGroup = A1000000000000000000007A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A1234567890123456789019A /* SwipesChatsExtension */,
-				A1234567890123456789016E /* SwipesChatsExtension Extension */,
+				A100000000000000000000FC /* PropSwipes */,
+				A100000000000000000000A5 /* PropSwipes Extension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A1234567890123456789019D /* Resources */ = {
+		A100000000000000000000A3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1234567890123456789013C /* LaunchScreen.storyboard in Resources */,
-				A1234567890123456789013A /* Assets.xcassets in Resources */,
-				A1234567890123456789012E /* Main.storyboard in Resources */,
-				
+				A100000000000000000000CC /* LaunchScreen.storyboard in Resources */,
+				A100000000000000000000AA /* Assets.xcassets in Resources */,
+				A1000000000000000000001E /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A123456789012345678901A1 /* Resources */ = {
+		A100000000000000000000A8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1234567890123456789015A /* content.js in Resources */,
-				A1234567890123456789014E /* popup.js in Resources */,
-				A1234567890123456789015E /* manifest.json in Resources */,
-				A1234567890123456789016A /* images in Resources */,
-				A1234567890123456789015C /* background.js in Resources */,
-				A1234567890123456789014C /* popup.html in Resources */,
+				A1000000000000000000003A /* content.js in Resources */,
+				A1000000000000000000002E /* popup.js in Resources */,
+				A1000000000000000000003E /* manifest.json in Resources */,
+				A1000000000000000000004A /* images in Resources */,
+				A1000000000000000000003C /* background.js in Resources */,
+				A1000000000000000000002C /* popup.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A1234567890123456789019C /* Sources */ = {
+		A100000000000000000000A2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1234567890123456789012C /* ViewController.swift in Sources */,
-				A1234567890123456789012A /* AppDelegate.swift in Sources */,
+				A1000000000000000000001C /* ViewController.swift in Sources */,
+				A1000000000000000000001A /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A123456789012345678901A0 /* Sources */ = {
+		A100000000000000000000A7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1234567890123456789014A /* SafariWebExtensionHandler.swift in Sources */,
+				A1000000000000000000002A /* SafariWebExtensionHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		A1234567890123456789019E /* PBXTargetDependency */ = {
+		A100000000000000000000A4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = A1234567890123456789016E /* SwipesChatsExtension Extension */;
-			targetProxy = A1234567890123456789016C /* PBXContainerItemProxy */;
+			target = A100000000000000000000A5 /* PropSwipes Extension */;
+			targetProxy = A100000000000000000000FA /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		A1234567890123456789012F /* Main.storyboard */ = {
+		A1000000000000000000001F /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				A123456789012345678901A3 /* Base */,
+				A100000000000000000000B1 /* Base */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
-		A1234567890123456789013D /* LaunchScreen.storyboard */ = {
+		A100000000000000000000DD /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				A123456789012345678901A4 /* Base */,
+				A100000000000000000000B2 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -295,7 +293,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		A123456789012345678901A5 /* Debug */ = {
+		A100000000000000000000B3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -358,7 +356,7 @@
 			};
 			name = Debug;
 		};
-		A123456789012345678901A6 /* Release */ = {
+		A100000000000000000000B4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -389,7 +387,7 @@
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN_UNREACHABLE_BEHAVIOR = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -413,7 +411,7 @@
 			};
 			name = Release;
 		};
-		A123456789012345678901A7 /* Debug */ = {
+		A100000000000000000000B5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -426,8 +424,6 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PropSwipes/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PropSwipes;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -436,14 +432,14 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "app.lovable.swipes-chats-extension";
+				PRODUCT_BUNDLE_IDENTIFIER = app.propswipes.safari.extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		A123456789012345678901A8 /* Release */ = {
+		A100000000000000000000B6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -456,8 +452,6 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PropSwipes/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PropSwipes;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -466,17 +460,17 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "app.lovable.swipes-chats-extension";
+				PRODUCT_BUNDLE_IDENTIFIER = app.propswipes.safari.extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
-		A123456789012345678901A9 /* Debug */ = {
+		A100000000000000000000B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/PropSwipes_Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/SwipesChatsExtension_Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -491,11 +485,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_LDFLAGS = (
-					"-framework",
-					SafariServices,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "app.lovable.swipes-chats-extension.Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = app.propswipes.safari.extension.Extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -503,10 +493,10 @@
 			};
 			name = Debug;
 		};
-		A123456789012345678901AA /* Release */ = {
+		A100000000000000000000B8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/PropSwipes_Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/SwipesChatsExtension_Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -521,11 +511,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				OTHER_LDFLAGS = (
-					"-framework",
-					SafariServices,
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "app.lovable.swipes-chats-extension.Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = app.propswipes.safari.extension.Extension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -536,34 +522,34 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A123456789012345678901A2 /* Build configuration list for PBXProject "SwipesChatsExtension" */ = {
+		A100000000000000000000A9 /* Build configuration list for PBXProject "SwipesChatsExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A123456789012345678901A5 /* Debug */,
-				A123456789012345678901A6 /* Release */,
+				A100000000000000000000B3 /* Debug */,
+				A100000000000000000000B4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A1234567890123456789019B /* Build configuration list for PBXNativeTarget "SwipesChatsExtension" */ = {
+		A100000000000000000000A1 /* Build configuration list for PBXNativeTarget "PropSwipes" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A123456789012345678901A7 /* Debug */,
-				A123456789012345678901A8 /* Release */,
+				A100000000000000000000B5 /* Debug */,
+				A100000000000000000000B6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A1234567890123456789019F /* Build configuration list for PBXNativeTarget "SwipesChatsExtension Extension" */ = {
+		A100000000000000000000A6 /* Build configuration list for PBXNativeTarget "PropSwipes Extension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A123456789012345678901A9 /* Debug */,
-				A123456789012345678901AA /* Release */,
+				A100000000000000000000B7 /* Debug */,
+				A100000000000000000000B8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = A1234567890123456789016D /* Project object */;
+	rootObject = A100000000000000000000FB /* Project object */;
 }
