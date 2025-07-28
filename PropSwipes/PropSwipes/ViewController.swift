@@ -1,5 +1,6 @@
 import Cocoa
 import SafariServices
+import WebKit
 
 class ViewController: NSViewController {
 
