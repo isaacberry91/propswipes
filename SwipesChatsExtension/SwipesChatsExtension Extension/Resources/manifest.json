@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "SwipesChats Extension",
+  "name": "PropSwipes Extension",
   "version": "1.0",
-  "description": "SwipesChats Safari Web Extension",
+  "description": "PropSwipes Safari Web Extension",
   "permissions": [
     "activeTab",
     "storage"

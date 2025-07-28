@@ -3,7 +3,7 @@
 // Listen for extension installation
 browser.runtime.onInstalled.addListener(function(details) {
     if (details.reason === 'install') {
-        console.log('SwipesChats extension installed');
+        console.log('PropSwipes extension installed');
     }
 });
 

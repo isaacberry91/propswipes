@@ -1,7 +1,7 @@
 // Content script for SwipesChats Safari Extension
 
 // This script runs on all web pages
-console.log('SwipesChats extension loaded');
+console.log('PropSwipes extension loaded');
 
 // You can add functionality here to interact with web pages
 // For example, detect if the user is on a dating site and show a notification
@@ -11,6 +11,6 @@ if (window.location.hostname.includes('tinder.com') ||
     window.location.hostname.includes('bumble.com') || 
     window.location.hostname.includes('hinge.co')) {
     
-    // Could show a subtle notification about SwipesChats
-    console.log('Dating site detected - SwipesChats available');
+    // Could show a subtle notification about PropSwipes
+    console.log('Dating site detected - PropSwipes available');
 }
