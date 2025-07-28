@@ -10,10 +10,10 @@ class ViewController: NSViewController {
         
         self.title = "PropSwipes Extension"
         
-        // Load your web app
-        if let url = URL(string: "https://propswipes.lovable.app") {
-            let request = URLRequest(url: url)
-            webView.load(request)
+        // Load local web app
+        if let path = Bundle.main.path(forResource: "index", ofType: "html", inDirectory: "dist") {
+            let url = URL(fileURLWithPath: path)
+            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         }
     }
 
