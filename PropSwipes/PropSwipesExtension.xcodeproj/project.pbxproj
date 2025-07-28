@@ -64,7 +64,7 @@
 		A1000000000000000000003F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		A1000000000000000000004B /* images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = images; sourceTree = "<group>"; };
 		A1000000000000000000005D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A1000000000000000000005E /* SwipesChatsExtension_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwipesChatsExtension_Extension.entitlements; sourceTree = "<group>"; };
+		A1000000000000000000005E /* PropSwipes_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes_Extension.entitlements; sourceTree = "<group>"; };
 		A100000000000000000000B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		A100000000000000000000B2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -125,7 +125,7 @@
 				A1000000000000000000007F /* Resources */,
 				A1000000000000000000002B /* SafariWebExtensionHandler.swift */,
 				A1000000000000000000005D /* Info.plist */,
-				A1000000000000000000005E /* SwipesChatsExtension_Extension.entitlements */,
+				A1000000000000000000005E /* PropSwipes_Extension.entitlements */,
 			);
 			path = "PropSwipes Extension";
 			sourceTree = "<group>";
@@ -470,7 +470,7 @@
 		A100000000000000000000B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/SwipesChatsExtension_Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/PropSwipes_Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -496,7 +496,7 @@
 		A100000000000000000000B8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/SwipesChatsExtension_Extension.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "PropSwipes Extension/PropSwipes_Extension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
