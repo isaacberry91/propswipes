@@ -20,6 +20,7 @@
 		A1000000000000000000003C /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003D /* background.js */; };
 		A1000000000000000000003E /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000003F /* manifest.json */; };
 		
+		A1000000000000000000004A /* icon-512.png in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000004B /* icon-512.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +64,7 @@
 		A1000000000000000000003D /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = background.js; sourceTree = "<group>"; };
 		A1000000000000000000003F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = manifest.json; sourceTree = "<group>"; };
 		
+		A1000000000000000000004B /* icon-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-512.png"; sourceTree = "<group>"; };
 		A1000000000000000000005D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000000000000000000005E /* PropSwipes_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes_Extension.entitlements; sourceTree = "<group>"; };
 		A100000000000000000000B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 				A1000000000000000000003B /* content.js */,
 				A1000000000000000000002D /* popup.html */,
 				A1000000000000000000002F /* popup.js */,
+				A1000000000000000000004B /* icon-512.png */,
 				
 			);
 			path = Resources;
@@ -236,6 +239,7 @@
 			files = (
 				A1000000000000000000003A /* content.js in Resources */,
 				A1000000000000000000002E /* popup.js in Resources */,
+				A1000000000000000000004A /* icon-512.png in Resources */,
 				A1000000000000000000003E /* manifest.json in Resources */,
 				
 				A1000000000000000000003C /* background.js in Resources */,
