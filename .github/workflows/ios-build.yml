@@ -63,7 +63,7 @@ jobs:
     - name: Build iOS app
       run: |
         cd ios/App
-        xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive CODE_SIGN_IDENTITY="iPhone Distribution" DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}"
+        xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}"
         
     - name: Export IPA
       run: |
