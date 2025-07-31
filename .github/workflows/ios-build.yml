@@ -36,16 +36,22 @@ jobs:
       with:
         xcode-version: latest-stable
         
-    - name: Setup App Store Connect API Key
+    - name: Setup App Store Connect API Key and Authentication
       run: |
         mkdir -p ~/private_keys
         echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
         
-        # Authenticate with App Store Connect API for automatic signing
-        xcrun notarytool store-credentials "AC_PROFILE" \
+        # Create authentication profile for xcodebuild
+        xcrun notarytool store-credentials "ASC_PROFILE" \
           --key ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 \
           --key-id ${{ secrets.APP_STORE_CONNECT_KEY_ID }} \
-          --issuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          --issuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }} \
+          --no-validate
+          
+        # Set environment variables for xcodebuild
+        export ASC_KEY_PATH=~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+        export ASC_KEY_ID=${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        export ASC_ISSUER_ID=${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         
     - name: Create ExportOptions.plist
       run: |
@@ -74,6 +80,8 @@ jobs:
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
           CODE_SIGN_STYLE=Automatic \
+          PROVISIONING_PROFILE_SPECIFIER="" \
+          CODE_SIGN_IDENTITY="" \
           -allowProvisioningUpdates \
           -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 \
           -authenticationKeyID ${{ secrets.APP_STORE_CONNECT_KEY_ID }} \
