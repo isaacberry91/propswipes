@@ -72,7 +72,7 @@ jobs:
             <key>teamID</key>
             <string>${{ secrets.APP_STORE_TEAM_ID }}</string>
             <key>signingStyle</key>
-            <string>manual</string>
+            <string>automatic</string>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
@@ -88,8 +88,7 @@ jobs:
         cd ios/App
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          CODE_SIGN_STYLE=Manual \
-          CODE_SIGN_IDENTITY="iPhone Distribution" \
+          CODE_SIGN_STYLE=Automatic \
           -allowProvisioningUpdates \
           -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 \
           -authenticationKeyID ${{ secrets.APP_STORE_CONNECT_KEY_ID }} \
