@@ -50,8 +50,14 @@ jobs:
         # Import distribution certificate if provided
         if [ -n "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" ]; then
           echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > dist_cert.p12
-          security import dist_cert.p12 -k build.keychain -P "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
+          # Verify the certificate file is valid
+          if file dist_cert.p12 | grep -q "data"; then
+            security import dist_cert.p12 -k build.keychain -P "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign -A
+            security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
+          else
+            echo "Invalid certificate format - skipping manual certificate import"
+            echo "Will use App Store Connect API for automatic certificate management"
+          fi
         fi
         
     - name: Create ExportOptions.plist
