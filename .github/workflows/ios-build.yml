@@ -94,7 +94,6 @@ jobs:
         cd ios/App
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          -target App \
           CODE_SIGN_STYLE=Manual \
           PROVISIONING_PROFILE_SPECIFIER="${{ env.PROFILE_UUID }}" \
           CODE_SIGN_IDENTITY="iPhone Distribution"
