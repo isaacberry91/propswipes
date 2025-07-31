@@ -38,11 +38,26 @@ jobs:
       with:
         xcode-version: latest-stable
         
-    - name: Setup App Store Connect API key
+    - name: Setup certificates and provisioning profile
       run: |
-        # Create API key for automatic signing
+        # Create API key
         mkdir -p ~/private_keys
         echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+        
+        # Create keychain
+        security create-keychain -p "build" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "build" build.keychain
+        security set-keychain-settings -lut 21600 build.keychain
+        
+        # Import distribution certificate
+        echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
+        security import certificate.p12 -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k build.keychain
+        security list-keychain -d user -s build.keychain
+        
+        # Install provisioning profile
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/PropSwipes_App.mobileprovision
         
     - name: Create ExportOptions.plist
       run: |
@@ -56,7 +71,12 @@ jobs:
             <key>teamID</key>
             <string>${{ secrets.APP_STORE_TEAM_ID }}</string>
             <key>signingStyle</key>
-            <string>automatic</string>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+                <key>com.propswipes.app116786</key>
+                <string>PropSwipes_App</string>
+            </dict>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
@@ -73,11 +93,8 @@ jobs:
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           PRODUCT_BUNDLE_IDENTIFIER="com.propswipes.app116786" \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          CODE_SIGN_STYLE=Automatic \
-          -allowProvisioningUpdates \
-          -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 \
-          -authenticationKeyID ${{ secrets.APP_STORE_CONNECT_KEY_ID }} \
-          -authenticationKeyIssuerID ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          CODE_SIGN_STYLE=Manual \
+          PROVISIONING_PROFILE_SPECIFIER="PropSwipes_App"
         
     - name: Export IPA
       run: |
