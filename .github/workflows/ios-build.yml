@@ -82,8 +82,6 @@ jobs:
       run: |
         cd ios/App
         xcodebuild -exportArchive -archivePath App.xcarchive -exportPath . -exportOptionsPlist ExportOptions.plist \
-          DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          -allowProvisioningUpdates \
           -authenticationKeyPath ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 \
           -authenticationKeyID ${{ secrets.APP_STORE_CONNECT_KEY_ID }} \
           -authenticationKeyIssuerID ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
