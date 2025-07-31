@@ -53,9 +53,11 @@ jobs:
         echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > ios_distribution.cer
         echo "${{ secrets.IOS_DISTRIBUTION_PRIVATE_KEY }}" | base64 --decode > ios_distribution.key
         
-        # Import certificate and key to keychain
-        security import ios_distribution.cer -k temp.keychain -T /usr/bin/codesign
-        security import ios_distribution.key -k temp.keychain -T /usr/bin/codesign
+        # Create .p12 file from certificate and private key
+        openssl pkcs12 -export -out ios_distribution.p12 -inkey ios_distribution.key -in ios_distribution.cer -passout pass:${{ secrets.IOS_DISTRIBUTION_PASSWORD }}
+        
+        # Import .p12 to keychain (this properly associates cert and key)
+        security import ios_distribution.p12 -k temp.keychain -P ${{ secrets.IOS_DISTRIBUTION_PASSWORD }} -T /usr/bin/codesign
         
         # Set key partition list to allow codesign access
         security set-key-partition-list -S apple-tool:,apple: -s -k temp_password temp.keychain
