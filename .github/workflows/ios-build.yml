@@ -36,16 +36,28 @@ jobs:
       with:
         xcode-version: latest-stable
         
-    - name: Setup App Store Connect Authentication
+    - name: Import certificates and provisioning profile
       run: |
-        mkdir -p ~/private_keys
-        echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+        # Create keychain
+        security create-keychain -p temp_password temp.keychain
+        security default-keychain -s temp.keychain
+        security unlock-keychain -p temp_password temp.keychain
+        security set-keychain-settings -lut 21600 temp.keychain
         
-        # Create authentication configuration for Xcode
+        # Import distribution certificate and private key
+        echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > ios_distribution.cer
+        echo "${{ secrets.IOS_DISTRIBUTION_PRIVATE_KEY }}" | base64 --decode > ios_distribution.key
+        
+        # Import certificate and key to keychain
+        security import ios_distribution.cer -k temp.keychain -T /usr/bin/codesign
+        security import ios_distribution.key -k temp.keychain -T /usr/bin/codesign
+        
+        # Set key partition list
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k temp_password temp.keychain
+        
+        # Import provisioning profile
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        
-        # Set up authentication using App Store Connect API
-        xcrun altool --store-password-in-keychain-item "AC_PASSWORD" -u "apiKey" -p "@keychain:AC_PASSWORD" || true
+        echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/propswipes.mobileprovision
         
     - name: Create ExportOptions.plist
       run: |
@@ -55,21 +67,13 @@ jobs:
         <plist version="1.0">
         <dict>
             <key>method</key>
-            <string>app-store-connect</string>
+            <string>app-store</string>
             <key>teamID</key>
             <string>${{ secrets.APP_STORE_TEAM_ID }}</string>
-            <key>signingStyle</key>
-            <string>automatic</string>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
             <true/>
-            <key>apiKeyPath</key>
-            <string>~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8</string>
-            <key>apiIssuer</key>
-            <string>${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}</string>
-            <key>apiKeyID</key>
-            <string>${{ secrets.APP_STORE_CONNECT_KEY_ID }}</string>
         </dict>
         </plist>
         EOF
@@ -77,18 +81,21 @@ jobs:
     - name: Build iOS app
       run: |
         cd ios/App
-        # Build workspace with specific target configurations
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          CODE_SIGN_STYLE=Automatic \
-          -allowProvisioningUpdates \
-          CODE_SIGN_IDENTITY="" \
-          PROVISIONING_PROFILE_SPECIFIER=""
+          CODE_SIGN_STYLE=Manual \
+          CODE_SIGN_IDENTITY="iPhone Distribution" \
+          PROVISIONING_PROFILE_SPECIFIER="propswipes"
         
     - name: Export IPA
       run: |
         cd ios/App
-        xcodebuild -exportArchive -archivePath App.xcarchive -exportPath . -exportOptionsPlist ExportOptions.plist -allowProvisioningUpdates
+        xcodebuild -exportArchive -archivePath App.xcarchive -exportPath . -exportOptionsPlist ExportOptions.plist
+        
+    - name: Setup App Store Connect API Key
+      run: |
+        mkdir -p ~/private_keys
+        echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
         
     - name: Upload to App Store
       run: |
