@@ -61,7 +61,7 @@ jobs:
         <plist version="1.0">
         <dict>
             <key>method</key>
-            <string>app-store-connect</string>
+            <string>app-store</string>
             <key>teamID</key>
             <string>${{ secrets.APP_STORE_TEAM_ID }}</string>
             <key>signingStyle</key>
@@ -70,6 +70,8 @@ jobs:
             <false/>
             <key>uploadSymbols</key>
             <true/>
+            <key>manageAppVersionAndBuildNumber</key>
+            <false/>
         </dict>
         </plist>
         EOF
