@@ -100,10 +100,12 @@ jobs:
     - name: Build iOS app
       run: |
         cd ios/App
-        # Use automatic signing for everything except the main app
-        xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
+        # Build main app with manual signing, let Pods use automatic
+        xcodebuild -project App.xcodeproj -target App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          -allowProvisioningUpdates
+          CODE_SIGN_STYLE=Manual \
+          PROVISIONING_PROFILE_SPECIFIER="${{ env.PROFILE_UUID }}" \
+          CODE_SIGN_IDENTITY="iPhone Distribution: Isaac Berry (84QMH65N7J)"
         
     - name: Export IPA
       run: |
