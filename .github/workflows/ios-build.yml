@@ -66,9 +66,10 @@ jobs:
         echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > temp_profile.mobileprovision
         
         # Extract UUID and rename profile file
-        PROFILE_UUID=$(grep -A1 UUID temp_profile.mobileprovision | grep string | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+        PROFILE_UUID=$(plutil -extract UUID raw temp_profile.mobileprovision)
         mv temp_profile.mobileprovision "${PROVISION_PATH}${PROFILE_UUID}.mobileprovision"
         echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
+        echo "Profile UUID: $PROFILE_UUID"
         
     - name: Create ExportOptions.plist
       run: |
@@ -92,11 +93,16 @@ jobs:
     - name: Build iOS app
       run: |
         cd ios/App
+        # Set automatic signing for Pods targets
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          CODE_SIGN_STYLE=Manual \
-          PROVISIONING_PROFILE_SPECIFIER="${{ env.PROFILE_UUID }}" \
-          CODE_SIGN_IDENTITY="iPhone Distribution"
+          CODE_SIGN_STYLE[config=Release][sdk=iphoneos*]=Manual \
+          PROVISIONING_PROFILE_SPECIFIER[config=Release][sdk=iphoneos*]="${{ env.PROFILE_UUID }}" \
+          CODE_SIGN_IDENTITY[config=Release][sdk=iphoneos*]="iPhone Distribution" \
+          CODE_SIGN_STYLE_Pods-App=Automatic \
+          CODE_SIGN_STYLE_Capacitor=Automatic \
+          CODE_SIGN_STYLE_CapacitorApp=Automatic \
+          CODE_SIGN_STYLE_CapacitorCordova=Automatic
         
     - name: Export IPA
       run: |
