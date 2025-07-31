@@ -65,8 +65,12 @@ jobs:
         PROVISION_PATH=~/Library/MobileDevice/Provisioning\ Profiles/
         echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > temp_profile.mobileprovision
         
-        # Extract UUID and rename profile file
-        PROFILE_UUID=$(plutil -extract UUID raw temp_profile.mobileprovision)
+        # Extract UUID using alternative method
+        PROFILE_UUID=$(security cms -D -i temp_profile.mobileprovision | plutil -extract UUID raw -)
+        if [ -z "$PROFILE_UUID" ]; then
+          # Fallback method
+          PROFILE_UUID=$(security cms -D -i temp_profile.mobileprovision | grep -A1 UUID | grep string | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+        fi
         mv temp_profile.mobileprovision "${PROVISION_PATH}${PROFILE_UUID}.mobileprovision"
         echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
         echo "Profile UUID: $PROFILE_UUID"
