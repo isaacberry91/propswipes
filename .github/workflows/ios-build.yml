@@ -60,9 +60,14 @@ jobs:
         # Set key partition list to allow codesign access
         security set-key-partition-list -S apple-tool:,apple: -s -k temp_password temp.keychain
         
-        # Import provisioning profile
+        # Import provisioning profile to correct location
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/PropSwipes_App_Store.mobileprovision
+        PROVISION_PATH=~/Library/MobileDevice/Provisioning\ Profiles/PropSwipes_App_Store.mobileprovision
+        echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > "$PROVISION_PATH"
+        
+        # Get provisioning profile UUID
+        PROFILE_UUID=$(grep -A1 UUID "$PROVISION_PATH" | grep string | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+        echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
         
     - name: Create ExportOptions.plist
       run: |
@@ -86,7 +91,11 @@ jobs:
     - name: Build iOS app
       run: |
         cd ios/App
-        xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}"
+        xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
+          DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
+          CODE_SIGN_STYLE=Manual \
+          PROVISIONING_PROFILE_SPECIFIER="PropSwipes_App_Store" \
+          CODE_SIGN_IDENTITY="iPhone Distribution"
         
     - name: Export IPA
       run: |
