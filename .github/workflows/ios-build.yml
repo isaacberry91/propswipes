@@ -101,12 +101,11 @@ jobs:
     - name: Build iOS app
       run: |
         cd ios/App
-        # Build with project and scheme for proper archiving
+        # Try automatic signing with certificates in keychain
         xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          CODE_SIGN_STYLE=Manual \
-          PROVISIONING_PROFILE_SPECIFIER="${{ env.PROFILE_UUID }}" \
-          CODE_SIGN_IDENTITY="iPhone Distribution"
+          CODE_SIGN_STYLE=Automatic \
+          -allowProvisioningUpdates
         
     - name: Export IPA
       run: |
