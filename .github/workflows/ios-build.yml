@@ -41,49 +41,6 @@ jobs:
         mkdir -p ~/private_keys
         echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
         
-    - name: Import certificates and provisioning profile
-      run: |
-        # Create keychain
-        security create-keychain -p temp_password temp.keychain
-        security default-keychain -s temp.keychain
-        security unlock-keychain -p temp_password temp.keychain
-        security set-keychain-settings -lut 21600 temp.keychain
-        
-        # Import distribution certificate and private key
-        echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > ios_distribution.cer
-        echo "${{ secrets.IOS_DISTRIBUTION_PRIVATE_KEY }}" | base64 --decode > ios_distribution.key
-        
-        # Import certificate and key to keychain with correct flags
-        security import ios_distribution.cer -k temp.keychain -A
-        security import ios_distribution.key -k temp.keychain -A
-        
-        # Set key partition list to allow codesign access
-        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k temp_password temp.keychain
-        
-        # List available certificates to debug and capture identity
-        echo "Available certificates:"
-        security find-identity -v -p codesigning temp.keychain
-        
-        # Get the exact certificate identity
-        CERT_IDENTITY=$(security find-identity -v -p codesigning temp.keychain | grep "iPhone Distribution" | head -1 | sed 's/.*) //' | sed 's/ ".*//')
-        echo "CERT_IDENTITY=$CERT_IDENTITY" >> $GITHUB_ENV
-        echo "Certificate Identity: $CERT_IDENTITY"
-        
-        # Import provisioning profile to correct location
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        PROVISION_PATH=~/Library/MobileDevice/Provisioning\ Profiles/
-        echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > temp_profile.mobileprovision
-        
-        # Extract UUID using alternative method
-        PROFILE_UUID=$(security cms -D -i temp_profile.mobileprovision | plutil -extract UUID raw -)
-        if [ -z "$PROFILE_UUID" ]; then
-          # Fallback method
-          PROFILE_UUID=$(security cms -D -i temp_profile.mobileprovision | grep -A1 UUID | grep string | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
-        fi
-        mv temp_profile.mobileprovision "${PROVISION_PATH}${PROFILE_UUID}.mobileprovision"
-        echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
-        echo "Profile UUID: $PROFILE_UUID"
-        
     - name: Create ExportOptions.plist
       run: |
         cat > ios/App/ExportOptions.plist << EOF
@@ -119,7 +76,7 @@ jobs:
     - name: Export IPA
       run: |
         cd ios/App
-        xcodebuild -exportArchive -archivePath App.xcarchive -exportPath . -exportOptionsPlist ExportOptions.plist
+        xcodebuild -exportArchive -archivePath App.xcarchive -exportPath . -exportOptionsPlist ExportOptions.plist -allowProvisioningUpdates
         
     - name: Upload to App Store
       run: |
