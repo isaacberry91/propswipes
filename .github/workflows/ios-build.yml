@@ -36,10 +36,16 @@ jobs:
       with:
         xcode-version: latest-stable
         
-    - name: Create App Store Connect API Key
+    - name: Setup App Store Connect Authentication
       run: |
         mkdir -p ~/private_keys
         echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+        
+        # Create authentication configuration for Xcode
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        
+        # Set up authentication using App Store Connect API
+        xcrun altool --store-password-in-keychain-item "AC_PASSWORD" -u "apiKey" -p "@keychain:AC_PASSWORD" || true
         
     - name: Create ExportOptions.plist
       run: |
@@ -58,6 +64,12 @@ jobs:
             <false/>
             <key>uploadSymbols</key>
             <true/>
+            <key>apiKeyPath</key>
+            <string>~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8</string>
+            <key>apiIssuer</key>
+            <string>${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}</string>
+            <key>apiKeyID</key>
+            <string>${{ secrets.APP_STORE_CONNECT_KEY_ID }}</string>
         </dict>
         </plist>
         EOF
