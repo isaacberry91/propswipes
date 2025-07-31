@@ -38,10 +38,14 @@ jobs:
       with:
         xcode-version: latest-stable
         
-    - name: Setup App Store Connect API Key
+    - name: Setup App Store Connect API Key and Provisioning Profile
       run: |
         mkdir -p ~/private_keys
         echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+        
+        # Install provisioning profile
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/PropSwipes_App.mobileprovision
         
     - name: Create ExportOptions.plist
       run: |
