@@ -1,5 +1,7 @@
 name: Build and Deploy iOS App
 
+# Auto-signing iOS build
+
 on:
   push:
     branches: [ main ]
