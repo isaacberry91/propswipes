@@ -62,11 +62,12 @@ jobs:
         
         # Import provisioning profile to correct location
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        PROVISION_PATH=~/Library/MobileDevice/Provisioning\ Profiles/PropSwipes_App_Store.mobileprovision
-        echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > "$PROVISION_PATH"
+        PROVISION_PATH=~/Library/MobileDevice/Provisioning\ Profiles/
+        echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 --decode > temp_profile.mobileprovision
         
-        # Get provisioning profile UUID
-        PROFILE_UUID=$(grep -A1 UUID "$PROVISION_PATH" | grep string | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+        # Extract UUID and rename profile file
+        PROFILE_UUID=$(grep -A1 UUID temp_profile.mobileprovision | grep string | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+        mv temp_profile.mobileprovision "${PROVISION_PATH}${PROFILE_UUID}.mobileprovision"
         echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
         
     - name: Create ExportOptions.plist
@@ -93,8 +94,9 @@ jobs:
         cd ios/App
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
+          -target App \
           CODE_SIGN_STYLE=Manual \
-          PROVISIONING_PROFILE_SPECIFIER="PropSwipes_App_Store" \
+          PROVISIONING_PROFILE_SPECIFIER="${{ env.PROFILE_UUID }}" \
           CODE_SIGN_IDENTITY="iPhone Distribution"
         
     - name: Export IPA
