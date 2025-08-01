@@ -55,9 +55,13 @@ jobs:
         security import certificate.p12 -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k build.keychain
         security list-keychain -d user -s build.keychain
         
-        # Install provisioning profile
+        # Install provisioning profile  
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/PropSwipes_App.mobileprovision
+        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+        
+        # Get the actual profile name
+        PROFILE_NAME=$(security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision | plutil -extract Name xml1 - -o - | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+        echo "PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
         
     - name: Create ExportOptions.plist
       run: |
@@ -75,7 +79,7 @@ jobs:
             <key>provisioningProfiles</key>
             <dict>
                 <key>com.propswipes.app116786</key>
-                <string>PropSwipes_App</string>
+                <string>\$PROFILE_NAME</string>
             </dict>
             <key>uploadBitcode</key>
             <false/>
@@ -94,7 +98,7 @@ jobs:
           PRODUCT_BUNDLE_IDENTIFIER="com.propswipes.app116786" \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
           CODE_SIGN_STYLE=Manual \
-          PROVISIONING_PROFILE_SPECIFIER="PropSwipes_App"
+          PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
         
     - name: Export IPA
       run: |
