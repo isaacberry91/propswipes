@@ -98,8 +98,8 @@ jobs:
           PRODUCT_BUNDLE_IDENTIFIER="com.propswipes.app116786" \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
           CODE_SIGN_STYLE=Manual \
-          PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
-          CODE_SIGN_IDENTITY="iPhone Distribution"
+          CODE_SIGN_IDENTITY="Apple Distribution" \
+          -xcconfig <(echo "PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*] = $PROFILE_NAME")
         
     - name: Export IPA
       run: |
