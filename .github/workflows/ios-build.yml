@@ -95,9 +95,10 @@ jobs:
       run: |
         cd ios/App
         
-        # Create xcconfig file with provisioning profile settings
+        # Create xcconfig file with provisioning profile settings only for App target
         cat > build.xcconfig << EOF
         PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*] = $PROFILE_NAME
+        PROVISIONING_PROFILE_SPECIFIER[target=App][sdk=iphoneos*] = $PROFILE_NAME
         EOF
         
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
