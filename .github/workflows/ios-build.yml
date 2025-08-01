@@ -75,12 +75,7 @@ jobs:
             <key>teamID</key>
             <string>${{ secrets.APP_STORE_TEAM_ID }}</string>
             <key>signingStyle</key>
-            <string>manual</string>
-            <key>provisioningProfiles</key>
-            <dict>
-                <key>com.propswipes.app116786</key>
-                <string>PropSwipes App Store</string>
-            </dict>
+            <string>automatic</string>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
