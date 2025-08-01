@@ -79,7 +79,7 @@ jobs:
             <key>provisioningProfiles</key>
             <dict>
                 <key>com.propswipes.app116786</key>
-                <string>\$PROFILE_NAME</string>
+                <string>$PROFILE_NAME</string>
             </dict>
             <key>uploadBitcode</key>
             <false/>
@@ -87,6 +87,8 @@ jobs:
             <true/>
             <key>manageAppVersionAndBuildNumber</key>
             <false/>
+            <key>signingCertificate</key>
+            <string>Apple Distribution</string>
         </dict>
         </plist>
         EOF
