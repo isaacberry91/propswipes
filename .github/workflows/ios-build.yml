@@ -95,18 +95,12 @@ jobs:
       run: |
         cd ios/App
         
-        # Create xcconfig file with provisioning profile settings only for App target
-        cat > build.xcconfig << EOF
-        PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*] = $PROFILE_NAME
-        PROVISIONING_PROFILE_SPECIFIER[target=App][sdk=iphoneos*] = $PROFILE_NAME
-        EOF
-        
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           PRODUCT_BUNDLE_IDENTIFIER="com.propswipes.app116786" \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
           CODE_SIGN_STYLE=Manual \
           CODE_SIGN_IDENTITY="Apple Distribution" \
-          -xcconfig build.xcconfig
+          PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME"
         
     - name: Export IPA
       run: |
