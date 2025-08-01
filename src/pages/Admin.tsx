@@ -201,7 +201,7 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4" style={{backgroundImage: `url('/src/assets/admin-dashboard-bg.jpg')`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>

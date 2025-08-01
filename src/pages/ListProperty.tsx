@@ -370,7 +370,10 @@ const ListProperty = () => {
               />
               <div className="h-32 border-2 border-dashed border-border hover:border-primary rounded-lg flex flex-col items-center justify-center bg-background hover:bg-accent/20 transition-colors">
                 <Camera className="w-6 h-6 mb-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground text-center">Upload Photos<br />from Camera Roll</span>
+                <span className="text-sm text-muted-foreground text-center">
+                  📸 Take Photo<br />
+                  <span className="text-xs">or choose from gallery</span>
+                </span>
               </div>
             </label>
             <Button

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Heart, Home, Users, MessageCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import heroImage from "@/assets/hero-image.jpg";
+import heroImage from "@/assets/propswipes-hero.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
