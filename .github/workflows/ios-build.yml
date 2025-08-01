@@ -95,18 +95,12 @@ jobs:
       run: |
         cd ios/App
         
-        # Create xcconfig file that applies provisioning profile only to App target
-        cat > App-Target.xcconfig << EOF
-        PROVISIONING_PROFILE_SPECIFIER = $PROFILE_NAME
-        EOF
-        
-        # Build with xcconfig applied only to App project
+        # Build with automatic signing, manual signing will happen during export
         xcodebuild -workspace App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath App.xcarchive archive \
           PRODUCT_BUNDLE_IDENTIFIER="com.propswipes.app116786" \
           DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
-          CODE_SIGN_STYLE=Manual \
-          CODE_SIGN_IDENTITY="Apple Distribution" \
-          -xcconfig App-Target.xcconfig
+          CODE_SIGN_STYLE=Automatic \
+          CODE_SIGN_IDENTITY="Apple Development"
         
     - name: Export IPA
       run: |
