@@ -124,4 +124,4 @@ jobs:
         
     - name: Upload to App Store
       run: |
-        xcrun notarytool submit ios/App/App.ipa --key ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 --key-id ${{ secrets.APP_STORE_CONNECT_KEY_ID }} --issuer-id ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }} --wait
+        xcrun notarytool submit ios/App/App.ipa --key ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 --key-id ${{ secrets.APP_STORE_CONNECT_KEY_ID }} --issuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }} --wait
