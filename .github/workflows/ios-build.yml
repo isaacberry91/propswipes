@@ -93,7 +93,7 @@ jobs:
     - name: Configure iOS project
       run: |
         chmod +x scripts/configure-ios.sh
-        ./scripts/configure-ios.sh
+        DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" ./scripts/configure-ios.sh
         
     - name: Build iOS app
       run: |
