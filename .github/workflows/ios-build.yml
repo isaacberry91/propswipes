@@ -73,8 +73,11 @@ jobs:
         if [ -n "$CERTIFICATE_CONTENT" ]; then
           echo "Decoding certificate..."
           
-          # Try direct decode without file manipulation
-          echo "$CERTIFICATE_CONTENT" | base64 -D > certificate.p12
+          # Debug: check if content is being passed correctly
+          echo "Certificate content starts with: $(echo "$CERTIFICATE_CONTENT" | head -c 50)"
+          
+          # Use the same base64 flags as the API key (which works)
+          echo "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
           
           if [ -f certificate.p12 ] && [ -s certificate.p12 ]; then
             echo "Certificate file created successfully, size: $(wc -c < certificate.p12) bytes"
