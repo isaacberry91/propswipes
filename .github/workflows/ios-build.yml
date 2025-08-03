@@ -71,9 +71,16 @@ jobs:
         
         # Import distribution certificate with specific identity
         if [ -n "$CERTIFICATE_CONTENT" ]; then
-          echo "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
-          security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
-          echo "Certificate imported successfully"
+          echo "Decoding certificate..."
+          echo "$CERTIFICATE_CONTENT" | tr -d '\n' | base64 --decode > certificate.p12
+          if [ -f certificate.p12 ] && [ -s certificate.p12 ]; then
+            echo "Certificate file created successfully, size: $(wc -c < certificate.p12) bytes"
+            security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
+            echo "Certificate imported successfully"
+          else
+            echo "ERROR: Certificate file was not created or is empty"
+            exit 1
+          fi
         else
           echo "ERROR: CERTIFICATE_CONTENT is empty"
           exit 1
