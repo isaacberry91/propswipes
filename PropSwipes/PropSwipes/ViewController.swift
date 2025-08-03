@@ -4,12 +4,17 @@ import WebKit
 
 class ViewController: UIViewController {
 
-    @IBOutlet var webView: WKWebView!
+    var webView: WKWebView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.title = "PropSwipes Extension"
+        
+        // Create webView programmatically
+        webView = WKWebView(frame: view.bounds)
+        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(webView)
         
         // Load PropSwipes web app
         if let url = URL(string: "https://propswipes.lovable.app") {
