@@ -42,7 +42,7 @@ jobs:
       run: |
         # Create API key
         mkdir -p ~/private_keys
-        echo "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+        printf '%s' "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
         
         # Create keychain
         security create-keychain -p "build" build.keychain
@@ -51,15 +51,15 @@ jobs:
         security set-keychain-settings -lut 21600 build.keychain
         
         # Import distribution certificate with specific identity
-        echo "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
-        security import certificate.p12 -P "${{ secrets.IOS_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
+        printf '%s' "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
+        security import certificate.p12 -P "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
         
         # Allow codesign to use the keychain
         security set-key-partition-list -S apple-tool:,apple: -s -k "build" build.keychain
         
         # Install provisioning profile  
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+        printf '%s' "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
         
         # List available identities and profiles for debugging
         security find-identity -v -p codesigning build.keychain
