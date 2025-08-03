@@ -73,12 +73,12 @@ jobs:
         if [ -n "$CERTIFICATE_CONTENT" ]; then
           echo "Decoding certificate..."
           
-          # Save content without newline
-          printf '%s' "$CERTIFICATE_CONTENT" > cert_temp.txt
-          echo "Temp file created, size: $(wc -c < cert_temp.txt) bytes"
+          # Save content without newline and ensure it's clean base64
+          printf '%s' "$CERTIFICATE_CONTENT" | tr -d ' \t\n\r' > cert_temp.txt
+          echo "Cleaned temp file created, size: $(wc -c < cert_temp.txt) bytes"
           
-          # Try to decode using -i flag
-          base64 -i cert_temp.txt -o certificate.p12
+          # Try to decode using base64 command properly
+          base64 -D -i cert_temp.txt -o certificate.p12
           
           if [ -f certificate.p12 ] && [ -s certificate.p12 ]; then
             echo "Certificate file created successfully, size: $(wc -c < certificate.p12) bytes"
@@ -86,15 +86,9 @@ jobs:
             # Check file type
             file certificate.p12
             
-            # Try to import with verbose output
+            # Import certificate (remove -v flag as it doesn't exist)
             echo "Attempting to import certificate..."
-            security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign -v
-            
-            # If that fails, try without specifying format
-            if [ $? -ne 0 ]; then
-              echo "Standard import failed, trying without format specification..."
-              security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -k build.keychain -T /usr/bin/codesign -v
-            fi
+            security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
             
             echo "Certificate imported successfully"
           else
