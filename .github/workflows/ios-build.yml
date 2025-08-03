@@ -72,15 +72,13 @@ jobs:
         # Import distribution certificate with specific identity
         if [ -n "$CERTIFICATE_CONTENT" ]; then
           echo "Decoding certificate..."
-          echo "First 100 chars of certificate: ${CERTIFICATE_CONTENT:0:100}"
-          echo "Last 100 chars of certificate: ${CERTIFICATE_CONTENT: -100}"
           
-          # Save to temp file first
-          echo "$CERTIFICATE_CONTENT" > cert_temp.txt
+          # Save content without newline
+          printf '%s' "$CERTIFICATE_CONTENT" > cert_temp.txt
           echo "Temp file created, size: $(wc -c < cert_temp.txt) bytes"
           
-          # Try to decode
-          cat cert_temp.txt | tr -d '\n\r' | base64 --decode > certificate.p12
+          # Try to decode using -i flag
+          base64 -i cert_temp.txt -o certificate.p12
           
           if [ -f certificate.p12 ] && [ -s certificate.p12 ]; then
             echo "Certificate file created successfully, size: $(wc -c < certificate.p12) bytes"
@@ -88,7 +86,7 @@ jobs:
             echo "Certificate imported successfully"
           else
             echo "ERROR: Certificate file was not created or is empty"
-            echo "Debugging temp file contents:"
+            echo "Debugging temp file contents (first 200 bytes):"
             head -c 200 cert_temp.txt | xxd
             exit 1
           fi
