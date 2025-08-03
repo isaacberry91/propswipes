@@ -120,7 +120,9 @@ jobs:
         fi
         
         # List available identities and profiles for debugging
+        echo "Available signing identities:"
         security find-identity -v -p codesigning build.keychain
+        echo "Available provisioning profiles:"
         ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
         
     - name: Create ExportOptions.plist
@@ -142,7 +144,7 @@ jobs:
                 <string>PropSwipes App Store Profile</string>
             </dict>
             <key>signingCertificate</key>
-            <string>iPhone Distribution</string>
+            <string>Apple Distribution</string>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
