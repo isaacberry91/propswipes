@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.propswipes.propswipess',
+  appId: 'com.propswipes.app',
   appName: 'propswipes',
   webDir: 'dist',
   ios: {
