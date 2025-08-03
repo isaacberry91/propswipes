@@ -13,7 +13,7 @@ sed -i '' '/CODE_SIGN_STYLE = Automatic;/c\
 				CODE_SIGN_STYLE = Manual;\
 				DEVELOPMENT_TEAM = "'"$DEVELOPMENT_TEAM"'";\
 				PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";\
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
 ' App.xcodeproj/project.pbxproj
 
 echo "iOS project configured for manual signing with development team: $DEVELOPMENT_TEAM"
