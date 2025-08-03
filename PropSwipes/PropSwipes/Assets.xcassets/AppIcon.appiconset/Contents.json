@@ -22,13 +22,11 @@
       "size" : "40x40"
     },
     {
-      "filename" : "Icon-512.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "60x60"
     },
     {
-      "filename" : "Icon-512@2x.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "76x76"
