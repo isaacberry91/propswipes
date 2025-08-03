@@ -73,21 +73,13 @@ jobs:
         if [ -n "$CERTIFICATE_CONTENT" ]; then
           echo "Decoding certificate..."
           
-          # Debug: Save to file and examine
-          echo "$CERTIFICATE_CONTENT" > debug_cert.txt
-          echo "Debug file size: $(wc -c < debug_cert.txt)"
-          echo "First line: $(head -1 debug_cert.txt)"
-          echo "Last line: $(tail -1 debug_cert.txt)"
-          echo "Character analysis:"
-          head -c 100 debug_cert.txt | xxd
+          # Use printf to avoid any newlines and pipe directly
+          printf '%s' "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
           
-          # Try cleaning the content more aggressively
-          echo "$CERTIFICATE_CONTENT" | tr -d '\r\n ' | base64 --decode > certificate.p12
-          
-          # If that fails, try the content as-is
+          # Check if it worked
           if [ ! -s certificate.p12 ]; then
-            echo "Cleaned decode failed, trying as-is..."
-            echo "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
+            echo "Direct decode failed, trying with cleanup..."
+            printf '%s' "$CERTIFICATE_CONTENT" | tr -cd 'A-Za-z0-9+/=' | base64 --decode > certificate.p12
           fi
           
           if [ -f certificate.p12 ] && [ -s certificate.p12 ]; then
