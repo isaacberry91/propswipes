@@ -12,7 +12,7 @@ cp App.xcodeproj/project.pbxproj App.xcodeproj/project.pbxproj.backup
 sed -i '' '/CODE_SIGN_STYLE = Automatic;/c\
 				CODE_SIGN_STYLE = Manual;\
 				DEVELOPMENT_TEAM = "'"$DEVELOPMENT_TEAM"'";\
-				PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store";\
+				PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";\
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 ' App.xcodeproj/project.pbxproj
 
