@@ -73,12 +73,8 @@ jobs:
         if [ -n "$CERTIFICATE_CONTENT" ]; then
           echo "Decoding certificate..."
           
-          # Save content without newline and ensure it's clean base64
-          printf '%s' "$CERTIFICATE_CONTENT" | tr -d ' \t\n\r' > cert_temp.txt
-          echo "Cleaned temp file created, size: $(wc -c < cert_temp.txt) bytes"
-          
-          # Try to decode using base64 command properly
-          base64 -D -i cert_temp.txt -o certificate.p12
+          # Try direct decode without file manipulation
+          echo "$CERTIFICATE_CONTENT" | base64 -D > certificate.p12
           
           if [ -f certificate.p12 ] && [ -s certificate.p12 ]; then
             echo "Certificate file created successfully, size: $(wc -c < certificate.p12) bytes"
@@ -86,15 +82,17 @@ jobs:
             # Check file type
             file certificate.p12
             
-            # Import certificate (remove -v flag as it doesn't exist)
+            # Import certificate
             echo "Attempting to import certificate..."
             security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
             
             echo "Certificate imported successfully"
           else
             echo "ERROR: Certificate file was not created or is empty"
-            echo "Debugging temp file contents (first 200 bytes):"
-            head -c 200 cert_temp.txt | xxd
+            echo "Let's debug the certificate content:"
+            echo "$CERTIFICATE_CONTENT" | head -c 100
+            echo "..."
+            echo "$CERTIFICATE_CONTENT" | tail -c 100
             exit 1
           fi
         else
