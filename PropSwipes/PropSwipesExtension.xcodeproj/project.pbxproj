@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		A1000000000000000000001A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001B /* AppDelegate.swift */; };
 		A1000000000000000000001C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001D /* ViewController.swift */; };
-		A1000000000000000000001E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001F /* Main.storyboard */; };
 		A100000000000000000000AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000BB /* Assets.xcassets */; };
 		A100000000000000000000CC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000DD /* LaunchScreen.storyboard */; };
 		A100000000000000000000EE /* PropSwipes Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A100000000000000000000FF /* PropSwipes Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -51,7 +50,7 @@
 		A1000000000000000000005A /* PropSwipes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PropSwipes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000000000000000000001B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A1000000000000000000001D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		A1000000000000000000001F /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Main.storyboard; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		
 		A100000000000000000000BB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A100000000000000000000DD /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A1000000000000000000005B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -67,7 +66,7 @@
 		A1000000000000000000004B /* icon-512.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon-512.png"; sourceTree = "<group>"; };
 		A1000000000000000000005D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000000000000000000005E /* PropSwipes_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes_Extension.entitlements; sourceTree = "<group>"; };
-		A100000000000000000000B1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		
 		A100000000000000000000B2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -112,7 +111,7 @@
 			children = (
 				A1000000000000000000001B /* AppDelegate.swift */,
 				A1000000000000000000001D /* ViewController.swift */,
-				A1000000000000000000001F /* Main.storyboard */,
+				
 				A100000000000000000000BB /* Assets.xcassets */,
 				A100000000000000000000DD /* LaunchScreen.storyboard */,
 				A1000000000000000000005B /* Info.plist */,
@@ -229,7 +228,7 @@
 			files = (
 				A100000000000000000000CC /* LaunchScreen.storyboard in Resources */,
 				A100000000000000000000AA /* Assets.xcassets in Resources */,
-				A1000000000000000000001E /* Main.storyboard in Resources */,
+				
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,14 +277,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		A1000000000000000000001F /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A100000000000000000000B1 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		A100000000000000000000DD /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -428,7 +419,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PropSwipes/Info.plist;
 				INFOPLIST_KEY_LSRequiresIPhoneOS = YES;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -456,7 +446,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PropSwipes/Info.plist;
 				INFOPLIST_KEY_LSRequiresIPhoneOS = YES;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
