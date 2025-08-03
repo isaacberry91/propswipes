@@ -26,14 +26,14 @@
                                 </wkWebViewConfiguration>
                             </wkWebView>
                         </subviews>
-                        <viewLayoutMarginsGuide key="safeArea" id="6Tk-OE-BBY-Main"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="fIj-lX-ooc" firstAttribute="leading" secondItem="6Tk-OE-BBY-Main" secondAttribute="leading" id="8xQ-dU-0YS"/>
-                            <constraint firstItem="6Tk-OE-BBY-Main" firstAttribute="trailing" secondItem="fIj-lX-ooc" secondAttribute="trailing" id="Qbe-Fr-6Rt"/>
-                            <constraint firstItem="6Tk-OE-BBY-Main" firstAttribute="bottom" secondItem="fIj-lX-ooc" secondAttribute="bottom" id="hjN-tI-hgX"/>
-                            <constraint firstItem="fIj-lX-ooc" firstAttribute="top" secondItem="6Tk-OE-BBY-Main" secondAttribute="top" id="s7c-cx-buJ"/>
+                            <constraint firstItem="fIj-lX-ooc" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="8xQ-dU-0YS"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="fIj-lX-ooc" secondAttribute="trailing" id="Qbe-Fr-6Rt"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="fIj-lX-ooc" secondAttribute="bottom" id="hjN-tI-hgX"/>
+                            <constraint firstItem="fIj-lX-ooc" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="s7c-cx-buJ"/>
                         </constraints>
+                        <viewLayoutMarginsGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
                         <outlet property="webView" destination="fIj-lX-ooc" id="dNc-tc-rPD"/>
