@@ -82,7 +82,20 @@ jobs:
           
           if [ -f certificate.p12 ] && [ -s certificate.p12 ]; then
             echo "Certificate file created successfully, size: $(wc -c < certificate.p12) bytes"
-            security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
+            
+            # Check file type
+            file certificate.p12
+            
+            # Try to import with verbose output
+            echo "Attempting to import certificate..."
+            security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign -v
+            
+            # If that fails, try without specifying format
+            if [ $? -ne 0 ]; then
+              echo "Standard import failed, trying without format specification..."
+              security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -k build.keychain -T /usr/bin/codesign -v
+            fi
+            
             echo "Certificate imported successfully"
           else
             echo "ERROR: Certificate file was not created or is empty"
