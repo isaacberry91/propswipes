@@ -24,10 +24,10 @@ class ViewController: UIViewController {
     }
 
     @IBAction func openSafariExtensionPreferences(_ sender: AnyObject?) {
-        SFSafariApplication.showPreferencesForExtension(withIdentifier: "app.propswipes.safari.extension.Extension") { error in
-            if let _ = error {
-                // Insert code to inform the user that something went wrong.
-            }
+        // iOS doesn't have Safari extension preferences
+        // This could open app settings or show an alert
+        if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(settingsUrl)
         }
     }
 }
