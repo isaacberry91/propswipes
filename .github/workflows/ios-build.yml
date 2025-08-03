@@ -81,7 +81,7 @@ jobs:
             <key>provisioningProfiles</key>
             <dict>
                 <key>com.propswipes.app</key>
-                <string>PropSwipes App Store Profile</string>
+                <string>PropSwipes App Store</string>
             </dict>
             <key>signingCertificate</key>
             <string>iPhone Distribution</string>
