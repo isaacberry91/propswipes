@@ -73,11 +73,22 @@ jobs:
         if [ -n "$CERTIFICATE_CONTENT" ]; then
           echo "Decoding certificate..."
           
-          # Debug: check if content is being passed correctly
-          echo "Certificate content starts with: $(echo "$CERTIFICATE_CONTENT" | head -c 50)"
+          # Debug: Save to file and examine
+          echo "$CERTIFICATE_CONTENT" > debug_cert.txt
+          echo "Debug file size: $(wc -c < debug_cert.txt)"
+          echo "First line: $(head -1 debug_cert.txt)"
+          echo "Last line: $(tail -1 debug_cert.txt)"
+          echo "Character analysis:"
+          head -c 100 debug_cert.txt | xxd
           
-          # Use the same base64 flags as the API key (which works)
-          echo "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
+          # Try cleaning the content more aggressively
+          echo "$CERTIFICATE_CONTENT" | tr -d '\r\n ' | base64 --decode > certificate.p12
+          
+          # If that fails, try the content as-is
+          if [ ! -s certificate.p12 ]; then
+            echo "Cleaned decode failed, trying as-is..."
+            echo "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
+          fi
           
           if [ -f certificate.p12 ] && [ -s certificate.p12 ]; then
             echo "Certificate file created successfully, size: $(wc -c < certificate.p12) bytes"
