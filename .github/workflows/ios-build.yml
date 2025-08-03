@@ -46,9 +46,22 @@ jobs:
         PROVISIONING_PROFILE_CONTENT: ${{ secrets.PROVISIONING_PROFILE }}
         API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
       run: |
+        # Debug: Check if secrets are available
+        echo "API_KEY_ID: $API_KEY_ID"
+        echo "API_KEY_CONTENT length: ${#API_KEY_CONTENT}"
+        echo "CERTIFICATE_CONTENT length: ${#CERTIFICATE_CONTENT}"
+        echo "CERTIFICATE_PASSWORD length: ${#CERTIFICATE_PASSWORD}"
+        echo "PROVISIONING_PROFILE_CONTENT length: ${#PROVISIONING_PROFILE_CONTENT}"
+        
         # Create API key
         mkdir -p ~/private_keys
-        echo "$API_KEY_CONTENT" | base64 --decode > ~/private_keys/AuthKey_$API_KEY_ID.p8
+        if [ -n "$API_KEY_CONTENT" ]; then
+          echo "$API_KEY_CONTENT" | base64 --decode > ~/private_keys/AuthKey_$API_KEY_ID.p8
+          echo "API key created successfully"
+        else
+          echo "ERROR: API_KEY_CONTENT is empty"
+          exit 1
+        fi
         
         # Create keychain
         security create-keychain -p "build" build.keychain
@@ -57,15 +70,27 @@ jobs:
         security set-keychain-settings -lut 21600 build.keychain
         
         # Import distribution certificate with specific identity
-        echo "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
-        security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
+        if [ -n "$CERTIFICATE_CONTENT" ]; then
+          echo "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
+          security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
+          echo "Certificate imported successfully"
+        else
+          echo "ERROR: CERTIFICATE_CONTENT is empty"
+          exit 1
+        fi
         
         # Allow codesign to use the keychain
         security set-key-partition-list -S apple-tool:,apple: -s -k "build" build.keychain
         
         # Install provisioning profile  
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        echo "$PROVISIONING_PROFILE_CONTENT" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+        if [ -n "$PROVISIONING_PROFILE_CONTENT" ]; then
+          echo "$PROVISIONING_PROFILE_CONTENT" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          echo "Provisioning profile installed successfully"
+        else
+          echo "ERROR: PROVISIONING_PROFILE_CONTENT is empty"
+          exit 1
+        fi
         
         # List available identities and profiles for debugging
         security find-identity -v -p codesigning build.keychain
