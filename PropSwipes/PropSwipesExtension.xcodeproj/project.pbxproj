@@ -10,7 +10,7 @@
 		A1000000000000000000001A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001B /* AppDelegate.swift */; };
 		A1000000000000000000001C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000001D /* ViewController.swift */; };
 		A100000000000000000000AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000BB /* Assets.xcassets */; };
-		A100000000000000000000CC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000DD /* LaunchScreen.storyboard */; };
+		
 		A100000000000000000000EE /* PropSwipes Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A100000000000000000000FF /* PropSwipes Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A1000000000000000000002A /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002B /* SafariWebExtensionHandler.swift */; };
 		A1000000000000000000002C /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = A1000000000000000000002D /* popup.html */; };
@@ -52,7 +52,7 @@
 		A1000000000000000000001D /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		
 		A100000000000000000000BB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A100000000000000000000DD /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		
 		A1000000000000000000005B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000000000000000000005C /* PropSwipes.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes.entitlements; sourceTree = "<group>"; };
 		A100000000000000000000FF /* PropSwipes Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "PropSwipes Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,7 +67,7 @@
 		A1000000000000000000005D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000000000000000000005E /* PropSwipes_Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PropSwipes_Extension.entitlements; sourceTree = "<group>"; };
 		
-		A100000000000000000000B2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +113,7 @@
 				A1000000000000000000001D /* ViewController.swift */,
 				
 				A100000000000000000000BB /* Assets.xcassets */,
-				A100000000000000000000DD /* LaunchScreen.storyboard */,
+				
 				A1000000000000000000005B /* Info.plist */,
 				A1000000000000000000005C /* PropSwipes.entitlements */,
 			);
@@ -226,7 +226,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A100000000000000000000CC /* LaunchScreen.storyboard in Resources */,
+				
 				A100000000000000000000AA /* Assets.xcassets in Resources */,
 				
 			);
@@ -277,14 +277,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		A100000000000000000000DD /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				A100000000000000000000B2 /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
