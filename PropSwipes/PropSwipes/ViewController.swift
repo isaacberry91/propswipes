@@ -1,8 +1,8 @@
-import Cocoa
+import UIKit
 import SafariServices
 import WebKit
 
-class ViewController: NSViewController {
+class ViewController: UIViewController {
 
     @IBOutlet var webView: WKWebView!
     
@@ -19,7 +19,7 @@ class ViewController: NSViewController {
     }
 
     @IBAction func openSafariExtensionPreferences(_ sender: AnyObject?) {
-        SFSafariApplication.showPreferencesForExtension(withIdentifier: "app.lovable.swipes-chats-extension.Extension") { error in
+        SFSafariApplication.showPreferencesForExtension(withIdentifier: "app.propswipes.safari.extension.Extension") { error in
             if let _ = error {
                 // Insert code to inform the user that something went wrong.
             }
