@@ -80,8 +80,8 @@ jobs:
             <string>manual</string>
             <key>provisioningProfiles</key>
             <dict>
-                <key>com.propswipes.app116786</key>
-                <string>PropSwipes App Store</string>
+                <key>com.propswipes.app</key>
+                <string>PropSwipes App Store Profile</string>
             </dict>
             <key>signingCertificate</key>
             <string>iPhone Distribution</string>
