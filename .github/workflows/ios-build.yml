@@ -39,10 +39,16 @@ jobs:
         xcode-version: latest-stable
         
     - name: Setup certificates and provisioning profile
+      env:
+        API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        CERTIFICATE_CONTENT: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+        CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+        PROVISIONING_PROFILE_CONTENT: ${{ secrets.PROVISIONING_PROFILE }}
+        API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
       run: |
         # Create API key
         mkdir -p ~/private_keys
-        printf '%s' "${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}" | base64 --decode > ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8
+        echo "$API_KEY_CONTENT" | base64 --decode > ~/private_keys/AuthKey_$API_KEY_ID.p8
         
         # Create keychain
         security create-keychain -p "build" build.keychain
@@ -51,15 +57,15 @@ jobs:
         security set-keychain-settings -lut 21600 build.keychain
         
         # Import distribution certificate with specific identity
-        printf '%s' "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}" | base64 --decode > certificate.p12
-        security import certificate.p12 -P "${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
+        echo "$CERTIFICATE_CONTENT" | base64 --decode > certificate.p12
+        security import certificate.p12 -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k build.keychain -T /usr/bin/codesign
         
         # Allow codesign to use the keychain
         security set-key-partition-list -S apple-tool:,apple: -s -k "build" build.keychain
         
         # Install provisioning profile  
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        printf '%s' "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+        echo "$PROVISIONING_PROFILE_CONTENT" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
         
         # List available identities and profiles for debugging
         security find-identity -v -p codesigning build.keychain
