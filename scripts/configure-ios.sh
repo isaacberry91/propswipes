@@ -9,20 +9,29 @@ echo "Configuring iOS project for manual signing..."
 cp App.xcodeproj/project.pbxproj App.xcodeproj/project.pbxproj.backup
 
 # Configure manual signing for App target only and add required settings
-# Find and replace ALL instances of CODE_SIGN_IDENTITY
+echo "Before modification:"
+grep -n "CODE_SIGN_IDENTITY\|DEVELOPMENT_TEAM\|CODE_SIGN_STYLE" App.xcodeproj/project.pbxproj | head -10
+
+# Replace ALL occurrences of iOS Distribution with Apple Distribution
+sed -i '' 's/iOS Distribution/Apple Distribution/g' App.xcodeproj/project.pbxproj
+sed -i '' 's/iPhone Distribution/Apple Distribution/g' App.xcodeproj/project.pbxproj
+
+# Set code signing style to manual everywhere
 sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' App.xcodeproj/project.pbxproj
 
-# Set development team more aggressively - find ALL DEVELOPMENT_TEAM lines and replace them
+# Set development team everywhere
 sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = "'"$DEVELOPMENT_TEAM"'";/g' App.xcodeproj/project.pbxproj
 sed -i '' 's/DEVELOPMENT_TEAM = ".*";/DEVELOPMENT_TEAM = "'"$DEVELOPMENT_TEAM"'";/g' App.xcodeproj/project.pbxproj
 sed -i '' 's/DEVELOPMENT_TEAM = .*;/DEVELOPMENT_TEAM = "'"$DEVELOPMENT_TEAM"'";/g' App.xcodeproj/project.pbxproj
 
-# Add provisioning profile and code sign identity to ALL configurations
-sed -i '' '/CODE_SIGN_STYLE = Manual;/a\
-				PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";\
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";\
-				CODE_SIGN_IDENTITY = "Apple Distribution";\
-				DEVELOPMENT_TEAM = "'"$DEVELOPMENT_TEAM"'";
-' App.xcodeproj/project.pbxproj
+# Set code sign identity everywhere
+sed -i '' 's/CODE_SIGN_IDENTITY = ".*";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' App.xcodeproj/project.pbxproj
+sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" = ".*";/"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";/g' App.xcodeproj/project.pbxproj
+
+# Set provisioning profile everywhere
+sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = ".*";/PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";/g' App.xcodeproj/project.pbxproj
+
+echo "After modification:"
+grep -n "CODE_SIGN_IDENTITY\|DEVELOPMENT_TEAM\|CODE_SIGN_STYLE" App.xcodeproj/project.pbxproj | head -10
 
 echo "iOS project configured for manual signing with development team: $DEVELOPMENT_TEAM"
