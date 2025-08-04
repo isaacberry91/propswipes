@@ -1,7 +1,15 @@
 #!/bin/bash
 
 # Configure iOS project for CI builds
-cd ios/App
+echo "Current directory: $(pwd)"
+echo "Contents: $(ls -la)"
+
+# Navigate to the iOS App directory
+cd ios/App || {
+    echo "ERROR: Could not find ios/App directory"
+    echo "Available directories: $(ls -la)"
+    exit 1
+}
 
 echo "Configuring iOS project for manual signing..."
 
