@@ -56,6 +56,12 @@ content = content.replace('iOS Distribution', 'Apple Distribution')
 content = content.replace('iPhone Distribution', 'Apple Distribution') 
 content = content.replace('"iOS Distribution"', '"Apple Distribution"')
 content = content.replace('"iPhone Distribution"', '"Apple Distribution"')
+content = content.replace('iPhone Developer', 'Apple Distribution')
+content = content.replace('"iPhone Developer"', '"Apple Distribution"')
+# Also handle any variations with spaces or quotes
+content = re.sub(r'"[^"]*iOS Distribution[^"]*"', '"Apple Distribution"', content)
+content = re.sub(r'"[^"]*iPhone Distribution[^"]*"', '"Apple Distribution"', content)
+content = re.sub(r'"[^"]*iPhone Developer[^"]*"', '"Apple Distribution"', content)
 
 # SECOND: Set all signing-related settings
 print("Setting signing configuration...")
