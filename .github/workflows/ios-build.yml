@@ -202,4 +202,12 @@ jobs:
         
     - name: Upload to App Store
       run: |
-        xcrun notarytool submit ios/App/App.ipa --key ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 --key-id ${{ secrets.APP_STORE_CONNECT_KEY_ID }} --issuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }} --wait
+        echo "Submitting to notarization..."
+        SUBMISSION_ID=$(xcrun notarytool submit ios/App/App.ipa --key ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 --key-id ${{ secrets.APP_STORE_CONNECT_KEY_ID }} --issuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }} --wait --timeout 10m --output-format json | jq -r '.id')
+        echo "Submission ID: $SUBMISSION_ID"
+        
+        echo "Getting detailed submission info..."
+        xcrun notarytool info $SUBMISSION_ID --key ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 --key-id ${{ secrets.APP_STORE_CONNECT_KEY_ID }} --issuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        
+        echo "Getting submission log..."
+        xcrun notarytool log $SUBMISSION_ID --key ~/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8 --key-id ${{ secrets.APP_STORE_CONNECT_KEY_ID }} --issuer ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
