@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       external: ['@capgo/native-purchases']
-    }
+    },
+    assetsDir: 'assets',
+    sourcemap: false,
+    minify: 'terser'
   },
 }));
