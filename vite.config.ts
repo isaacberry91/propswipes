@@ -24,7 +24,6 @@ export default defineConfig(({ mode }) => ({
       external: ['@capgo/native-purchases']
     },
     assetsDir: 'assets',
-    sourcemap: false,
-    minify: 'terser'
+    sourcemap: false
   },
 }));
