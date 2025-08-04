@@ -31,6 +31,14 @@ sed -i '' 's/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" = ".*";/"CODE_SIGN_IDENTITY[
 # Set provisioning profile everywhere
 sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = ".*";/PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";/g' App.xcodeproj/project.pbxproj
 
+# Add provisioning profile to configurations that don't have it
+sed -i '' '/CODE_SIGN_STYLE = Manual;/a\
+				PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";
+' App.xcodeproj/project.pbxproj
+
+# Remove any duplicate PROVISIONING_PROFILE_SPECIFIER lines that might have been created
+awk '!seen[$0]++' App.xcodeproj/project.pbxproj > App.xcodeproj/project.pbxproj.tmp && mv App.xcodeproj/project.pbxproj.tmp App.xcodeproj/project.pbxproj
+
 echo "After modification:"
 grep -n "CODE_SIGN_IDENTITY\|DEVELOPMENT_TEAM\|CODE_SIGN_STYLE" App.xcodeproj/project.pbxproj | head -10
 
