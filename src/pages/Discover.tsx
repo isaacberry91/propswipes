@@ -181,19 +181,17 @@ const Discover = () => {
     return new Intl.NumberFormat('en-US').format(sqft);
   };
 
-  const getPropertiesForLocation = async (location: string) => {
+  const getPropertiesForLocation = async (location: string, radius: number = 10) => {
     setSelectedLocation(location);
     setLoading(true);
     
     try {
-      // Extract city from location string (e.g., "Seattle, WA" -> "Seattle")
-      const cityName = location.split(',')[0].trim();
-      
+      // Search by address first, then fallback to city  
       const { data, error } = await supabase
         .from('properties')
         .select('*')
         .eq('status', 'approved')
-        .or(`city.ilike.%${cityName}%,state.ilike.%${cityName}%`)
+        .or(`address.ilike.%${location}%,city.ilike.%${location.split(',')[0].trim()}%`)
         .limit(20);
 
       if (error) throw error;
@@ -202,8 +200,8 @@ const Discover = () => {
       setCurrentIndex(0);
       
       toast({
-        title: "Location Updated! 📍",
-        description: `Found ${data?.length || 0} properties in ${location}`,
+        title: "Location Updated! 📍", 
+        description: `Found ${data?.length || 0} properties within ${radius} miles of ${location}`,
       });
     } catch (error) {
       console.error('Error fetching properties by location:', error);

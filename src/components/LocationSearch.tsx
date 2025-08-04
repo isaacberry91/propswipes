@@ -3,19 +3,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Search, Navigation, Target } from "lucide-react";
 
 interface LocationSearchProps {
   value: string;
-  onChange: (location: string) => void;
+  onChange: (location: string, radius?: number) => void;
   placeholder?: string;
 }
 
-const LocationSearch = ({ value, onChange, placeholder = "Search any city, state, or area..." }: LocationSearchProps) => {
+const LocationSearch = ({ value, onChange, placeholder = "Search any address, city, or area..." }: LocationSearchProps) => {
   const [searchValue, setSearchValue] = useState(value);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedRadius, setSelectedRadius] = useState(10);
   const [recentSearches] = useState([
-    "Seattle, WA", "Portland, OR", "San Francisco, CA", "Los Angeles, CA"
+    "1234 Main St, Seattle, WA", "456 Oak Ave, Portland, OR", "789 Pine St, San Francisco, CA"
   ]);
 
   const popularLocations = [
@@ -53,17 +55,26 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any city, state
 
   const handleLocationSelect = (location: string) => {
     setSearchValue(location);
-    onChange(location);
+    onChange(location, selectedRadius);
     setShowSuggestions(false);
   };
 
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          // In a real app, you'd reverse geocode these coordinates
-          const mockLocation = "Current Location (Seattle, WA)";
-          handleLocationSelect(mockLocation);
+        async (position) => {
+          try {
+            // Reverse geocode coordinates to get actual address
+            const response = await fetch(
+              `https://api.mapbox.com/geocoding/v5/mapbox.places/${position.coords.longitude},${position.coords.latitude}.json?access_token=pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGV1cW9lY2YwM3djM25xbmJpMzZjMXR5In0.example`
+            );
+            const data = await response.json();
+            const address = data.features?.[0]?.place_name || "Current Location";
+            handleLocationSelect(address);
+          } catch (error) {
+            console.error("Error reverse geocoding:", error);
+            handleLocationSelect("Current Location");
+          }
         },
         (error) => {
           console.error("Error getting location:", error);
@@ -104,6 +115,25 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any city, state
       {showSuggestions && (
         <Card className="absolute top-full left-0 right-0 mt-1 p-4 shadow-lg z-50 max-h-96 overflow-y-auto bg-background border">
           <div className="space-y-4">
+            {/* Radius Selection */}
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                Search Radius
+              </h4>
+              <Select value={selectedRadius.toString()} onValueChange={(value) => setSelectedRadius(parseInt(value))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 miles</SelectItem>
+                  <SelectItem value="10">10 miles</SelectItem>
+                  <SelectItem value="25">25 miles</SelectItem>
+                  <SelectItem value="50">50 miles</SelectItem>
+                  <SelectItem value="100">100 miles</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Current Location Option */}
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
