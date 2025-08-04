@@ -162,6 +162,12 @@ jobs:
         chmod +x scripts/configure-ios.sh
         DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" ./scripts/configure-ios.sh
         
+        # Debug: Show what's actually in the project file
+        echo "=== PROJECT CONFIGURATION ==="
+        grep -A5 -B5 "CODE_SIGN_IDENTITY" ios/App/App.xcodeproj/project.pbxproj
+        echo "=== AVAILABLE CERTIFICATES ==="
+        security find-identity -v -p codesigning build.keychain
+        
     - name: Build iOS app
       run: |
         cd ios/App
