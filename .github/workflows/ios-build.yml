@@ -159,12 +159,24 @@ jobs:
         
     - name: Configure iOS project
       run: |
+        echo "=== BEFORE CONFIGURATION ==="
+        echo "Current directory: $(pwd)"
+        echo "iOS App directory exists: $(ls -la ios/App/)"
+        echo "Project file exists: $(ls -la ios/App/App.xcodeproj/project.pbxproj)"
+        
+        # Show current signing settings
+        echo "=== CURRENT SIGNING SETTINGS ==="
+        grep -n "CODE_SIGN_IDENTITY\|iOS Distribution\|Apple Distribution" ios/App/App.xcodeproj/project.pbxproj | head -10
+        
+        # Run configuration script
         chmod +x scripts/configure-ios.sh
+        echo "=== RUNNING CONFIGURATION SCRIPT ==="
         DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" ./scripts/configure-ios.sh
         
-        # Debug: Show what's actually in the project file
-        echo "=== PROJECT CONFIGURATION ==="
-        grep -A5 -B5 "CODE_SIGN_IDENTITY" ios/App/App.xcodeproj/project.pbxproj
+        # Show settings after modification
+        echo "=== AFTER CONFIGURATION ==="
+        grep -n "CODE_SIGN_IDENTITY\|iOS Distribution\|Apple Distribution" ios/App/App.xcodeproj/project.pbxproj | head -10
+        
         echo "=== AVAILABLE CERTIFICATES ==="
         security find-identity -v -p codesigning build.keychain
         

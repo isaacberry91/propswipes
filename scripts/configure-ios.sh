@@ -1,15 +1,25 @@
 #!/bin/bash
 
 # Configure iOS project for CI builds
-echo "Current directory: $(pwd)"
+echo "=== SCRIPT STARTING ==="
+echo "Script current directory: $(pwd)"
 echo "Contents: $(ls -la)"
 
 # Navigate to the iOS App directory
-cd ios/App || {
-    echo "ERROR: Could not find ios/App directory"
+if [ -d "ios/App" ]; then
+    echo "Found ios/App directory, navigating..."
+    cd ios/App || {
+        echo "ERROR: Could not change to ios/App directory"
+        exit 1
+    }
+else
+    echo "ERROR: ios/App directory not found"
     echo "Available directories: $(ls -la)"
     exit 1
-}
+fi
+
+echo "Now in directory: $(pwd)"
+echo "Project file exists: $(ls -la App.xcodeproj/project.pbxproj)"
 
 echo "Configuring iOS project for manual signing..."
 
