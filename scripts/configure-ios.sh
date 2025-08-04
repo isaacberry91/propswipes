@@ -32,59 +32,85 @@ if not team_id:
 
 print(f"Setting development team to: {team_id}")
 
-# More aggressive replacement of development team
+# FIRST: Replace ALL occurrences of old certificate names everywhere
+print("Replacing certificate references...")
+content = content.replace('iOS Distribution', 'Apple Distribution')
+content = content.replace('iPhone Distribution', 'Apple Distribution') 
+content = content.replace('"iOS Distribution"', '"Apple Distribution"')
+content = content.replace('"iPhone Distribution"', '"Apple Distribution"')
+
+# SECOND: Set all signing-related settings
+print("Setting signing configuration...")
+content = re.sub(r'CODE_SIGN_STYLE = Automatic;', 'CODE_SIGN_STYLE = Manual;', content)
+
+# Development team - be very aggressive
 content = re.sub(r'DEVELOPMENT_TEAM = "[^"]*";', f'DEVELOPMENT_TEAM = "{team_id}";', content)
 content = re.sub(r'DEVELOPMENT_TEAM = "";', f'DEVELOPMENT_TEAM = "{team_id}";', content)
 content = re.sub(r'DEVELOPMENT_TEAM = ;', f'DEVELOPMENT_TEAM = "{team_id}";', content)
 
-# Set signing settings
-content = re.sub(r'CODE_SIGN_STYLE = Automatic;', 'CODE_SIGN_STYLE = Manual;', content)
+# Code signing identity - replace ALL variations
 content = re.sub(r'CODE_SIGN_IDENTITY = "[^"]*";', 'CODE_SIGN_IDENTITY = "Apple Distribution";', content)
 content = re.sub(r'"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]" = "[^"]*";', '"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";', content)
 
-# Set provisioning profile
+# Provisioning profile
 content = re.sub(r'PROVISIONING_PROFILE_SPECIFIER = "[^"]*";', 'PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";', content)
 
-# Replace any old distribution certificate references
-content = re.sub(r'iOS Distribution', 'Apple Distribution', content)
-content = re.sub(r'iPhone Distribution', 'Apple Distribution', content)
-
-# Ensure build configurations have all required settings
-# Find build configurations and add missing settings
+# THIRD: Ensure every build configuration has the required settings
+print("Ensuring complete build configuration...")
 build_config_pattern = r'(buildSettings = \{[^}]*?)(};)'
 
-def ensure_signing_settings(match):
+def ensure_complete_signing(match):
     build_settings = match.group(1)
     end_brace = match.group(2)
     
-    # Only modify configurations that have CODE_SIGN_STYLE
-    if 'CODE_SIGN_STYLE' in build_settings:
-        # Ensure development team is set
-        if f'DEVELOPMENT_TEAM = "{team_id}";' not in build_settings:
-            if 'DEVELOPMENT_TEAM' not in build_settings:
-                build_settings += f'\n\t\t\t\tDEVELOPMENT_TEAM = "{team_id}";'
+    # Only modify configurations that seem to be for the main app target
+    if 'CODE_SIGN_STYLE' in build_settings or 'PRODUCT_BUNDLE_IDENTIFIER' in build_settings:
+        required_settings = [
+            f'DEVELOPMENT_TEAM = "{team_id}";',
+            'CODE_SIGN_STYLE = Manual;',
+            'CODE_SIGN_IDENTITY = "Apple Distribution";',
+            '"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";',
+            'PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";'
+        ]
         
-        # Ensure provisioning profile is set for manual signing
-        if 'CODE_SIGN_STYLE = Manual;' in build_settings:
-            if 'PROVISIONING_PROFILE_SPECIFIER' not in build_settings:
-                build_settings += '\n\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";'
+        for setting in required_settings:
+            key = setting.split(' = ')[0].strip('"')
+            if key not in build_settings:
+                build_settings += f'\n\t\t\t\t{setting}'
     
     return build_settings + end_brace
 
-content = re.sub(build_config_pattern, ensure_signing_settings, content, flags=re.DOTALL)
+content = re.sub(build_config_pattern, ensure_complete_signing, content, flags=re.DOTALL)
 
+# Save the file
 with open('App.xcodeproj/project.pbxproj', 'w') as f:
     f.write(content)
 
 print("Configuration complete")
 
-# Show what we set
+# Verification
 with open('App.xcodeproj/project.pbxproj', 'r') as f:
-    content = f.read()
-    team_count = content.count(f'DEVELOPMENT_TEAM = "{team_id}";')
-    profile_count = content.count('PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";')
-    print(f"Development team set in {team_count} locations")
-    print(f"Provisioning profile set in {profile_count} locations")
+    final_content = f.read()
+    
+    # Count occurrences
+    ios_dist_count = final_content.count('iOS Distribution')
+    apple_dist_count = final_content.count('Apple Distribution')
+    team_count = final_content.count(f'DEVELOPMENT_TEAM = "{team_id}";')
+    profile_count = final_content.count('PROVISIONING_PROFILE_SPECIFIER = "PropSwipes App Store Profile";')
+    
+    print(f"Verification results:")
+    print(f"  - Remaining 'iOS Distribution' references: {ios_dist_count}")
+    print(f"  - 'Apple Distribution' references: {apple_dist_count}")
+    print(f"  - Development team set in {team_count} locations")
+    print(f"  - Provisioning profile set in {profile_count} locations")
+    
+    if ios_dist_count > 0:
+        print("WARNING: Some 'iOS Distribution' references remain!")
+        # Show context for remaining references
+        lines = final_content.split('\n')
+        for i, line in enumerate(lines):
+            if 'iOS Distribution' in line:
+                print(f"  Line {i+1}: {line.strip()}")
 EOF
 
 # Run the Python script
