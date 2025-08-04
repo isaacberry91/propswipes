@@ -87,7 +87,7 @@ def ensure_complete_signing(match):
     build_settings = match.group(1)
     end_brace = match.group(2)
     
-    # Only modify configurations that seem to be for the main app target
+    # Only modify configurations that seem to be for app targets (including extensions)
     if 'CODE_SIGN_STYLE' in build_settings or 'PRODUCT_BUNDLE_IDENTIFIER' in build_settings:
         required_settings = [
             f'DEVELOPMENT_TEAM = "{team_id}";',
