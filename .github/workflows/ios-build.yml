@@ -184,12 +184,16 @@ jobs:
       run: |
         cd ios/App
         
-        # Build with the configured manual signing
+        # Build with explicit code signing settings
         xcodebuild -workspace App.xcworkspace \
           -scheme App \
           -configuration Release \
           -destination generic/platform=iOS \
           -archivePath App.xcarchive \
+          CODE_SIGN_STYLE=Manual \
+          CODE_SIGN_IDENTITY="Apple Distribution" \
+          PROVISIONING_PROFILE_SPECIFIER="PropSwipes App Store Profile" \
+          DEVELOPMENT_TEAM="${{ secrets.APP_STORE_TEAM_ID }}" \
           archive
         
     - name: Export IPA
