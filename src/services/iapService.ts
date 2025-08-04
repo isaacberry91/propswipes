@@ -36,25 +36,35 @@ class IAPService {
     }
 
     try {
-      // Only try to import in actual native environment
-      if (typeof window !== 'undefined' && (window as any).Capacitor?.Plugins) {
-        // Construct the import path dynamically to avoid Vite resolution
-        const moduleName = '@capgo/native-purchases';
-        const { NativePurchases } = await import(/* @vite-ignore */ moduleName);
-        this.iapPlugin = NativePurchases;
-        
-        // Initialize the plugin
-        await this.iapPlugin.initialize();
-        
-        console.log('IAP: Native purchases plugin initialized successfully');
-      } else {
-        console.log('IAP: Capacitor plugins not available, using mock service');
-      }
+      // Add timeout to prevent hanging
+      const initTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('IAP initialization timeout')), 5000)
+      );
+
+      const initPromise = (async () => {
+        // Only try to import in actual native environment
+        if (typeof window !== 'undefined' && (window as any).Capacitor?.Plugins) {
+          // Construct the import path dynamically to avoid Vite resolution
+          const moduleName = '@capgo/native-purchases';
+          const { NativePurchases } = await import(/* @vite-ignore */ moduleName);
+          this.iapPlugin = NativePurchases;
+          
+          // Initialize the plugin
+          await this.iapPlugin.initialize();
+          
+          console.log('IAP: Native purchases plugin initialized successfully');
+        } else {
+          console.log('IAP: Capacitor plugins not available, using mock service');
+        }
+      })();
+
+      // Race between initialization and timeout
+      await Promise.race([initPromise, initTimeout]);
       
       this.isInitialized = true;
       return true;
     } catch (error) {
-      console.log('IAP: Plugin not available, continuing with mock service. Error:', error);
+      console.log('IAP: Plugin not available or timeout, continuing with mock service. Error:', error);
       this.isInitialized = true;
       return true;
     }
