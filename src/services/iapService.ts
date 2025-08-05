@@ -31,31 +31,56 @@ class IAPService {
 
   async initialize(): Promise<boolean> {
     if (!Capacitor.isNativePlatform()) {
-      console.log('IAP: Not on native platform');
+      console.log('PropSwipes Main: Not on native platform, using web fallback');
       this.isInitialized = true;
       return true;
     }
 
+    // Prevent multiple initialization attempts
+    if (this.isInitialized) {
+      console.log('PropSwipes Main: IAP already initialized');
+      return true;
+    }
+
     try {
+      // Clear any existing webtoappview IAP instances that might conflict
+      if (typeof window !== 'undefined') {
+        // Clear any existing global IAP references from other PropSwipes apps
+        delete (window as any).__propswipes_iap__;
+        delete (window as any).__webtoappview_iap__;
+      }
+
       // Add timeout to prevent hanging
       const initTimeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('IAP initialization timeout')), 5000)
+        setTimeout(() => reject(new Error('IAP initialization timeout after 10 seconds')), 10000)
       );
 
       const initPromise = (async () => {
         // Only try to import in actual native environment
         if (typeof window !== 'undefined' && (window as any).Capacitor?.Plugins) {
-          // Construct the import path dynamically to avoid Vite resolution
-          const moduleName = '@capgo/native-purchases';
-          const { NativePurchases } = await import(/* @vite-ignore */ moduleName);
-          this.iapPlugin = NativePurchases;
-          
-          // Initialize the plugin
-          await this.iapPlugin.initialize();
-          
-          console.log('IAP: Native purchases plugin initialized successfully');
+          try {
+            // Dynamic import to avoid Vite resolution issues
+            const moduleName = '@capgo/native-purchases';
+            const { NativePurchases } = await import(/* @vite-ignore */ moduleName);
+            this.iapPlugin = NativePurchases;
+            
+            // Set unique app identifier to prevent conflicts
+            (window as any).__propswipes_main_iap__ = this.iapPlugin;
+            
+            // Initialize the plugin with app-specific settings
+            await this.iapPlugin.initialize({
+              apiKey: '', // Will be set in App Store Connect
+              appUserID: `propswipes_main_${Date.now()}`, // Unique identifier
+              observerMode: false // Take control of purchases
+            });
+            
+            console.log('PropSwipes Main: Native purchases plugin initialized successfully');
+          } catch (importError) {
+            console.log('PropSwipes Main: Native purchases not available, using fallback');
+            // Don't throw, just continue with fallback
+          }
         } else {
-          console.log('IAP: Capacitor plugins not available, using mock service');
+          console.log('PropSwipes Main: Capacitor plugins not available, using mock service');
         }
       })();
 
@@ -65,9 +90,9 @@ class IAPService {
       this.isInitialized = true;
       return true;
     } catch (error) {
-      console.log('IAP: Plugin not available or timeout, continuing with mock service. Error:', error);
-      this.isInitialized = true;
-      return true;
+      console.log('PropSwipes Main: IAP initialization failed, continuing with fallback service. Error:', error);
+      this.isInitialized = true; // Still mark as initialized to allow fallback
+      return true; // Return true to allow app to continue
     }
   }
 

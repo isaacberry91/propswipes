@@ -55,8 +55,13 @@ serve(async (req) => {
       throw new Error('User profile not found');
     }
 
-    // Map product ID to subscription tier
+    // Map product ID to subscription tier - updated for new PropSwipes main app
     const tierMap: Record<string, string> = {
+      'com.propswipes.main.buyer.pro.monthly': 'buyer_pro',
+      'com.propswipes.main.seller.basic.monthly': 'seller_basic',
+      'com.propswipes.main.seller.professional.monthly': 'seller_professional',
+      'com.propswipes.main.seller.enterprise.monthly': 'seller_enterprise',
+      // Legacy support for old product IDs to prevent conflicts
       'com.propswipes.subscription.buyer_pro': 'buyer_pro',
       'com.propswipes.seller_basic': 'seller_basic',
       'com.propswipes.seller_professional': 'seller_professional',
