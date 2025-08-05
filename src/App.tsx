@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
+import { useEffect } from "react";
+import { iapService } from "./services/iapService";
 import Index from "./pages/Index";
 import Discover from "./pages/Discover";
 import ListProperty from "./pages/ListProperty";
@@ -20,7 +22,23 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // Initialize IAP service on app startup
+  useEffect(() => {
+    const initializeIAP = async () => {
+      try {
+        console.log('PropSwipes: Initializing IAP service...');
+        await iapService.initialize();
+        console.log('PropSwipes: IAP service initialized successfully');
+      } catch (error) {
+        console.log('PropSwipes: IAP initialization failed:', error);
+      }
+    };
+    
+    initializeIAP();
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
@@ -75,6 +93,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

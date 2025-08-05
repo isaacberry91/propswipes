@@ -3,10 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 // Product IDs for Apple App Store and Google Play Store
 export const PRODUCT_IDS = {
-  BUYER_PRO: 'com.propswipes.subscription.buyer_pro_v2',
-  SELLER_BASIC: 'com.propswipes.subscription.seller_basic_v2', 
-  SELLER_PROFESSIONAL: 'com.propswipes.subscription.seller_professional_v2',
-  SELLER_ENTERPRISE: 'com.propswipes.subscription.seller_enterprise_v2'
+  BUYER_PRO: 'app.lovable.c53d60b9f83247acaabd6a1765b647a5.buyer_pro',
+  SELLER_BASIC: 'app.lovable.c53d60b9f83247acaabd6a1765b647a5.seller_basic', 
+  SELLER_PROFESSIONAL: 'app.lovable.c53d60b9f83247acaabd6a1765b647a5.seller_professional',
+  SELLER_ENTERPRISE: 'app.lovable.c53d60b9f83247acaabd6a1765b647a5.seller_enterprise'
 };
 
 export interface IAPProduct {
