@@ -23,19 +23,41 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Initialize IAP service on app startup
+  // Initialize IAP service on app startup with improved error handling
   useEffect(() => {
+    let isCancelled = false;
+    
     const initializeIAP = async () => {
       try {
-        console.log('PropSwipes: Initializing IAP service...');
-        await iapService.initialize();
-        console.log('PropSwipes: IAP service initialized successfully');
+        console.log('PropSwipes Main App: Starting IAP initialization...');
+        
+        // Wait a bit for app to fully load
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        if (isCancelled) return;
+        
+        const success = await iapService.initialize();
+        
+        if (!isCancelled) {
+          if (success) {
+            console.log('PropSwipes Main App: IAP service ready for use');
+          } else {
+            console.log('PropSwipes Main App: IAP service failed to initialize');
+          }
+        }
       } catch (error) {
-        console.log('PropSwipes: IAP initialization failed:', error);
+        if (!isCancelled) {
+          console.log('PropSwipes Main App: IAP initialization error (non-fatal):', error);
+        }
       }
     };
     
     initializeIAP();
+    
+    // Cleanup function
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   return (

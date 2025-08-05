@@ -1,12 +1,13 @@
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 
-// Product IDs for Apple App Store and Google Play Store
+// PropSwipes App-Specific Product IDs for Apple App Store and Google Play Store
+// Using unique prefix to avoid conflicts with other PropSwipes apps
 export const PRODUCT_IDS = {
-  BUYER_PRO: 'app.lovable.c53d60b9f83247acaabd6a1765b647a5.buyer_pro',
-  SELLER_BASIC: 'app.lovable.c53d60b9f83247acaabd6a1765b647a5.seller_basic', 
-  SELLER_PROFESSIONAL: 'app.lovable.c53d60b9f83247acaabd6a1765b647a5.seller_professional',
-  SELLER_ENTERPRISE: 'app.lovable.c53d60b9f83247acaabd6a1765b647a5.seller_enterprise'
+  BUYER_PRO: 'com.propswipes.main.buyer.pro.monthly',
+  SELLER_BASIC: 'com.propswipes.main.seller.basic.monthly', 
+  SELLER_PROFESSIONAL: 'com.propswipes.main.seller.professional.monthly',
+  SELLER_ENTERPRISE: 'com.propswipes.main.seller.enterprise.monthly'
 };
 
 export interface IAPProduct {
