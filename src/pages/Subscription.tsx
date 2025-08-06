@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star, Building, Crown, Users, Smartphone, AlertCircle } from "lucide-react";
+import { Check, Star, Building, Crown, Users, Smartphone, AlertCircle, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
 import { iapService, PRODUCT_IDS } from "@/services/iapService";
@@ -140,6 +140,33 @@ const Subscription = () => {
     }
   };
 
+  const handleRestorePurchases = async () => {
+    if (!isNative) {
+      alert("Restore purchases is only available in the mobile app.");
+      return;
+    }
+
+    try {
+      console.log('Starting restore purchases...');
+      const restoredPurchases = await iapService.restorePurchases();
+      
+      if (restoredPurchases.length > 0) {
+        // Refresh subscription status
+        await fetchSubscription();
+        alert(`Successfully restored ${restoredPurchases.length} purchase(s).`);
+      } else {
+        alert("No previous purchases found to restore.");
+      }
+    } catch (error) {
+      console.error("Restore Error:", error);
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("Unable to restore purchases. Please try again.");
+      }
+    }
+  };
+
   const PlanCard = ({ plan, type }: { plan: any, type: 'buyer' | 'seller' }) => {
     const Icon = plan.icon;
     
@@ -249,6 +276,20 @@ const Subscription = () => {
             ))}
           </div>
         </div>
+
+        {/* Restore Purchases Button */}
+        {isNative && (
+          <div className="text-center mb-8">
+            <Button
+              variant="outline"
+              onClick={handleRestorePurchases}
+              className="flex items-center gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Restore Purchases
+            </Button>
+          </div>
+        )}
 
         {/* Money Back Guarantee */}
         <div className="text-center space-y-4">
