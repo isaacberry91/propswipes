@@ -30,7 +30,10 @@ jobs:
     - name: Setup Capacitor and sync
       run: |
         npm install -g @capacitor/cli
-        npx cap add ios
+        # Only add iOS platform if it doesn't exist
+        if [ ! -d "ios" ]; then
+          npx cap add ios
+        fi
         npx cap sync ios
         
     - name: Setup Xcode
