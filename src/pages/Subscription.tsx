@@ -300,7 +300,9 @@ const Subscription = () => {
           {/* Legal Links */}
           <div className="flex items-center justify-center gap-6 text-sm">
             <a 
-              href="/terms" 
+              href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors underline"
             >
               Terms of Use
