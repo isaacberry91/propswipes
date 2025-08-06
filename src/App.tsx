@@ -16,6 +16,7 @@ import Subscription from "./pages/Subscription";
 import TestSubscription from "./pages/TestSubscription";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import Privacy from "./pages/Privacy";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -106,8 +107,9 @@ const App = () => {
                  <ProtectedRoute>
                    <TestSubscription />
                  </ProtectedRoute>
-               } />
-              <Route path="*" element={<NotFound />} />
+                } />
+                <Route path="/privacy" element={<Privacy />} />
+               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
           <Navigation />
