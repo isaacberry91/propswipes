@@ -251,10 +251,27 @@ const Subscription = () => {
         </div>
 
         {/* Money Back Guarantee */}
-        <div className="text-center">
+        <div className="text-center space-y-4">
           <p className="text-muted-foreground">
             All subscriptions include 30-day money-back guarantee
           </p>
+          
+          {/* Legal Links */}
+          <div className="flex items-center justify-center gap-6 text-sm">
+            <a 
+              href="/terms" 
+              className="text-muted-foreground hover:text-foreground transition-colors underline"
+            >
+              Terms of Use
+            </a>
+            <span className="text-muted-foreground">•</span>
+            <a 
+              href="/privacy" 
+              className="text-muted-foreground hover:text-foreground transition-colors underline"
+            >
+              Privacy Policy
+            </a>
+          </div>
         </div>
       </div>
     </div>
