@@ -143,7 +143,7 @@ jobs:
             <string>manual</string>
             <key>provisioningProfiles</key>
             <dict>
-                <key>com.propswipes.app</key>
+                <key>com.propswipes.main</key>
                 <string>PropSwipes App Store Profile</string>
             </dict>
             <key>signingCertificate</key>
