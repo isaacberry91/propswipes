@@ -113,30 +113,59 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    console.log('PropSwipes Auth: Starting sign in process...');
-    console.log('PropSwipes Auth: Email:', email);
+    console.log('🔐 PropSwipes Auth: Starting sign in process...');
+    console.log('🔐 PropSwipes Auth: Email:', email);
+    console.log('🔐 PropSwipes Auth: Password length:', password.length);
+    console.log('🔐 PropSwipes Auth: Supabase URL:', 'https://jkctleefoomwpaglrvie.supabase.co');
+    console.log('🔐 PropSwipes Auth: User agent:', navigator.userAgent);
+    console.log('🔐 PropSwipes Auth: Online status:', navigator.onLine);
 
     try {
+      console.log('🔐 PropSwipes Auth: Making sign in request...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      console.log('PropSwipes Auth: Sign in response:', { data, error });
+      console.log('🔐 PropSwipes Auth: Sign in response:', { 
+        data: {
+          user: data?.user ? {
+            id: data.user.id,
+            email: data.user.email,
+            confirmed_at: data.user.confirmed_at
+          } : null,
+          session: data?.session ? {
+            access_token: data.session.access_token ? 'present' : 'missing',
+            refresh_token: data.session.refresh_token ? 'present' : 'missing',
+            expires_at: data.session.expires_at
+          } : null
+        },
+        error: error ? {
+          name: error.name,
+          message: error.message,
+          status: error.status,
+          isAuthError: true
+        } : null
+      });
 
       if (error) {
-        console.error('PropSwipes Auth: Sign in error:', error);
+        console.error('🔐 PropSwipes Auth: Sign in error:', {
+          name: error.name,
+          message: error.message,
+          status: error.status,
+          isAuthError: true
+        });
         toast({
           title: "Sign in failed",
           description: error.message,
           variant: "destructive",
         });
       } else {
-        console.log('PropSwipes Auth: Sign in successful, navigating to discover...');
+        console.log('🔐 PropSwipes Auth: Sign in successful, navigating to discover...');
         navigate('/discover');
       }
     } catch (error) {
-      console.error('PropSwipes Auth: Unexpected error:', error);
+      console.error('🔐 PropSwipes Auth: Unexpected error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",

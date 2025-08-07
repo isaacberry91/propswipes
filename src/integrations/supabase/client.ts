@@ -13,5 +13,24 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    debug: true,
+  },
+  global: {
+    headers: {
+      'x-client-info': 'propswipes-ios-debug'
+    }
   }
 });
+
+// Add global event listeners for debugging
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('🔐 PropSwipes Supabase Client: Global auth state change', {
+    event,
+    timestamp: new Date().toISOString(),
+    hasSession: !!session,
+    userId: session?.user?.id,
+    userEmail: session?.user?.email
+  });
+});
+
+console.log('🔐 PropSwipes Supabase Client: Initialized with URL:', SUPABASE_URL);

@@ -17,9 +17,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔐 PropSwipes Auth: Setting up auth state listener');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('🔐 PropSwipes Auth: Auth state changed', { 
+          event, 
+          hasSession: !!session,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email 
+        });
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -27,9 +35,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    console.log('🔐 PropSwipes Auth: Getting initial session');
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log('🔐 PropSwipes Auth: Initial session result', { 
+        hasSession: !!session,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email,
+        error: error ? { name: error.name, message: error.message } : null 
+      });
       setSession(session);
       setUser(session?.user ?? null);
+      setLoading(false);
+    }).catch((error) => {
+      console.error('🔐 PropSwipes Auth: Error getting initial session', error);
       setLoading(false);
     });
 
@@ -37,7 +55,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    console.log('🔐 PropSwipes Auth: Signing out');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('🔐 PropSwipes Auth: Sign out error', error);
+      } else {
+        console.log('🔐 PropSwipes Auth: Sign out successful');
+      }
+    } catch (error) {
+      console.error('🔐 PropSwipes Auth: Sign out exception', error);
+    }
   };
 
   return (
