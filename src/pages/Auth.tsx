@@ -39,6 +39,10 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    console.log('PropSwipes Auth: Starting sign up process...');
+    console.log('PropSwipes Auth: Email:', email);
+    console.log('PropSwipes Auth: Redirect URL:', `${window.location.origin}/discover`);
+
     try {
       const displayName = `${firstName} ${lastName}`.trim();
       const { data, error } = await supabase.auth.signUp({
@@ -58,7 +62,10 @@ const Auth = () => {
         }
       });
 
+      console.log('PropSwipes Auth: Sign up response:', { data, error });
+
       if (error) {
+        console.error('PropSwipes Auth: Sign up error:', error);
         if (error.message.includes('already registered')) {
           toast({
             title: "Account exists",
@@ -73,14 +80,17 @@ const Auth = () => {
           });
         }
       } else {
+        console.log('PropSwipes Auth: Sign up successful');
         // Check if user is immediately signed in (auto-confirm enabled)
         if (data.user && data.session) {
+          console.log('PropSwipes Auth: User auto-confirmed, navigating to discover...');
           toast({
             title: "Welcome to PropSwipes! 🎉",
             description: "Account created successfully! Let's start swiping!",
           });
           navigate('/discover');
         } else {
+          console.log('PropSwipes Auth: User needs email confirmation');
           toast({
             title: "Welcome to PropSwipes! 🎉",
             description: "Check your email to confirm your account and start swiping!",
@@ -88,6 +98,7 @@ const Auth = () => {
         }
       }
     } catch (error) {
+      console.error('PropSwipes Auth: Unexpected error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -102,22 +113,30 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    console.log('PropSwipes Auth: Starting sign in process...');
+    console.log('PropSwipes Auth: Email:', email);
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log('PropSwipes Auth: Sign in response:', { data, error });
+
       if (error) {
+        console.error('PropSwipes Auth: Sign in error:', error);
         toast({
           title: "Sign in failed",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log('PropSwipes Auth: Sign in successful, navigating to discover...');
         navigate('/discover');
       }
     } catch (error) {
+      console.error('PropSwipes Auth: Unexpected error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
