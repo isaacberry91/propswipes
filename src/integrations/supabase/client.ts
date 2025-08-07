@@ -18,6 +18,39 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   global: {
     headers: {
       'x-client-info': 'propswipes-ios-debug'
+    },
+    fetch: (url: RequestInfo | URL, options: RequestInit = {}) => {
+      console.log('🔐 PropSwipes Supabase Client: Making request to:', url);
+      console.log('🔐 PropSwipes Supabase Client: Request options:', {
+        method: options.method || 'GET',
+        headers: options.headers ? 'present' : 'none',
+        body: options.body ? 'present' : 'none',
+        credentials: options.credentials
+      });
+      
+      const startTime = Date.now();
+      
+      return fetch(url, options).then(response => {
+        const duration = Date.now() - startTime;
+        console.log('🔐 PropSwipes Supabase Client: Response received:', {
+          url: url.toString(),
+          status: response.status,
+          statusText: response.statusText,
+          duration: `${duration}ms`,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        return response;
+      }).catch(error => {
+        const duration = Date.now() - startTime;
+        console.error('🔐 PropSwipes Supabase Client: Request failed:', {
+          url: url.toString(),
+          error: error.message,
+          name: error.name,
+          duration: `${duration}ms`,
+          stack: error.stack
+        });
+        throw error;
+      });
     }
   }
 });

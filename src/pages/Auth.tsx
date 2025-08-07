@@ -39,17 +39,29 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    // For Capacitor apps, use the deployed app URL for redirects
+    const isCapacitor = window.location.protocol === 'capacitor:';
+    const redirectUrl = isCapacitor 
+      ? 'https://c53d60b9-f832-47ac-aabd-6a1765b647a5.lovableproject.com/discover'
+      : `${window.location.origin}/discover`;
+
     console.log('PropSwipes Auth: Starting sign up process...');
     console.log('PropSwipes Auth: Email:', email);
-    console.log('PropSwipes Auth: Redirect URL:', `${window.location.origin}/discover`);
+    console.log('PropSwipes Auth: Is Capacitor:', isCapacitor);
+    console.log('PropSwipes Auth: Window location:', window.location);
+    console.log('PropSwipes Auth: Redirect URL:', redirectUrl);
+    console.log('PropSwipes Auth: Navigator online:', navigator.onLine);
 
     try {
+      // Test network connectivity first
+      console.log('PropSwipes Auth: Testing network connectivity...');
+      
       const displayName = `${firstName} ${lastName}`.trim();
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/discover`,
+          emailRedirectTo: redirectUrl,
           data: {
             display_name: displayName,
             first_name: firstName,
