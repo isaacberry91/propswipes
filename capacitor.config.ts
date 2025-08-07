@@ -13,7 +13,8 @@ const config: CapacitorConfig = {
   ios: {
     scheme: 'PropSwipes',
     webContentsDebuggingEnabled: true,
-    allowsLinkPreview: false
+    allowsLinkPreview: false,
+    contentInset: 'automatic'
   },
   android: {
     allowMixedContent: false,
