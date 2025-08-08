@@ -27,6 +27,10 @@ const config: CapacitorConfig = {
       showSpinner: false,
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP"
+    },
+    NativePurchases: {
+      androidPublicKey: '',
+      usesStoreKit2IfAvailable: false
     }
   }
 };
