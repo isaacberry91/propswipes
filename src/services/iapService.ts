@@ -1,6 +1,13 @@
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 
+// Extend window interface for native purchases
+declare global {
+  interface Window {
+    NativePurchases?: any;
+  }
+}
+
 // PropSwipes App-Specific Product IDs
 export const PRODUCT_IDS = {
   BUYER_PRO: 'com.propswipes.main.buyer.pro.monthly',
@@ -29,6 +36,10 @@ class IAPService {
   private nativePurchases: any = null;
 
   async initialize(): Promise<boolean> {
+    console.log('PropSwipes: Initializing IAP service...');
+    console.log('PropSwipes: Platform:', Capacitor.getPlatform());
+    console.log('PropSwipes: Is native platform:', Capacitor.isNativePlatform());
+
     if (!Capacitor.isNativePlatform()) {
       console.log('PropSwipes: Not on native platform, IAP will use mock data');
       this.isInitialized = true;
@@ -41,18 +52,47 @@ class IAPService {
     }
 
     try {
-      // Import @capgo/native-purchases
-      const { NativePurchases } = await import('@capgo/native-purchases');
-      this.nativePurchases = NativePurchases;
+      console.log('PropSwipes: Attempting to import @capgo/native-purchases...');
       
+      // Try different import methods
+      let NativePurchases;
+      try {
+        const module = await import('@capgo/native-purchases');
+        NativePurchases = module.NativePurchases;
+        console.log('PropSwipes: ES6 import successful');
+      } catch (esError) {
+        console.log('PropSwipes: ES6 import failed, trying direct import:', esError);
+        // Try accessing from window/global if plugin is registered differently
+        if (window.NativePurchases) {
+          NativePurchases = window.NativePurchases;
+          console.log('PropSwipes: Found NativePurchases on window');
+        } else {
+          throw new Error('Plugin not found in any import method');
+        }
+      }
+
+      if (!NativePurchases) {
+        throw new Error('NativePurchases is undefined after import');
+      }
+
+      this.nativePurchases = NativePurchases;
       console.log('PropSwipes: Native purchases plugin loaded successfully');
+      
+      // Test that the plugin actually works
+      try {
+        await this.nativePurchases.getProducts({ productIdentifiers: [] });
+        console.log('PropSwipes: Plugin functionality test passed');
+      } catch (testError) {
+        console.log('PropSwipes: Plugin test failed:', testError);
+        throw testError;
+      }
+      
       this.isInitialized = true;
       return true;
     } catch (error) {
       console.error('PropSwipes: Failed to load native purchases plugin:', error);
-      // Still mark as initialized for testing
-      this.isInitialized = true;
-      return true;
+      this.isInitialized = true; // Mark as initialized to avoid repeated attempts
+      return false;
     }
   }
 
