@@ -178,16 +178,15 @@ class IAPService {
       }
     }
 
-    // Fallback for development - attempt native IAP anyway
-    console.log('IAP: No native plugin available, attempting to proceed for testing');
-    
-    // Return a mock purchase that can be used for testing flows
-    return {
-      productId: productId,
-      transactionId: `test_${Date.now()}`,
-      receipt: `test_receipt_${productId}`,
-      platform: Capacitor.getPlatform() as 'ios' | 'android'
-    };
+    // If no plugin available, throw error to guide proper setup
+    throw new Error(
+      'Native IAP plugin not available. Make sure:\n\n' +
+      '1. App is built and run from Xcode (not browser)\n' +
+      '2. @capgo/native-purchases is properly installed\n' +
+      '3. Products are configured in App Store Connect\n' +
+      '4. Sandbox test user is signed in\n\n' +
+      'Current platform: ' + Capacitor.getPlatform()
+    );
   }
 
   async verifyPurchase(purchase: IAPPurchase): Promise<void> {
