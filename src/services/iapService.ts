@@ -57,17 +57,26 @@ class IAPService {
       // Try different import methods
       let NativePurchases;
       try {
-        const module = await import('@capgo/native-purchases');
-        NativePurchases = module.NativePurchases;
+        // Use Capacitor's registerPlugin method for native plugins
+        const { NativePurchases: NP } = await import('@capgo/native-purchases');
+        NativePurchases = NP;
         console.log('PropSwipes: ES6 import successful');
       } catch (esError) {
         console.log('PropSwipes: ES6 import failed, trying direct import:', esError);
-        // Try accessing from window/global if plugin is registered differently
-        if (window.NativePurchases) {
-          NativePurchases = window.NativePurchases;
-          console.log('PropSwipes: Found NativePurchases on window');
-        } else {
-          throw new Error('Plugin not found in any import method');
+        // Try with Capacitor's registerPlugin
+        try {
+          const { registerPlugin } = await import('@capacitor/core');
+          NativePurchases = registerPlugin('NativePurchases');
+          console.log('PropSwipes: Plugin registered with Capacitor');
+        } catch (registerError) {
+          console.log('PropSwipes: Capacitor register failed:', registerError);
+          // Try accessing from window/global if plugin is registered differently
+          if (window.NativePurchases) {
+            NativePurchases = window.NativePurchases;
+            console.log('PropSwipes: Found NativePurchases on window');
+          } else {
+            throw new Error('Plugin not found in any import method');
+          }
         }
       }
 
