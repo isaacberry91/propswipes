@@ -28,8 +28,8 @@ const config: CapacitorConfig = {
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP"
     },
-    NativePurchases: {
-      apiKey: "appl_YOUR_REVENUECAT_API_KEY_HERE"
+    PurchasesCapacitor: {
+      // RevenueCat will be configured in the app
     }
   }
 };

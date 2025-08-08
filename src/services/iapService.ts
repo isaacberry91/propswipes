@@ -1,8 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 
-// PropSwipes App-Specific Product IDs for Apple App Store and Google Play Store
-// Using unique prefix to avoid conflicts with other PropSwipes apps
+// PropSwipes App-Specific Product IDs for RevenueCat
 export const PRODUCT_IDS = {
   BUYER_PRO: 'com.propswipes.main.buyer.pro.monthly',
   SELLER_BASIC: 'com.propswipes.main.seller.basic.monthly', 
@@ -27,72 +26,43 @@ export interface IAPPurchase {
 
 class IAPService {
   private isInitialized = false;
-  private iapPlugin: any = null;
+  private purchasesPlugin: any = null;
 
   async initialize(): Promise<boolean> {
     if (!Capacitor.isNativePlatform()) {
-      console.log('PropSwipes Main: Not on native platform, using web fallback');
+      console.log('PropSwipes: Not on native platform, using web fallback');
       this.isInitialized = true;
       return true;
     }
 
-    // Prevent multiple initialization attempts
     if (this.isInitialized) {
-      console.log('PropSwipes Main: IAP already initialized');
+      console.log('PropSwipes: IAP already initialized');
       return true;
     }
 
     try {
-      // Clear any existing webtoappview IAP instances that might conflict
-      if (typeof window !== 'undefined') {
-        // Clear any existing global IAP references from other PropSwipes apps
-        delete (window as any).__propswipes_iap__;
-        delete (window as any).__webtoappview_iap__;
-      }
-
-      // Add timeout to prevent hanging
-      const initTimeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('IAP initialization timeout after 10 seconds')), 10000)
-      );
-
-      const initPromise = (async () => {
-        // Only try to import in actual native environment
-        if (typeof window !== 'undefined' && (window as any).Capacitor?.Plugins) {
-          try {
-            // Dynamic import to avoid Vite resolution issues
-            const moduleName = '@capgo/native-purchases';
-            const { NativePurchases } = await import(/* @vite-ignore */ moduleName);
-            this.iapPlugin = NativePurchases;
-            
-            // Set unique app identifier to prevent conflicts
-            (window as any).__propswipes_main_iap__ = this.iapPlugin;
-            
-            // Initialize the plugin with app-specific settings
-            await this.iapPlugin.initialize({
-              apiKey: '', // Will be set in App Store Connect
-              appUserID: `propswipes_main_${Date.now()}`, // Unique identifier
-              observerMode: false // Take control of purchases
-            });
-            
-            console.log('PropSwipes Main: Native purchases plugin initialized successfully');
-          } catch (importError) {
-            console.log('PropSwipes Main: Native purchases not available, using fallback');
-            // Don't throw, just continue with fallback
-          }
-        } else {
-          console.log('PropSwipes Main: Capacitor plugins not available, using mock service');
-        }
-      })();
-
-      // Race between initialization and timeout
-      await Promise.race([initPromise, initTimeout]);
+      // Import RevenueCat Purchases
+      const { Purchases } = await import('@revenuecat/purchases-capacitor');
+      this.purchasesPlugin = Purchases;
       
+      // Configure RevenueCat
+      await this.purchasesPlugin.configure({
+        apiKey: 'appl_YOUR_REVENUECAT_API_KEY_HERE', // Replace with your RevenueCat API key
+        appUserID: null, // Let RevenueCat generate anonymous ID
+        observerMode: false,
+        userDefaultsSuiteName: null,
+        useAmazon: false,
+        shouldShowInAppMessagesAutomatically: true
+      });
+      
+      console.log('PropSwipes: RevenueCat initialized successfully');
       this.isInitialized = true;
       return true;
     } catch (error) {
-      console.log('PropSwipes Main: IAP initialization failed, continuing with fallback service. Error:', error);
-      this.isInitialized = true; // Still mark as initialized to allow fallback
-      return true; // Return true to allow app to continue
+      console.error('PropSwipes: RevenueCat initialization failed:', error);
+      // Still mark as initialized for fallback
+      this.isInitialized = true;
+      return true;
     }
   }
 
@@ -101,19 +71,23 @@ class IAPService {
       throw new Error('IAP service not initialized');
     }
 
-    if (this.iapPlugin) {
+    if (this.purchasesPlugin) {
       try {
         const productIds = Object.values(PRODUCT_IDS);
-        const products = await this.iapPlugin.getProducts(productIds);
-        return products.map((product: any) => ({
-          id: product.id,
+        const offerings = await this.purchasesPlugin.getProducts({
+          productIdentifiers: productIds,
+          type: 'SUBSCRIPTION'
+        });
+        
+        return offerings.map((product: any) => ({
+          id: product.identifier,
           title: product.title,
           description: product.description,
-          price: product.price,
-          currency: product.currency || 'USD'
+          price: product.priceString,
+          currency: product.currencyCode || 'USD'
         }));
       } catch (error) {
-        console.error('IAP: Error getting products', error);
+        console.error('RevenueCat: Error getting products', error);
         // Fall through to mock data
       }
     }
@@ -156,15 +130,29 @@ class IAPService {
       throw new Error('IAP service not initialized');
     }
 
-    if (this.iapPlugin) {
+    if (this.purchasesPlugin) {
       try {
-        console.log(`IAP: Starting purchase for ${productId}`);
-        const result = await this.iapPlugin.purchaseProduct(productId);
+        console.log(`RevenueCat: Starting purchase for ${productId}`);
+        
+        // Get the product first
+        const products = await this.purchasesPlugin.getProducts({
+          productIdentifiers: [productId],
+          type: 'SUBSCRIPTION'
+        });
+        
+        if (products.length === 0) {
+          throw new Error(`Product ${productId} not found`);
+        }
+        
+        // Purchase the product
+        const result = await this.purchasesPlugin.purchaseProduct({
+          product: products[0]
+        });
         
         const purchase: IAPPurchase = {
-          productId: result.productId,
-          transactionId: result.transactionId,
-          receipt: result.receipt,
+          productId: productId,
+          transactionId: result.transaction.transactionIdentifier,
+          receipt: result.transaction.originalJSON,
           platform: Capacitor.getPlatform() as 'ios' | 'android'
         };
 
@@ -173,25 +161,26 @@ class IAPService {
         
         return purchase;
       } catch (error) {
-        console.error('IAP: Purchase failed', error);
+        console.error('RevenueCat: Purchase failed', error);
         throw error;
       }
     }
 
     // If no plugin available, throw error to guide proper setup
     throw new Error(
-      'Native IAP plugin not available. Make sure:\n\n' +
+      'RevenueCat plugin not available. Make sure:\n\n' +
       '1. App is built and run from Xcode (not browser)\n' +
-      '2. @capgo/native-purchases is properly installed\n' +
-      '3. Products are configured in App Store Connect\n' +
-      '4. Sandbox test user is signed in\n\n' +
+      '2. @revenuecat/purchases-capacitor is properly installed\n' +
+      '3. Products are configured in RevenueCat Dashboard\n' +
+      '4. RevenueCat API key is set\n' +
+      '5. Sandbox test user is signed in\n\n' +
       'Current platform: ' + Capacitor.getPlatform()
     );
   }
 
   async verifyPurchase(purchase: IAPPurchase): Promise<void> {
     try {
-      console.log('IAP: Verifying purchase with backend');
+      console.log('RevenueCat: Verifying purchase with backend');
       
       const { data, error } = await supabase.functions.invoke('verify-purchase', {
         body: {
@@ -209,9 +198,9 @@ class IAPService {
         throw new Error(`Purchase verification failed: ${data.error}`);
       }
 
-      console.log('IAP: Purchase verified successfully');
+      console.log('RevenueCat: Purchase verified successfully');
     } catch (error) {
-      console.error('IAP: Purchase verification failed', error);
+      console.error('RevenueCat: Purchase verification failed', error);
       throw error;
     }
   }
@@ -221,29 +210,51 @@ class IAPService {
       throw new Error('IAP service not initialized');
     }
 
-    if (this.iapPlugin) {
+    if (this.purchasesPlugin) {
       try {
-        const restored = await this.iapPlugin.restorePurchases();
+        const result = await this.purchasesPlugin.restorePurchases();
         
-        // Verify each restored purchase
-        for (const purchase of restored) {
-          await this.verifyPurchase({
-            productId: purchase.productId,
-            transactionId: purchase.transactionId,
-            receipt: purchase.receipt,
-            platform: Capacitor.getPlatform() as 'ios' | 'android'
-          });
+        const restored: IAPPurchase[] = [];
+        
+        // Process active subscriptions
+        if (result.purchaserInfo && result.purchaserInfo.activeSubscriptions) {
+          for (const subscription of result.purchaserInfo.activeSubscriptions) {
+            const purchase: IAPPurchase = {
+              productId: subscription,
+              transactionId: `restored_${subscription}_${Date.now()}`,
+              receipt: JSON.stringify(result.purchaserInfo),
+              platform: Capacitor.getPlatform() as 'ios' | 'android'
+            };
+            
+            // Verify each restored purchase
+            await this.verifyPurchase(purchase);
+            restored.push(purchase);
+          }
         }
         
         return restored;
       } catch (error) {
-        console.error('IAP: Restore failed', error);
+        console.error('RevenueCat: Restore failed', error);
         throw error;
       }
     }
 
-    console.log('IAP: Restore purchases - mock mode');
+    console.log('RevenueCat: Restore purchases - no plugin available');
     return [];
+  }
+
+  async getCustomerInfo(): Promise<any> {
+    if (!this.isInitialized || !this.purchasesPlugin) {
+      return null;
+    }
+
+    try {
+      const customerInfo = await this.purchasesPlugin.getCustomerInfo();
+      return customerInfo;
+    } catch (error) {
+      console.error('RevenueCat: Error getting customer info', error);
+      return null;
+    }
   }
 
   isNativePlatform(): boolean {
