@@ -178,8 +178,19 @@ class IAPService {
       }
     }
 
-    // Mock purchase for development
-    throw new Error('In-App Purchases are only available in the published app from the App Store. For testing, please use the TestFlight build with sandbox Apple ID.');
+    // Mock purchase for development - show detailed instructions
+    throw new Error(
+      'IAP Testing Required:\n\n' +
+      '1. Create products in App Store Connect with these IDs:\n' +
+      '   • com.propswipes.main.buyer.pro.monthly\n' +
+      '   • com.propswipes.main.seller.basic.monthly\n' +
+      '   • com.propswipes.main.seller.professional.monthly\n' +
+      '   • com.propswipes.main.seller.enterprise.monthly\n\n' +
+      '2. Create sandbox test users in App Store Connect\n' +
+      '3. Upload TestFlight build\n' +
+      '4. Test on device with TestFlight build + sandbox Apple ID\n\n' +
+      'IAP does not work in development builds from Xcode.'
+    );
   }
 
   async verifyPurchase(purchase: IAPPurchase): Promise<void> {
