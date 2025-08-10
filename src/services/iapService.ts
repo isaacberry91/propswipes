@@ -176,12 +176,17 @@ class IAPService {
           productIdentifier: productId 
         });
         
+        console.log('Native purchase result:', result);
+        
+        // Handle different possible result structures from the plugin
         const purchase: IAPPurchase = {
           productId: productId,
-          transactionId: result.transactionIdentifier,
-          receipt: result.transactionReceipt,
+          transactionId: result.transactionIdentifier || result.transactionId || result.identifier,
+          receipt: result.transactionReceipt || result.receipt || result.receiptData,
           platform: Capacitor.getPlatform() as 'ios' | 'android'
         };
+
+        console.log('Constructed purchase object:', purchase);
 
         // Verify purchase with backend
         await this.verifyPurchase(purchase);
@@ -206,7 +211,18 @@ class IAPService {
 
   async verifyPurchase(purchase: IAPPurchase): Promise<void> {
     try {
-      console.log('Verifying purchase with backend');
+      console.log('Verifying purchase with backend', purchase);
+      
+      // Validate required purchase data before sending
+      if (!purchase.transactionId || !purchase.receipt || !purchase.productId) {
+        console.error('Missing required purchase data:', {
+          hasTransactionId: !!purchase.transactionId,
+          hasReceipt: !!purchase.receipt,
+          hasProductId: !!purchase.productId,
+          purchase
+        });
+        throw new Error('Purchase data is incomplete. Cannot verify purchase.');
+      }
       
       const { data, error } = await supabase.functions.invoke('verify-purchase', {
         body: {
@@ -217,11 +233,13 @@ class IAPService {
       });
 
       if (error) {
+        console.error('Supabase function error:', error);
         throw new Error(`Verification failed: ${error.message}`);
       }
 
-      if (!data.success) {
-        throw new Error(`Purchase verification failed: ${data.error}`);
+      if (!data?.success) {
+        console.error('Verification response error:', data);
+        throw new Error(`Purchase verification failed: ${data?.error || 'Unknown error'}`);
       }
 
       console.log('Purchase verified successfully');
