@@ -178,32 +178,30 @@ class IAPService {
         
         console.log('Native purchase result:', result);
         console.log('Native purchase result keys:', Object.keys(result));
-        console.log('Native purchase result type:', typeof result);
         
-        // Extract receipt data - try all possible property names
-        let receiptData = null;
-        const possibleReceiptProps = [
-          'transactionReceipt', 'receipt', 'receiptData', 'originalTransactionReceipt',
-          'appStoreReceiptURL', 'transactionReceiptData', 'purchaseToken'
-        ];
+        // For iOS, we need to get the App Store receipt
+        let receiptData = '';
         
-        for (const prop of possibleReceiptProps) {
-          if (result[prop]) {
-            receiptData = result[prop];
-            console.log(`Found receipt data in property: ${prop}`, receiptData);
-            break;
+        if (Capacitor.getPlatform() === 'ios') {
+          try {
+            // Try to get the receipt from the plugin
+            const receiptResult = await this.nativePurchases.getAppStoreReceipt();
+            receiptData = receiptResult.receipt || receiptResult.appStoreReceipt || '';
+            console.log('iOS App Store receipt obtained:', !!receiptData);
+          } catch (receiptError) {
+            console.error('Failed to get iOS receipt:', receiptError);
+            // Fallback: use transaction as receipt for validation
+            receiptData = result.transactionIdentifier || result.transactionId || '';
           }
+        } else {
+          // For Android, look for purchase token
+          receiptData = result.purchaseToken || result.receipt || result.transactionReceipt || '';
         }
         
-        if (!receiptData) {
-          console.error('No receipt data found in any expected properties:', result);
-        }
-        
-        // Handle different possible result structures from the plugin
         const purchase: IAPPurchase = {
           productId: productId,
-          transactionId: result.transactionIdentifier || result.transactionId || result.identifier,
-          receipt: receiptData || '',
+          transactionId: result.transactionIdentifier || result.transactionId || result.identifier || '',
+          receipt: receiptData,
           platform: Capacitor.getPlatform() as 'ios' | 'android'
         };
 
