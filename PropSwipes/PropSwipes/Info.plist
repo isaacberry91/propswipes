@@ -28,5 +28,13 @@
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>PropSwipes uses your location to show properties near you and provide location-based property recommendations.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>PropSwipes uses your location to show properties near you and provide location-based property recommendations.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>PropSwipes needs access to your camera to take photos for property listings and your profile.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PropSwipes needs access to your photo library to select photos for property listings and your profile.</string>
 </dict>
 </plist>

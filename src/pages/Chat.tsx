@@ -8,93 +8,22 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone } from "lucide-react";
 
-// Sample chat data
-const chatData = {
-  1: {
-    match: {
-      property: {
-        title: "Modern Downtown Condo",
-        price: "$850,000",
-        location: "Downtown, Seattle",
-        image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=200&fit=crop"
-      },
-      user: {
-        name: "Sarah Chen",
-        avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b429?w=100&h=100&fit=crop&crop=face",
-        type: "Buyer"
-      }
-    },
-    messages: [
-      {
-        id: 1,
-        senderId: "other",
-        text: "Hi! I'm really interested in this property. When can we schedule a viewing?",
-        timestamp: "2:30 PM"
-      },
-      {
-        id: 2,
-        senderId: "me",
-        text: "Hello Sarah! Great to meet another person interested in this condo. I'm available this weekend for a viewing.",
-        timestamp: "2:35 PM"
-      },
-      {
-        id: 3,
-        senderId: "other",
-        text: "Perfect! How about Saturday at 2 PM? Also, have you seen the building amenities yet?",
-        timestamp: "2:40 PM"
-      },
-      {
-        id: 4,
-        senderId: "me",
-        text: "Saturday works great! Yes, the rooftop deck and gym look amazing. Are you looking to buy or rent?",
-        timestamp: "2:45 PM"
-      },
-      {
-        id: 5,
-        senderId: "other",
-        text: "Looking to buy! This would be my first home purchase. What drew you to this property?",
-        timestamp: "2:50 PM"
-      }
-    ]
-  }
-};
 
 const Chat = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState(chatData[1]?.messages || []);
+  const [messages, setMessages] = useState([]);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showPropertyDetails, setShowPropertyDetails] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const match = chatData[1]?.match;
+  // TODO: Fetch actual match data from API
+  const match = null;
 
-  // Extended user profile data
-  const userProfile = {
-    ...match?.user,
-    company: "TechCorp Solutions",
-    position: "Senior Software Engineer",
-    email: "sarah.chen@techcorp.com",
-    phone: "+1 (206) 555-0123",
-    bio: "Experienced software engineer looking for my first home purchase. Interested in modern condos with good amenities and proximity to tech hubs.",
-    verified: true,
-    memberSince: "2024"
-  };
-
-  // Extended property details
-  const propertyDetails = {
-    ...match?.property,
-    bedrooms: 2,
-    bathrooms: 2,
-    sqft: 1200,
-    yearBuilt: 2019,
-    amenities: ["Gym", "Rooftop Deck", "Concierge", "In-unit Laundry"],
-    features: ["Floor-to-ceiling Windows", "Hardwood Floors", "Stainless Steel Appliances"],
-    hoaFees: "$350/month",
-    parking: "1 space included",
-    petPolicy: "Cats allowed"
-  };
+  // TODO: Fetch actual user and property data from API
+  const userProfile = null;
+  const propertyDetails = null;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

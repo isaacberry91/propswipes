@@ -4,64 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, MapPin, Users, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-// Sample matches data
-const sampleMatches = [
-  {
-    id: 1,
-    property: {
-      title: "Modern Downtown Condo",
-      price: "$850,000",
-      location: "Downtown, Seattle",
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop"
-    },
-    matchedUser: {
-      name: "Sarah Chen",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b429?w=100&h=100&fit=crop&crop=face",
-      type: "Buyer"
-    },
-    matchedAt: "2 hours ago",
-    lastMessage: "Hi! I'm really interested in this property. When can we schedule a viewing?",
-    unreadCount: 2
-  },
-  {
-    id: 2,
-    property: {
-      title: "Cozy Suburban House",
-      price: "$650,000",
-      location: "Bellevue, WA",
-      image: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=400&h=300&fit=crop"
-    },
-    matchedUser: {
-      name: "Mike Johnson",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-      type: "Investor"
-    },
-    matchedAt: "1 day ago",
-    lastMessage: "What's the neighborhood like? Any upcoming developments?",
-    unreadCount: 0
-  },
-  {
-    id: 3,
-    property: {
-      title: "Luxury Waterfront Loft",
-      price: "$1,200,000",
-      location: "Capitol Hill, Seattle",
-      image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=300&fit=crop"
-    },
-    matchedUser: {
-      name: "Emma Davis",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-      type: "Buyer"
-    },
-    matchedAt: "3 days ago",
-    lastMessage: "The views are amazing! Is the HOA fee included in the price?",
-    unreadCount: 1
-  }
-];
 
 const Matches = () => {
   const navigate = useNavigate();
-  const [matches] = useState(sampleMatches);
+  const [matches] = useState([]); // TODO: Fetch actual matches from API
 
   const handleChatClick = (matchId: number) => {
     navigate(`/chat/${matchId}`);
