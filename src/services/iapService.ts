@@ -177,12 +177,33 @@ class IAPService {
         });
         
         console.log('Native purchase result:', result);
+        console.log('Native purchase result keys:', Object.keys(result));
+        console.log('Native purchase result type:', typeof result);
+        
+        // Extract receipt data - try all possible property names
+        let receiptData = null;
+        const possibleReceiptProps = [
+          'transactionReceipt', 'receipt', 'receiptData', 'originalTransactionReceipt',
+          'appStoreReceiptURL', 'transactionReceiptData', 'purchaseToken'
+        ];
+        
+        for (const prop of possibleReceiptProps) {
+          if (result[prop]) {
+            receiptData = result[prop];
+            console.log(`Found receipt data in property: ${prop}`, receiptData);
+            break;
+          }
+        }
+        
+        if (!receiptData) {
+          console.error('No receipt data found in any expected properties:', result);
+        }
         
         // Handle different possible result structures from the plugin
         const purchase: IAPPurchase = {
           productId: productId,
           transactionId: result.transactionIdentifier || result.transactionId || result.identifier,
-          receipt: result.transactionReceipt || result.receipt || result.receiptData,
+          receipt: receiptData || '',
           platform: Capacitor.getPlatform() as 'ios' | 'android'
         };
 
