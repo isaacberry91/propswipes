@@ -10,10 +10,10 @@ declare global {
 
 // PropSwipes App-Specific Product IDs
 export const PRODUCT_IDS = {
-  BUYER_PRO: 'com.propswipes.main.buyer.pro.monthly',
-  SELLER_BASIC: 'com.propswipes.main.seller.basic.monthly', 
-  SELLER_PROFESSIONAL: 'com.propswipes.main.seller.professional.monthly',
-  SELLER_ENTERPRISE: 'com.propswipes.main.seller.enterprise.monthly'
+  BUYER_PRO: 'com.propswipes.subscription.buyer_pro_v2',
+  SELLER_BASIC: 'com.propswipes.subscription.seller_basic_v2', 
+  SELLER_PROFESSIONAL: 'com.propswipes.subscription.seller_professional_v2',
+  SELLER_ENTERPRISE: 'com.propswipes.subscription.seller_enterprise_v2'
 };
 
 export interface IAPProduct {
