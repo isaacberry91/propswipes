@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +11,16 @@ import { Camera, MapPin, Home, Plus, X, Upload, DollarSign, Crown, Lock, ImageIc
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Camera as CapacitorCamera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
 
 const ListProperty = () => {
+  const location = useLocation();
+  const editingProperty = location.state?.editingProperty;
+  const isEditing = location.state?.isEditing || false;
+  
   const [formData, setFormData] = useState({
     // Required Core Fields
     title: "",
@@ -64,6 +68,41 @@ const ListProperty = () => {
   const navigate = useNavigate();
   const { subscription, canListProperties } = useSubscription();
   const [currentPropertyCount, setCurrentPropertyCount] = useState(0);
+
+  // Pre-fill form data when editing
+  useEffect(() => {
+    if (isEditing && editingProperty) {
+      setFormData({
+        title: editingProperty.title || "",
+        propertyType: editingProperty.property_type || "",
+        listingType: "for-sale",
+        address: editingProperty.address || "",
+        city: editingProperty.city || "",
+        state: editingProperty.state || "",
+        zipCode: editingProperty.zip_code || "",
+        price: editingProperty.price?.toString() || "",
+        squareFeet: editingProperty.square_feet?.toString() || "",
+        description: editingProperty.description || "",
+        bedrooms: editingProperty.bedrooms?.toString() || "",
+        bathrooms: editingProperty.bathrooms?.toString() || "",
+        parkingSpaces: "",
+        yearBuilt: "",
+        lotSize: "",
+        hoaFees: "",
+        grossIncome: "",
+        expenses: "",
+        capRate: "",
+        monthlyRent: "",
+        leaseTerm: "",
+        securityDeposit: "",
+        availableDate: "",
+        amenities: editingProperty.amenities || [],
+        appliances: [],
+        features: [],
+      });
+      setImageUrls(editingProperty.images || []);
+    }
+  }, [isEditing, editingProperty]);
 
   // Sample images for demo
   const sampleImages = [
@@ -180,49 +219,84 @@ const ListProperty = () => {
         uploadedImageUrls.push(publicUrl);
       }
 
-      // Create property record
-      const propertyData = {
-        owner_id: profile.id,
-        title: formData.title,
-        property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio",
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zipCode,
-        price: parseFloat(formData.price.replace(/,/g, '')),
-        square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
-        description: formData.description,
-        bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
-        bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
-        amenities: [...formData.amenities, ...formData.appliances, ...formData.features],
-        images: uploadedImageUrls,
-        status: 'pending' as const
-      };
+      if (isEditing && editingProperty) {
+        // Update existing property
+        const propertyData = {
+          title: formData.title,
+          property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio",
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zip_code: formData.zipCode,
+          price: parseFloat(formData.price.replace(/,/g, '')),
+          square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
+          description: formData.description,
+          bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
+          bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
+          amenities: [...formData.amenities, ...formData.appliances, ...formData.features],
+          images: uploadedImageUrls.length > 0 ? uploadedImageUrls : editingProperty.images,
+          status: 'pending' as const,
+          updated_at: new Date().toISOString()
+        };
 
-      const { error: insertError } = await supabase
-        .from('properties')
-        .insert(propertyData);
+        const { error: updateError } = await supabase
+          .from('properties')
+          .update(propertyData)
+          .eq('id', editingProperty.id);
 
-      if (insertError) {
-        throw insertError;
+        if (updateError) {
+          throw updateError;
+        }
+
+        toast({
+          title: "Property Updated Successfully! 🏠",
+          description: "Your property changes are pending admin approval!",
+        });
+      } else {
+        // Create new property
+        const propertyData = {
+          owner_id: profile.id,
+          title: formData.title,
+          property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio",
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zip_code: formData.zipCode,
+          price: parseFloat(formData.price.replace(/,/g, '')),
+          square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
+          description: formData.description,
+          bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
+          bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
+          amenities: [...formData.amenities, ...formData.appliances, ...formData.features],
+          images: uploadedImageUrls,
+          status: 'pending' as const
+        };
+
+        const { error: insertError } = await supabase
+          .from('properties')
+          .insert(propertyData);
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        // Update property count in profile
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ 
+            properties_listed: currentPropertyCount + 1 
+          })
+          .eq('user_id', user.id);
+
+        if (updateError) {
+          console.error('Error updating property count:', updateError);
+        }
+
+        toast({
+          title: "Property Listed Successfully! 🏠",
+          description: "Your property is pending approval and will be live soon!",
+        });
       }
-
-      // Update property count in profile
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ 
-          properties_listed: currentPropertyCount + 1 
-        })
-        .eq('user_id', user.id);
-
-      if (updateError) {
-        console.error('Error updating property count:', updateError);
-      }
-
-      toast({
-        title: "Property Listed Successfully! 🏠",
-        description: "Your property is pending approval and will be live soon!",
-      });
 
       // Reset form
       setFormData({
@@ -257,8 +331,8 @@ const ListProperty = () => {
       setImageUrls([]);
       setCurrentStep(1);
 
-      // Navigate to profile or discover
-      navigate('/discover');
+      // Navigate back to profile or discover
+      navigate(isEditing ? '/profile' : '/discover');
 
     } catch (error: any) {
       console.error('Error creating property:', error);
