@@ -161,11 +161,28 @@ const ListProperty = () => {
       return;
     }
 
-    // Validation
-    if (!formData.title || !formData.propertyType || !formData.address || !formData.price) {
+    // Detailed validation with specific error messages
+    const missingFields = [];
+    
+    if (!formData.title) missingFields.push("Property Title");
+    if (!formData.propertyType) missingFields.push("Property Type");
+    if (!formData.address) missingFields.push("Address");
+    if (!formData.city) missingFields.push("City");
+    if (!formData.state) missingFields.push("State");
+    if (!formData.price) missingFields.push("Price");
+    if (!formData.squareFeet) missingFields.push("Square Feet");
+    if (!formData.description) missingFields.push("Description");
+    
+    // Add property type specific validations
+    if (isResidential) {
+      if (!formData.bedrooms) missingFields.push("Bedrooms");
+      if (!formData.bathrooms) missingFields.push("Bathrooms");
+    }
+
+    if (missingFields.length > 0) {
       toast({
-        title: "Missing required fields",
-        description: "Please fill in all required information.",
+        title: "Missing Required Fields",
+        description: `Please fill in: ${missingFields.join(", ")}`,
         variant: "destructive"
       });
       return;
@@ -624,7 +641,7 @@ const ListProperty = () => {
         <Label className="text-base font-medium">Address *</Label>
         <div className="space-y-3">
           <div className="space-y-2">
-            <Label>Street Address</Label>
+            <Label>Street Address *</Label>
             <Input
               placeholder="123 Main Street"
               value={formData.address}
@@ -635,7 +652,7 @@ const ListProperty = () => {
           
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
-              <Label>City</Label>
+              <Label>City *</Label>
               <Input
                 placeholder="Seattle"
                 value={formData.city}
@@ -644,7 +661,7 @@ const ListProperty = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>State</Label>
+              <Label>State *</Label>
               <Input
                 placeholder="WA"
                 value={formData.state}
@@ -718,7 +735,7 @@ const ListProperty = () => {
         <div className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label>Bedrooms</Label>
+              <Label>Bedrooms *</Label>
               <Select value={formData.bedrooms} onValueChange={(value) => setFormData(prev => ({ ...prev, bedrooms: value }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Beds" />
@@ -735,7 +752,7 @@ const ListProperty = () => {
             </div>
             
             <div className="space-y-2">
-              <Label>Bathrooms</Label>
+              <Label>Bathrooms *</Label>
               <Select value={formData.bathrooms} onValueChange={(value) => setFormData(prev => ({ ...prev, bathrooms: value }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Baths" />
