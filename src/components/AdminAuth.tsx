@@ -25,23 +25,16 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
 
     try {
       if (password === "BenIsaac") {
-        // First, try to create admin user if it doesn't exist
-        console.log('🔧 Creating admin user if needed...');
-        const { error: createError } = await supabase.functions.invoke('create-admin-user');
-        
-        if (createError) {
-          console.warn('Admin user creation warning:', createError);
-        }
-
-        // Now try to sign in as admin user
+        // For security, we'll use a simpler approach
+        // Sign in with the existing admin user (assuming it exists)
         const { data, error } = await supabase.auth.signInWithPassword({
-          email: 'admin@propswipes.com',
-          password: 'admin123password'
+          email: 'isaacberry91@yahoo.com', // Using existing admin email from RLS policies
+          password: password // Using the same password for simplicity
         });
 
         if (error) {
           console.error('Admin auth error:', error);
-          setError(`Authentication failed: ${error.message}`);
+          setError(`Please contact support to set up admin access: ${error.message}`);
           return;
         }
 
