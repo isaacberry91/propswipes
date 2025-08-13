@@ -71,22 +71,31 @@ class NotificationService {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        // Store the push token for this user
-        const { error } = await supabase
-          .from('user_push_tokens')
-          .upsert({ 
-            user_id: user.id, 
-            push_token: token,
-            platform: Capacitor.getPlatform(),
-            created_at: new Date().toISOString()
-          }, { 
-            onConflict: 'user_id,platform' 
-          });
+        // Get the user's profile ID
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
 
-        if (error) {
-          console.error('📱 Error storing push token:', error);
-        } else {
-          console.log('📱 Push token stored successfully');
+        if (profile) {
+          // Store the push token for this user
+          const { error } = await supabase
+            .from('user_push_tokens')
+            .upsert({ 
+              user_id: profile.id, 
+              push_token: token,
+              platform: Capacitor.getPlatform(),
+              created_at: new Date().toISOString()
+            }, { 
+              onConflict: 'user_id,platform' 
+            });
+
+          if (error) {
+            console.error('📱 Error storing push token:', error);
+          } else {
+            console.log('📱 Push token stored successfully');
+          }
         }
       }
     } catch (error) {
@@ -154,14 +163,23 @@ class NotificationService {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        const { error } = await supabase
-          .from('user_push_tokens')
-          .delete()
+        // Get the user's profile ID
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
           .eq('user_id', user.id)
-          .eq('platform', Capacitor.getPlatform());
+          .single();
 
-        if (error) {
-          console.error('📱 Error removing push token:', error);
+        if (profile) {
+          const { error } = await supabase
+            .from('user_push_tokens')
+            .delete()
+            .eq('user_id', profile.id)
+            .eq('platform', Capacitor.getPlatform());
+
+          if (error) {
+            console.error('📱 Error removing push token:', error);
+          }
         }
       }
     } catch (error) {
