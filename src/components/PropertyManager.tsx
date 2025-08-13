@@ -136,85 +136,87 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
           </p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-4">
           {properties.map((property) => (
             <Card key={property.id} className="overflow-hidden">
-              <div className="relative">
-                {property.images && property.images.length > 0 ? (
-                  <img 
-                    src={property.images[0]} 
-                    alt={property.title}
-                    className="w-full h-48 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-muted flex items-center justify-center">
-                    <Home className="w-8 h-8 text-muted-foreground" />
+              <div className="flex">
+                <div className="relative w-48 h-32 flex-shrink-0">
+                  {property.images && property.images.length > 0 ? (
+                    <img 
+                      src={property.images[0]} 
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <Home className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div className="absolute top-2 right-2">
+                    {getStatusBadge(property.status)}
                   </div>
-                )}
-                <div className="absolute top-3 right-3">
-                  {getStatusBadge(property.status)}
                 </div>
-              </div>
-              
-              <div className="p-4">
-                <div className="space-y-3">
-                  <div>
-                    <h4 className="font-semibold text-lg line-clamp-1">{property.title}</h4>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="w-3 h-3" />
-                      <span className="line-clamp-1">
-                        {property.address}, {property.city}, {property.state}
-                      </span>
+                
+                <div className="flex-1 p-4 min-w-0">
+                  <div className="flex flex-col h-full">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-lg truncate mb-1">{property.title}</h4>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">
+                          {property.address}, {property.city}, {property.state}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 text-sm flex-wrap">
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-4 h-4 text-green-600" />
+                          <span className="font-medium">
+                            ${property.price.toLocaleString()}
+                          </span>
+                        </div>
+                        {property.bedrooms && (
+                          <div className="flex items-center gap-1">
+                            <Bed className="w-4 h-4" />
+                            <span>{property.bedrooms}</span>
+                          </div>
+                        )}
+                        {property.bathrooms && (
+                          <div className="flex items-center gap-1">
+                            <Bath className="w-4 h-4" />
+                            <span>{property.bathrooms}</span>
+                          </div>
+                        )}
+                        {property.square_feet && (
+                          <div className="flex items-center gap-1">
+                            <Square className="w-4 h-4" />
+                            <span>{property.square_feet.toLocaleString()} sq ft</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="w-4 h-4 text-green-600" />
-                      <span className="font-medium">
-                        ${property.price.toLocaleString()}
-                      </span>
-                    </div>
-                    {property.bedrooms && (
-                      <div className="flex items-center gap-1">
-                        <Bed className="w-4 h-4" />
-                        <span>{property.bedrooms}</span>
-                      </div>
-                    )}
-                    {property.bathrooms && (
-                      <div className="flex items-center gap-1">
-                        <Bath className="w-4 h-4" />
-                        <span>{property.bathrooms}</span>
-                      </div>
-                    )}
-                    {property.square_feet && (
-                      <div className="flex items-center gap-1">
-                        <Square className="w-4 h-4" />
-                        <span>{property.square_feet.toLocaleString()} sq ft</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleView(property)}
-                      className="flex-1"
-                    >
-                      <Eye className="w-4 h-4 mr-2" />
-                      View
-                    </Button>
                     
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(property)}
-                      className="flex-1"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(property)}
+                        className="flex-1"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </Button>
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(property)}
+                        className="flex-1"
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
