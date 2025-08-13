@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-// Admin client with service role key - bypasses RLS for admin operations
+// For admin operations, we'll use the regular client but with admin authentication
+// This is safer than hardcoding service role keys
 const SUPABASE_URL = "https://jkctleefoomwpaglrvie.supabase.co";
-const SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprY3RsZWVmb29td3BhZ2xydmllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MzQ3ODk2MCwiZXhwIjoyMDY5MDU0OTYwfQ.Y8cjYeKw_MBhxGwQJcSJu2VcJKYJvzKRKPUKlr-gBFo";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImprY3RsZWVmb29td3BhZ2xydmllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0Nzg5NjAsImV4cCI6MjA2OTA1NDk2MH0.QGzHZYiP-m_ayMQ5RjYBLbSRd2J400E4c-UjHNvhmHg";
 
-export const adminSupabase = createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+export const adminSupabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
