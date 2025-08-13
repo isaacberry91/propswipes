@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Camera, MapPin, Home, Plus, X, Upload, DollarSign, Crown, Lock, ImageIcon } from "lucide-react";
+import { Camera, MapPin, Home, Plus, X, Upload, DollarSign, Crown, Lock, ImageIcon, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,7 +70,6 @@ const ListProperty = () => {
   const navigate = useNavigate();
   const { subscription, canListProperties } = useSubscription();
   const [currentPropertyCount, setCurrentPropertyCount] = useState(0);
-  const [showPropertyManager, setShowPropertyManager] = useState(false);
 
   // Pre-fill form data when editing
   useEffect(() => {
@@ -1090,35 +1090,16 @@ const ListProperty = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/10 to-accent/5 p-4">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="outline"
-              onClick={() => setShowPropertyManager(!showPropertyManager)}
-              className="flex items-center gap-2"
-            >
-              <Home className="w-4 h-4" />
-              {showPropertyManager ? "Add New Property" : "View My Properties"}
-            </Button>
-            
-            <div className="flex items-center gap-2">
-              <Home className="w-8 h-8 text-primary" />
-              {subscription.isActive && subscription.tier?.startsWith('seller') && (
-                <Crown className="w-6 h-6 text-amber-500" />
-              )}
-            </div>
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Home className="w-8 h-8 text-primary" />
+            {subscription.isActive && subscription.tier?.startsWith('seller') && (
+              <Crown className="w-6 h-6 text-amber-500" />
+            )}
           </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Property Management</h1>
+          <p className="text-muted-foreground">Create and manage your property listings</p>
           
-          <h1 className="text-2xl font-bold text-foreground mb-2 mt-4">
-            {showPropertyManager ? "My Properties" : "List Your Property"}
-          </h1>
-          <p className="text-muted-foreground">
-            {showPropertyManager 
-              ? "Manage your existing property listings" 
-              : "Create a professional listing to attract the right buyers"
-            }
-          </p>
-          
-          {!subscription.isActive && !showPropertyManager && (
+          {!subscription.isActive && (
             <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
               <div className="flex items-center gap-3">
                 <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -1133,58 +1114,75 @@ const ListProperty = () => {
           )}
         </div>
 
-        {showPropertyManager ? (
-          <Card className="p-6 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
-            <PropertyManager onPropertyUpdate={() => {}} />
-          </Card>
-        ) : (
-          <Card className="p-8 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {renderPhotosSection()}
-              
-              <Separator />
-              
-              {renderBasicInfo()}
-              
-              <Separator />
-              
-              {renderPropertyDetails()}
-              
-              <Separator />
-              
-              {renderFeatures()}
-              
-              <div className="pt-6">
-                <Button 
-                  type="submit" 
-                  size="lg" 
-                  className="w-full"
-                  disabled={!canListProperties(currentPropertyCount) || isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                      {isEditing ? "Saving..." : "Creating Listing..."}
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-5 h-5 mr-2" />
-                      {isEditing ? "Save Property" : "List Property"}
-                    </>
-                  )}
-                </Button>
+        <Tabs defaultValue="create" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="create">
+              <Plus className="w-4 h-4 mr-2" />
+              Create
+            </TabsTrigger>
+            <TabsTrigger value="properties">
+              <List className="w-4 h-4 mr-2" />
+              My Properties
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Create Property Tab */}
+          <TabsContent value="create">
+            <Card className="p-8 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {renderPhotosSection()}
                 
-                {!canListProperties(currentPropertyCount) && (
-                  <p className="text-center text-sm text-muted-foreground mt-2">
-                    <Button variant="link" onClick={() => navigate('/subscription')} className="p-0 h-auto text-primary">
-                      Upgrade your plan
-                    </Button> to list more properties
-                  </p>
-                )}
-              </div>
-            </form>
-          </Card>
-        )}
+                <Separator />
+                
+                {renderBasicInfo()}
+                
+                <Separator />
+                
+                {renderPropertyDetails()}
+                
+                <Separator />
+                
+                {renderFeatures()}
+                
+                <div className="pt-6">
+                  <Button 
+                    type="submit" 
+                    size="lg" 
+                    className="w-full"
+                    disabled={!canListProperties(currentPropertyCount) || isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                        {isEditing ? "Saving..." : "Creating Listing..."}
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-5 h-5 mr-2" />
+                        {isEditing ? "Save Property" : "List Property"}
+                      </>
+                    )}
+                  </Button>
+                  
+                  {!canListProperties(currentPropertyCount) && (
+                    <p className="text-center text-sm text-muted-foreground mt-2">
+                      <Button variant="link" onClick={() => navigate('/subscription')} className="p-0 h-auto text-primary">
+                        Upgrade your plan
+                      </Button> to list more properties
+                    </p>
+                  )}
+                </div>
+              </form>
+            </Card>
+          </TabsContent>
+
+          {/* Properties Management Tab */}
+          <TabsContent value="properties">
+            <Card className="p-6 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
+              <PropertyManager onPropertyUpdate={() => {}} />
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
