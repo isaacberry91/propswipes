@@ -171,7 +171,7 @@ const ListProperty = () => {
       return;
     }
 
-    if (images.length === 0) {
+    if (images.length === 0 && (!isEditing || !editingProperty?.images?.length)) {
       toast({
         title: "Add photos",
         description: "Please add at least one photo of your property.",
