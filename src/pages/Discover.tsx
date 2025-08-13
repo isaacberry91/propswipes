@@ -94,6 +94,7 @@ const Discover = () => {
           title: "Error loading properties",
           description: "We'll show you some sample properties instead.",
           variant: "destructive",
+          duration: 5000
         });
         // Fallback to sample data
         setProperties([]);
@@ -147,6 +148,7 @@ const Discover = () => {
         toast({
           title: "Property Liked! 💕",
           description: `You liked ${property.title}. Looking for matches...`,
+          duration: 5000
         });
         
         // Check for potential matches
@@ -155,6 +157,7 @@ const Discover = () => {
         toast({
           title: "Property Passed",
           description: "Looking for your next match...",
+          duration: 5000
         });
       }
     } catch (error) {
@@ -202,6 +205,7 @@ const Discover = () => {
       toast({
         title: "Location Updated! 📍", 
         description: `Found ${data?.length || 0} properties within ${radius} miles of ${location}`,
+        duration: 5000
       });
     } catch (error) {
       console.error('Error fetching properties by location:', error);
@@ -209,6 +213,7 @@ const Discover = () => {
         title: "Error",
         description: "Could not load properties for that location.",
         variant: "destructive",
+        duration: 5000
       });
     } finally {
       setLoading(false);

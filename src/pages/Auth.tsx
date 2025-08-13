@@ -83,12 +83,14 @@ const Auth = () => {
             title: "Account exists",
             description: "This email is already registered. Please sign in instead.",
             variant: "destructive",
+            duration: 5000
           });
         } else {
           toast({
             title: "Sign up failed",
             description: error.message,
             variant: "destructive",
+            duration: 5000
           });
         }
       } else {
@@ -99,6 +101,7 @@ const Auth = () => {
           toast({
             title: "Welcome to PropSwipes! 🎉",
             description: "Account created successfully! Let's start swiping!",
+            duration: 5000
           });
           navigate('/discover');
         } else {
@@ -106,6 +109,7 @@ const Auth = () => {
           toast({
             title: "Welcome to PropSwipes! 🎉",
             description: "Check your email to confirm your account and start swiping!",
+            duration: 5000
           });
         }
       }
@@ -115,6 +119,7 @@ const Auth = () => {
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
+        duration: 5000
       });
     } finally {
       setLoading(false);
@@ -171,6 +176,7 @@ const Auth = () => {
           title: "Sign in failed",
           description: error.message,
           variant: "destructive",
+          duration: 5000
         });
       } else {
         console.log('🔐 PropSwipes Auth: Sign in successful, navigating to discover...');
@@ -182,6 +188,7 @@ const Auth = () => {
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
+        duration: 5000
       });
     } finally {
       setLoading(false);
@@ -202,11 +209,13 @@ const Auth = () => {
           title: "Reset failed",
           description: error.message,
           variant: "destructive",
+          duration: 5000
         });
       } else {
         toast({
           title: "Reset email sent! 📧",
           description: "Check your email for password reset instructions.",
+          duration: 5000
         });
         setShowForgotPassword(false);
       }
@@ -215,6 +224,7 @@ const Auth = () => {
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
+        duration: 5000
       });
     } finally {
       setLoading(false);

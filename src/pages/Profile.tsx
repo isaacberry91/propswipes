@@ -110,13 +110,15 @@ const Profile = () => {
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
+        duration: 5000
       });
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
         title: "Error updating profile",
         description: "Please try again later.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     }
   };
@@ -125,6 +127,7 @@ const Profile = () => {
     toast({
       title: "Mobile App Required 📱",
       description: "Subscription management is only available in the mobile app. Download from your app store!",
+      duration: 5000
     });
   };
 
@@ -138,6 +141,7 @@ const Profile = () => {
       toast({
         title: "Logged out successfully",
         description: "You have been logged out of your account.",
+        duration: 5000
       });
       navigate('/auth');
     } catch (error) {
@@ -145,7 +149,8 @@ const Profile = () => {
       toast({
         title: "Error logging out",
         description: "Please try again.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     }
   };
@@ -220,6 +225,7 @@ const Profile = () => {
                           toast({
                             title: "Upload photo",
                             description: "Photo upload feature coming soon!",
+                            duration: 5000
                           });
                         }}
                       >

@@ -27,7 +27,8 @@ const TestSubscription = () => {
       toast({
         title: "Error",
         description: "Please select a subscription tier and ensure you're logged in.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
       return;
     }
@@ -68,13 +69,15 @@ const TestSubscription = () => {
       toast({
         title: "Test Subscription Added! 🎉",
         description: `You now have ${selectedTier} access for testing.`,
+        duration: 5000
       });
     } catch (error) {
       console.error('Error adding test subscription:', error);
       toast({
         title: "Error",
         description: "Failed to add test subscription.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     } finally {
       setLoading(false);
@@ -98,13 +101,15 @@ const TestSubscription = () => {
       toast({
         title: "Subscription Removed",
         description: "You're back to the free tier.",
+        duration: 5000
       });
     } catch (error) {
       console.error('Error removing subscription:', error);
       toast({
         title: "Error",
         description: "Failed to remove subscription.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     } finally {
       setLoading(false);
@@ -128,13 +133,15 @@ const TestSubscription = () => {
       toast({
         title: "Daily Likes Reset",
         description: "Your daily like count has been reset to 0.",
+        duration: 5000
       });
     } catch (error) {
       console.error('Error resetting likes:', error);
       toast({
         title: "Error",
         description: "Failed to reset daily likes.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     }
   };
@@ -153,6 +160,7 @@ const TestSubscription = () => {
       toast({
         title: "Daily Likes Updated",
         description: `Set daily likes used to ${count}.`,
+        duration: 5000
       });
     } catch (error) {
       console.error('Error setting likes:', error);

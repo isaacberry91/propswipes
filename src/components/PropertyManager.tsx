@@ -74,7 +74,8 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
       toast({
         title: "Error loading properties",
         description: "Could not load your properties. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     } finally {
       setLoading(false);
@@ -107,6 +108,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
       toast({
         title: "Property deleted",
         description: "Your property has been deleted successfully.",
+        duration: 5000
       });
 
       await fetchUserProperties();
@@ -117,7 +119,8 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
       toast({
         title: "Error deleting property",
         description: error.message || "Please try again.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     }
   };

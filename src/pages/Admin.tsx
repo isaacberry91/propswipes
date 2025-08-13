@@ -115,7 +115,8 @@ const Admin = () => {
       toast({
         title: "Error",
         description: "Failed to load admin data",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     } finally {
       setLoading(false);
@@ -154,13 +155,15 @@ const Admin = () => {
       toast({
         title: "Property approved",
         description: "Property has been approved and is now visible to users",
+        duration: 5000
       });
       loadData();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to approve property",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     }
   };
@@ -177,13 +180,15 @@ const Admin = () => {
       toast({
         title: "Property rejected",
         description: "Property has been rejected",
+        duration: 5000
       });
       loadData();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to reject property",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     }
   };
@@ -200,13 +205,15 @@ const Admin = () => {
       toast({
         title: "Property deleted",
         description: "Property listing has been permanently deleted",
+        duration: 5000
       });
       loadData();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete property",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     }
   };
