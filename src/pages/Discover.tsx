@@ -224,15 +224,15 @@ const Discover = () => {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Fixed Header - Always Visible */}
       <div className="flex-shrink-0 bg-background border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <div className="flex items-center justify-between mb-3">
+        <div className="max-w-md mx-auto px-4 py-2">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <img 
                 src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
                 alt="PropSwipes" 
-                className="w-8 h-8"
+                className="w-6 h-6"
               />
-              <span className="text-lg font-bold text-primary">PropSwipes</span>
+              <span className="text-base font-bold text-primary">PropSwipes</span>
               {subscription.isActive && (
                 <Crown className="w-4 h-4 text-amber-500" />
               )}
@@ -256,7 +256,7 @@ const Discover = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden">
+      <div className="flex-1 flex flex-col items-center justify-center p-2 overflow-hidden">
         {/* Subscription Prompt for Likes */}
         {showLikePrompt && (
           <div className="max-w-sm w-full mb-4">
