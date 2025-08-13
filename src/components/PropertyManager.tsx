@@ -138,9 +138,9 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
       ) : (
         <div className="space-y-4">
           {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden">
-              <div className="flex">
-                <div className="relative w-48 h-32 flex-shrink-0">
+            <Card key={property.id} className="overflow-hidden h-40">
+              <div className="flex h-full">
+                <div className="relative w-48 flex-shrink-0">
                   {property.images && property.images.length > 0 ? (
                     <img 
                       src={property.images[0]} 
@@ -149,7 +149,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                     />
                   ) : (
                     <div className="w-full h-full bg-muted flex items-center justify-center">
-                      <Home className="w-6 h-6 text-muted-foreground" />
+                      <Home className="w-8 h-8 text-muted-foreground" />
                     </div>
                   )}
                   <div className="absolute top-2 right-2">
@@ -158,23 +158,22 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                 </div>
                 
                 <div className="flex-1 p-4 min-w-0">
-                  <div className="flex flex-col h-full">
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-lg truncate mb-1">{property.title}</h4>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
+                  <div className="flex flex-col justify-between h-full">
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-lg truncate">{property.title}</h4>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <MapPin className="w-3 h-3 flex-shrink-0" />
                         <span className="truncate">
                           {property.address}, {property.city}, {property.state}
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-4 text-sm flex-wrap">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4 text-green-600" />
-                          <span className="font-medium">
-                            ${property.price.toLocaleString()}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-1 text-lg font-bold text-green-600">
+                        <DollarSign className="w-5 h-5" />
+                        <span>${property.price.toLocaleString()}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         {property.bedrooms && (
                           <div className="flex items-center gap-1">
                             <Bed className="w-4 h-4" />
@@ -196,7 +195,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                       </div>
                     </div>
                     
-                    <div className="flex gap-2 mt-3">
+                    <div className="flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
