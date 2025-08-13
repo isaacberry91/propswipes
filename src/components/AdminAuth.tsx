@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, Shield } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminAuthProps {
   onAuthenticated: () => void;
@@ -14,22 +16,45 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
-    // Simulate authentication delay
-    setTimeout(() => {
+    try {
       if (password === "BenIsaac") {
+        // Sign in as admin user
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: 'admin@propswipes.com',
+          password: 'admin123password' // Default admin password
+        });
+
+        if (error) {
+          console.error('Admin auth error:', error);
+          setError("Authentication failed. Please try again.");
+          return;
+        }
+
+        console.log('🔧 Admin signed in:', data.user?.email);
         localStorage.setItem("admin-authenticated", "true");
+        
+        toast({
+          title: "Admin Access Granted",
+          description: "Welcome to the admin dashboard!",
+        });
+        
         onAuthenticated();
       } else {
         setError("Invalid password. Access denied.");
       }
+    } catch (error) {
+      console.error('Admin authentication error:', error);
+      setError("Authentication failed. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   return (

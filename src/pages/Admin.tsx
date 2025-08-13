@@ -53,14 +53,22 @@ const Admin = () => {
 
   const loadData = async () => {
     try {
+      console.log('🔧 Admin Debug: Loading data...');
+      
+      // Check current user authentication
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔧 Admin Debug: Current user:', user?.email);
+      
       // Load users
       const { data: usersData } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      // Load properties
-      const { data: propertiesData } = await supabase
+      console.log('🔧 Admin Debug: Users loaded:', usersData?.length);
+
+      // Load properties with detailed logging
+      const { data: propertiesData, error: propertiesError } = await supabase
         .from('properties')
         .select(`
           *,
@@ -68,7 +76,12 @@ const Admin = () => {
         `)
         .order('created_at', { ascending: false });
 
-      // Load stats
+      console.log('🔧 Admin Debug: Properties query result:', {
+        data: propertiesData?.length,
+        error: propertiesError
+      });
+
+      // Load stats with detailed logging
       const { count: userCount } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
@@ -77,10 +90,17 @@ const Admin = () => {
         .from('properties')
         .select('*', { count: 'exact', head: true });
 
-      const { count: pendingCount } = await supabase
+      console.log('🔧 Admin Debug: Total properties count:', propertyCount);
+
+      const { count: pendingCount, error: pendingError } = await supabase
         .from('properties')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
+
+      console.log('🔧 Admin Debug: Pending count query result:', {
+        count: pendingCount,
+        error: pendingError
+      });
 
       const { count: matchCount } = await supabase
         .from('matches')
