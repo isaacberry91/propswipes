@@ -1086,7 +1086,7 @@ const ListProperty = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/10 to-accent/5 p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Home className="w-12 h-12 text-primary" />

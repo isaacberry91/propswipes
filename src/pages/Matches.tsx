@@ -15,7 +15,7 @@ const Matches = () => {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
           <Heart className="w-12 h-12 text-love mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-foreground mb-2">Your Matches</h1>
