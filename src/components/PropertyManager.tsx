@@ -138,7 +138,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
       ) : (
         <div className="space-y-4">
           {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden h-40">
+            <Card key={property.id} className="overflow-hidden h-48">
               <div className="flex h-full">
                 <div className="relative w-48 flex-shrink-0">
                   {property.images && property.images.length > 0 ? (
