@@ -24,32 +24,37 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
     setError("");
 
     try {
-      if (password === "BenIsaac") {
-        // For security, we'll use a simpler approach
-        // Sign in with the existing admin user (assuming it exists)
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: 'isaacberry91@yahoo.com', // Using existing admin email from RLS policies
-          password: password // Using the same password for simplicity
-        });
+      // Validate admin password against stored secret
+      const { data: passwordCheck, error: secretError } = await supabase.functions.invoke('verify-admin-password', {
+        body: { password }
+      });
 
-        if (error) {
-          console.error('Admin auth error:', error);
-          setError(`Please contact support to set up admin access: ${error.message}`);
-          return;
-        }
-
-        console.log('🔧 Admin signed in successfully:', data.user?.email);
-        localStorage.setItem("admin-authenticated", "true");
-        
-        toast({
-          title: "Admin Access Granted",
-          description: "Welcome to the admin dashboard!",
-        });
-        
-        onAuthenticated();
-      } else {
-        setError("Invalid password. Access denied.");
+      if (secretError || !passwordCheck?.isValid) {
+        setError("Invalid admin password. Access denied.");
+        return;
       }
+
+      // Sign in with the verified admin email
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: passwordCheck.adminEmail,
+        password: passwordCheck.adminPassword
+      });
+
+      if (error) {
+        console.error('Admin auth error:', error);
+        setError(`Authentication failed: ${error.message}. Please ensure admin account exists.`);
+        return;
+      }
+
+      console.log('🔧 Admin signed in successfully:', data.user?.email);
+      localStorage.setItem("admin-authenticated", "true");
+      
+      toast({
+        title: "Admin Access Granted",
+        description: `Welcome, ${data.user?.email}!`,
+      });
+      
+      onAuthenticated();
     } catch (error) {
       console.error('Admin authentication error:', error);
       setError("Authentication failed. Please try again.");
