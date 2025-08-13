@@ -24,50 +24,34 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
     setError("");
 
     try {
-      console.log("🔧 Admin login attempt with password:", password);
-      
-      // First, ensure admin user exists
-      console.log("🔧 Calling create-admin-user function...");
-      const { data: createResult, error: createError } = await supabase.functions.invoke('create-admin-user', {
-        body: { password }
-      });
+      // Direct admin login - user has been manually created
+      if (password === "FI@1802") {
+        console.log("🔧 Attempting admin login...");
+        
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: 'ankur@furrisic.com',
+          password: 'FI@1802'
+        });
 
-      console.log("🔧 Create admin user result:", createResult);
-      console.log("🔧 Create admin user error:", createError);
+        if (error) {
+          console.error('Admin auth error:', error);
+          setError(`Authentication failed: ${error.message}. Please ensure the user exists in Supabase Auth.`);
+          return;
+        }
 
-      if (createError) {
-        console.error("🔧 Create admin user failed:", createError);
-        setError(`Failed to setup admin access: ${createError.message}`);
-        return;
+        console.log('🔧 Admin signed in successfully:', data.user?.email);
+        localStorage.setItem("admin-authenticated", "true");
+        
+        toast({
+          title: "Admin Access Granted",
+          description: `Welcome, ${data.user?.email}!`,
+        });
+        
+        onAuthenticated();
+      } else {
+        setError("Invalid admin password. Access denied.");
       }
 
-      if (!createResult?.success) {
-        setError(createResult?.error || "Failed to verify admin access.");
-        return;
-      }
-
-      // Now try to sign in directly
-      console.log("🔧 Attempting direct sign in...");
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: 'ankur@furrisic.com',
-        password: 'FI@1802'
-      });
-
-      if (error) {
-        console.error('Admin auth error:', error);
-        setError(`Authentication failed: ${error.message}. Try creating user manually in Supabase.`);
-        return;
-      }
-
-      console.log('🔧 Admin signed in successfully:', data.user?.email);
-      localStorage.setItem("admin-authenticated", "true");
-      
-      toast({
-        title: "Admin Access Granted",
-        description: `Welcome, ${data.user?.email}!`,
-      });
-      
-      onAuthenticated();
     } catch (error) {
       console.error('Admin authentication error:', error);
       setError("Authentication failed. Please try again.");
