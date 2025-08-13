@@ -7,12 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Camera, MapPin, Home, Plus, X, Upload, DollarSign, Crown, Lock } from "lucide-react";
+import { Camera, MapPin, Home, Plus, X, Upload, DollarSign, Crown, Lock, ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
+import { Camera as CapacitorCamera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Capacitor } from "@capacitor/core";
 
 const ListProperty = () => {
   const [formData, setFormData] = useState({
@@ -301,6 +303,79 @@ const ListProperty = () => {
     setImages(prev => [...prev, ...newFiles]);
   };
 
+  const handleCameraCapture = async () => {
+    if (images.length >= 10) {
+      toast({
+        title: "Maximum photos reached",
+        description: "You can upload up to 10 photos total.",
+      });
+      return;
+    }
+
+    try {
+      const image = await CapacitorCamera.getPhoto({
+        quality: 80,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        allowEditing: true,
+        saveToGallery: false
+      });
+
+      if (image.dataUrl) {
+        // Convert data URL to File object
+        const response = await fetch(image.dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        
+        setImages(prev => [...prev, file]);
+        setImageUrls(prev => [...prev, image.dataUrl]);
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      toast({
+        title: "Camera Error",
+        description: "Could not access camera. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleGallerySelect = async () => {
+    if (images.length >= 10) {
+      toast({
+        title: "Maximum photos reached",
+        description: "You can upload up to 10 photos total.",
+      });
+      return;
+    }
+
+    try {
+      const image = await CapacitorCamera.getPhoto({
+        quality: 80,
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Photos,
+        allowEditing: true
+      });
+
+      if (image.dataUrl) {
+        // Convert data URL to File object
+        const response = await fetch(image.dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        
+        setImages(prev => [...prev, file]);
+        setImageUrls(prev => [...prev, image.dataUrl]);
+      }
+    } catch (error) {
+      console.error('Error selecting from gallery:', error);
+      toast({
+        title: "Gallery Error",
+        description: "Could not access photo gallery. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const addSampleImage = () => {
     if (images.length >= 10) {
       toast({
@@ -359,23 +434,48 @@ const ListProperty = () => {
         
         {images.length < 10 && (
           <div className="space-y-2">
-            <label className="cursor-pointer">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                capture="environment"
-              />
-              <div className="h-32 border-2 border-dashed border-border hover:border-primary rounded-lg flex flex-col items-center justify-center bg-background hover:bg-accent/20 transition-colors">
-                <Camera className="w-6 h-6 mb-2 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground text-center">
-                  📸 Take Photo<br />
-                  <span className="text-xs">or choose from gallery</span>
-                </span>
+            {Capacitor.isNativePlatform() ? (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCameraCapture}
+                  className="h-16 flex flex-col gap-1"
+                >
+                  <Camera className="w-5 h-5" />
+                  <span className="text-xs">Camera</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGallerySelect}
+                  className="h-16 flex flex-col gap-1"
+                >
+                  <ImageIcon className="w-5 h-5" />
+                  <span className="text-xs">Gallery</span>
+                </Button>
               </div>
-            </label>
+            ) : (
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  capture="environment"
+                />
+                <div className="h-32 border-2 border-dashed border-border hover:border-primary rounded-lg flex flex-col items-center justify-center bg-background hover:bg-accent/20 transition-colors">
+                  <Camera className="w-6 h-6 mb-2 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground text-center">
+                    📸 Take Photo<br />
+                    <span className="text-xs">or choose from gallery</span>
+                  </span>
+                </div>
+              </label>
+            )}
             <Button
               type="button"
               variant="ghost"
