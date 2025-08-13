@@ -141,7 +141,8 @@ const ListProperty = () => {
       toast({
         title: "Authentication required",
         description: "Please log in to list a property.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
       return;
     }
@@ -155,7 +156,8 @@ const ListProperty = () => {
       toast({
         title: "Listing Limit Reached 🏠",
         description: upgradeMessage,
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
       navigate('/subscription');
       return;
@@ -190,7 +192,8 @@ const ListProperty = () => {
       toast({
         title: "Missing Required Fields",
         description: `Please fill in: ${missingFields.join(", ")}`,
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
       return;
     }
@@ -199,7 +202,8 @@ const ListProperty = () => {
       toast({
         title: "Add photos",
         description: "Please add at least one photo of your property.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
       return;
     }
@@ -367,7 +371,8 @@ const ListProperty = () => {
       toast({
         title: "Error creating property",
         description: error.message || "Please try again.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000
       });
     } finally {
       setIsSubmitting(false);
