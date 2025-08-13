@@ -105,12 +105,18 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
 
       if (error) throw error;
 
+      // Immediately update local state to remove the deleted property
+      setProperties(prevProperties => 
+        prevProperties.filter(property => property.id !== propertyId)
+      );
+
       toast({
         title: "Property deleted",
         description: "Your property has been deleted successfully.",
         duration: 5000
       });
 
+      // Also fetch fresh data to ensure consistency
       await fetchUserProperties();
       onPropertyUpdate?.();
 
