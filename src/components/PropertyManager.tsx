@@ -192,10 +192,10 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                             <span>{property.square_feet.toLocaleString()} sq ft</span>
                           </div>
                         )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
+                       </div>
+                     </div>
+                     
+                     <div className="flex gap-2 mt-4">
                       <Button
                         variant="outline"
                         size="sm"
