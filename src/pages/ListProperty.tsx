@@ -1103,12 +1103,12 @@ const ListProperty = () => {
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                    Creating Listing...
+                    {isEditing ? "Saving..." : "Creating Listing..."}
                   </>
                 ) : (
                   <>
                     <Plus className="w-5 h-5 mr-2" />
-                    List Property
+                    {isEditing ? "Save Property" : "List Property"}
                   </>
                 )}
               </Button>
