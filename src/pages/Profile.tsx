@@ -201,20 +201,20 @@ const Profile = () => {
           {/* Profile Tab */}
           <TabsContent value="profile">
             <Card className="p-6 overflow-hidden">
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {/* Avatar Section */}
-                <div className="flex items-start gap-6">
+                <div className="flex items-start gap-4">
                    <div className="relative shrink-0">
-                     <Avatar className="w-24 h-24">
+                     <Avatar className="w-20 h-20">
                        <AvatarImage src={userProfile?.avatar_url} />
-                       <AvatarFallback className="text-xl">
+                       <AvatarFallback className="text-lg">
                          {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
                        </AvatarFallback>
                      </Avatar>
                     {isEditing && (
                       <Button
                         size="sm"
-                        className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0"
+                        className="absolute -bottom-1 -right-1 rounded-full w-6 h-6 p-0"
                         onClick={() => {
                           // TODO: Implement image upload
                           toast({
@@ -224,73 +224,79 @@ const Profile = () => {
                           });
                         }}
                       >
-                        <Camera className="w-4 h-4" />
+                        <Camera className="w-3 h-3" />
                       </Button>
                     )}
                   </div>
                    <div className="flex-1 min-w-0">
-                     <h2 className="text-2xl font-bold text-foreground truncate">{userProfile?.display_name || user?.email}</h2>
-                     <p className="text-muted-foreground truncate">{user?.email}</p>
-                     <p className="text-sm text-muted-foreground capitalize">{userProfile?.user_type || 'buyer'}</p>
-                     <div className="flex items-center gap-2 mt-2 flex-wrap">
-                       <Badge variant={subscription.isActive ? "default" : "secondary"} className="flex items-center gap-1 shrink-0">
+                     <h2 className="text-xl font-bold text-foreground truncate">{userProfile?.display_name || user?.email}</h2>
+                     <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+                     <p className="text-xs text-muted-foreground capitalize truncate">{userProfile?.user_type || 'buyer'}</p>
+                     <div className="flex items-center gap-2 mt-2">
+                       <Badge variant={subscription.isActive ? "default" : "secondary"} className="flex items-center gap-1 text-xs">
                          {subscription.isActive ? <Crown className="w-3 h-3" /> : <Star className="w-3 h-3" />}
-                         <span className="truncate">{getTierDisplayName()}</span>
+                         <span className="truncate max-w-[80px]">{getTierDisplayName()}</span>
                        </Badge>
-                       <Badge variant="outline" className="capitalize shrink-0">
-                         {userProfile?.user_type || 'buyer'}
+                       <Badge variant="outline" className="capitalize text-xs">
+                         <span className="truncate">{userProfile?.user_type || 'buyer'}</span>
                        </Badge>
                      </div>
                    </div>
                 </div>
 
                 {/* Profile Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className="space-y-2 min-w-0">
-                     <Label htmlFor="displayName">Display Name</Label>
-                     <Input
-                       id="displayName"
-                       value={userProfile?.display_name || ''}
-                       onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
-                       disabled={!isEditing}
-                       className="w-full"
-                     />
+                <div className="grid grid-cols-1 gap-4">
+                   <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2 min-w-0">
+                       <Label htmlFor="displayName" className="text-sm">Display Name</Label>
+                       <Input
+                         id="displayName"
+                         value={userProfile?.display_name || ''}
+                         onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
+                         disabled={!isEditing}
+                         className="w-full text-sm"
+                         maxLength={50}
+                       />
+                     </div>
+                     
+                     <div className="space-y-2 min-w-0">
+                       <Label htmlFor="email" className="text-sm">Email</Label>
+                       <Input
+                         id="email"
+                         type="email"
+                         value={user?.email || ''}
+                         disabled={true}
+                         className="bg-muted w-full text-sm truncate"
+                         title={user?.email || ''}
+                       />
+                     </div>
                    </div>
                    
-                   <div className="space-y-2 min-w-0">
-                     <Label htmlFor="email">Email</Label>
-                     <Input
-                       id="email"
-                       type="email"
-                       value={user?.email || ''}
-                       disabled={true}
-                       className="bg-muted w-full"
-                       title={user?.email || ''}
-                     />
-                   </div>
-                   
-                   <div className="space-y-2 min-w-0">
-                     <Label htmlFor="phone">Phone</Label>
-                     <Input
-                       id="phone"
-                       value={userProfile?.phone || ''}
-                       onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
-                       disabled={!isEditing}
-                       placeholder="Enter your phone number"
-                       className="w-full"
-                     />
-                   </div>
-                   
-                   <div className="space-y-2 min-w-0">
-                     <Label htmlFor="location">Location</Label>
-                     <Input
-                       id="location"
-                       value={userProfile?.location || ''}
-                       onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
-                       disabled={!isEditing}
-                       placeholder="Enter your location"
-                       className="w-full"
-                     />
+                   <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2 min-w-0">
+                       <Label htmlFor="phone" className="text-sm">Phone</Label>
+                       <Input
+                         id="phone"
+                         value={userProfile?.phone || ''}
+                         onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
+                         disabled={!isEditing}
+                         placeholder="Phone number"
+                         className="w-full text-sm"
+                       />
+                     </div>
+                     
+                     <div className="space-y-2 min-w-0">
+                       <Label htmlFor="location" className="text-sm">Location</Label>
+                       <Input
+                         id="location"
+                         value={userProfile?.location || ''}
+                         onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
+                         disabled={!isEditing}
+                         placeholder="Your location"
+                         className="w-full text-sm"
+                         maxLength={100}
+                       />
+                     </div>
                    </div>
                 </div>
 
@@ -298,14 +304,17 @@ const Profile = () => {
                    <Label htmlFor="bio">Bio</Label>
                    <textarea
                      id="bio"
-                     className="w-full p-3 border border-border rounded-md bg-background text-foreground disabled:opacity-50 resize-none"
-                     rows={3}
+                     className="w-full p-3 border border-border rounded-md bg-background text-foreground disabled:opacity-50 resize-none text-sm"
+                     rows={2}
                      value={userProfile?.bio || ''}
                      onChange={(e) => setUserProfile({...userProfile, bio: e.target.value})}
                      disabled={!isEditing}
-                     placeholder="Tell others about yourself and your real estate interests..."
-                     style={{ minHeight: '80px', maxHeight: '120px' }}
+                     placeholder="Tell others about yourself..."
+                     maxLength={150}
                    />
+                   <p className="text-xs text-muted-foreground">
+                     {userProfile?.bio?.length || 0}/150 characters
+                   </p>
                  </div>
                 {isEditing && (
                   <div className="flex gap-4">
