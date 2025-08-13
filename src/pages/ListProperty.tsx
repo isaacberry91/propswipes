@@ -252,7 +252,9 @@ const ListProperty = () => {
           city: formData.city,
           state: formData.state,
           zip_code: formData.zipCode,
-          price: parseFloat(formData.price.replace(/,/g, '')),
+          price: isRental 
+            ? parseFloat(formData.monthlyRent.replace(/,/g, '')) 
+            : parseFloat(formData.price.replace(/,/g, '')),
           square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
           description: formData.description,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
@@ -286,7 +288,9 @@ const ListProperty = () => {
           city: formData.city,
           state: formData.state,
           zip_code: formData.zipCode,
-          price: parseFloat(formData.price.replace(/,/g, '')),
+          price: isRental 
+            ? parseFloat(formData.monthlyRent.replace(/,/g, '')) 
+            : parseFloat(formData.price.replace(/,/g, '')),
           square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
           description: formData.description,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
