@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, MapPin, Bed, Bath, Square, DollarSign, Home } from "lucide-react";
+import { Edit, Eye, MapPin, Bed, Bath, Square, DollarSign, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,43 +92,9 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
     });
   };
 
-  const handleDelete = async (propertyId: string) => {
-    if (!confirm('Are you sure you want to delete this property? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', propertyId);
-
-      if (error) throw error;
-
-      // Immediately update local state to remove the deleted property
-      setProperties(prevProperties => 
-        prevProperties.filter(property => property.id !== propertyId)
-      );
-
-      toast({
-        title: "Property deleted",
-        description: "Your property has been deleted successfully.",
-        duration: 5000
-      });
-
-      // Also fetch fresh data to ensure consistency
-      await fetchUserProperties();
-      onPropertyUpdate?.();
-
-    } catch (error: any) {
-      console.error('Error deleting property:', error);
-      toast({
-        title: "Error deleting property",
-        description: error.message || "Please try again.",
-        variant: "destructive",
-        duration: 5000
-      });
-    }
+  const handleView = (property: Property) => {
+    // Navigate to PropertyDetails page
+    navigate(`/property/${property.id}`);
   };
 
   const getStatusBadge = (status: string) => {
@@ -233,21 +199,21 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => handleView(property)}
+                      className="flex-1"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      View
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleEdit(property)}
                       className="flex-1"
                     >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
-                    </Button>
-                    
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(property.id)}
-                      className="flex-1"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
                     </Button>
                   </div>
                 </div>
