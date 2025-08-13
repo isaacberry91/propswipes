@@ -24,7 +24,17 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
     setError("");
 
     try {
-      // Validate admin password against stored secret
+      // First, ensure admin user exists
+      const { data: createResult, error: createError } = await supabase.functions.invoke('create-admin-user', {
+        body: { password }
+      });
+
+      if (createError || !createResult?.success) {
+        setError(createResult?.error || "Failed to verify admin access.");
+        return;
+      }
+
+      // Now validate admin password against stored secret
       const { data: passwordCheck, error: secretError } = await supabase.functions.invoke('verify-admin-password', {
         body: { password }
       });
@@ -42,7 +52,7 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
 
       if (error) {
         console.error('Admin auth error:', error);
-        setError(`Authentication failed: ${error.message}. Please ensure admin account exists.`);
+        setError(`Authentication failed: ${error.message}. Please try again.`);
         return;
       }
 
