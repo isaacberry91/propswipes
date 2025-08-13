@@ -7,6 +7,13 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { 
   ArrowLeft, 
   MapPin, 
   Bed, 
@@ -58,7 +65,6 @@ const PropertyDetails = () => {
   const { toast } = useToast();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     if (propertyId) {
@@ -177,35 +183,30 @@ const PropertyDetails = () => {
             {/* Property Images */}
             <Card className="overflow-hidden">
               {property.images && property.images.length > 0 ? (
-                <div className="relative">
-                  <img 
-                    src={property.images[currentImageIndex]} 
-                    alt={property.title}
-                    className="w-full h-96 object-cover"
-                  />
+                <Carousel className="w-full">
+                  <CarouselContent>
+                    {property.images.map((image, index) => (
+                      <CarouselItem key={index}>
+                        <div className="relative">
+                          <img 
+                            src={image} 
+                            alt={`${property.title} - ${index + 1}`}
+                            className="w-full h-96 object-cover"
+                          />
+                          <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                            {index + 1} / {property.images.length}
+                          </div>
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
                   {property.images.length > 1 && (
-                    <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                      {currentImageIndex + 1} / {property.images.length}
-                    </div>
+                    <>
+                      <CarouselPrevious className="left-4" />
+                      <CarouselNext className="right-4" />
+                    </>
                   )}
-                  
-                  {/* Image Navigation */}
-                  {property.images.length > 1 && (
-                    <div className="flex gap-2 mt-4 px-4 pb-4 overflow-x-auto">
-                      {property.images.map((image, index) => (
-                        <img
-                          key={index}
-                          src={image}
-                          alt={`${property.title} - ${index + 1}`}
-                          className={`w-20 h-16 object-cover rounded cursor-pointer border-2 ${
-                            index === currentImageIndex ? 'border-primary' : 'border-transparent'
-                          }`}
-                          onClick={() => setCurrentImageIndex(index)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+                </Carousel>
               ) : (
                 <div className="w-full h-96 bg-muted flex items-center justify-center">
                   <Home className="w-16 h-16 text-muted-foreground" />
