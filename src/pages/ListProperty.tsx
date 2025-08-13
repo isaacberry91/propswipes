@@ -15,6 +15,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Camera as CapacitorCamera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { Capacitor } from "@capacitor/core";
+import PropertyManager from "@/components/PropertyManager";
 
 const ListProperty = () => {
   const location = useLocation();
@@ -68,6 +69,7 @@ const ListProperty = () => {
   const navigate = useNavigate();
   const { subscription, canListProperties } = useSubscription();
   const [currentPropertyCount, setCurrentPropertyCount] = useState(0);
+  const [showPropertyManager, setShowPropertyManager] = useState(false);
 
   // Pre-fill form data when editing
   useEffect(() => {
@@ -1088,16 +1090,35 @@ const ListProperty = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/10 to-accent/5 p-4">
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Home className="w-12 h-12 text-primary" />
-            {subscription.isActive && subscription.tier?.startsWith('seller') && (
-              <Crown className="w-6 h-6 text-amber-500" />
-            )}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              onClick={() => setShowPropertyManager(!showPropertyManager)}
+              className="flex items-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              {showPropertyManager ? "Add New Property" : "View My Properties"}
+            </Button>
+            
+            <div className="flex items-center gap-2">
+              <Home className="w-8 h-8 text-primary" />
+              {subscription.isActive && subscription.tier?.startsWith('seller') && (
+                <Crown className="w-6 h-6 text-amber-500" />
+              )}
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">List Your Property</h1>
-          <p className="text-muted-foreground">Create a professional listing to attract the right buyers</p>
           
-          {!subscription.isActive && (
+          <h1 className="text-2xl font-bold text-foreground mb-2 mt-4">
+            {showPropertyManager ? "My Properties" : "List Your Property"}
+          </h1>
+          <p className="text-muted-foreground">
+            {showPropertyManager 
+              ? "Manage your existing property listings" 
+              : "Create a professional listing to attract the right buyers"
+            }
+          </p>
+          
+          {!subscription.isActive && !showPropertyManager && (
             <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
               <div className="flex items-center gap-3">
                 <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -1112,52 +1133,58 @@ const ListProperty = () => {
           )}
         </div>
 
-        <Card className="p-8 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {renderPhotosSection()}
-            
-            <Separator />
-            
-            {renderBasicInfo()}
-            
-            <Separator />
-            
-            {renderPropertyDetails()}
-            
-            <Separator />
-            
-            {renderFeatures()}
-            
-            <div className="pt-6">
-              <Button 
-                type="submit" 
-                size="lg" 
-                className="w-full"
-                disabled={!canListProperties(currentPropertyCount) || isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                    {isEditing ? "Saving..." : "Creating Listing..."}
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-5 h-5 mr-2" />
-                    {isEditing ? "Save Property" : "List Property"}
-                  </>
-                )}
-              </Button>
+        {showPropertyManager ? (
+          <Card className="p-6 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
+            <PropertyManager onPropertyUpdate={() => {}} />
+          </Card>
+        ) : (
+          <Card className="p-8 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {renderPhotosSection()}
               
-              {!canListProperties(currentPropertyCount) && (
-                <p className="text-center text-sm text-muted-foreground mt-2">
-                  <Button variant="link" onClick={() => navigate('/subscription')} className="p-0 h-auto text-primary">
-                    Upgrade your plan
-                  </Button> to list more properties
-                </p>
-              )}
-            </div>
-          </form>
-        </Card>
+              <Separator />
+              
+              {renderBasicInfo()}
+              
+              <Separator />
+              
+              {renderPropertyDetails()}
+              
+              <Separator />
+              
+              {renderFeatures()}
+              
+              <div className="pt-6">
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full"
+                  disabled={!canListProperties(currentPropertyCount) || isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="animate-spin w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full" />
+                      {isEditing ? "Saving..." : "Creating Listing..."}
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-5 h-5 mr-2" />
+                      {isEditing ? "Save Property" : "List Property"}
+                    </>
+                  )}
+                </Button>
+                
+                {!canListProperties(currentPropertyCount) && (
+                  <p className="text-center text-sm text-muted-foreground mt-2">
+                    <Button variant="link" onClick={() => navigate('/subscription')} className="p-0 h-auto text-primary">
+                      Upgrade your plan
+                    </Button> to list more properties
+                  </p>
+                )}
+              </div>
+            </form>
+          </Card>
+        )}
       </div>
     </div>
   );
