@@ -29,7 +29,7 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
         console.log("🔧 Attempting admin login...");
         
         const { data, error } = await supabase.auth.signInWithPassword({
-          email: 'ankur@furrisic.com',
+          email: 'developer@furrisic.com',
           password: 'FI@1802'
         });
 
