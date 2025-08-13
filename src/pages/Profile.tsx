@@ -21,13 +21,15 @@ import {
   AlertCircle,
   CheckCircle,
   TrendingUp,
-  LogOut
+  LogOut,
+  Home
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import PropertyManager from "@/components/PropertyManager";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -173,10 +175,14 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile">
               <User className="w-4 h-4 mr-2" />
               Profile
+            </TabsTrigger>
+            <TabsTrigger value="properties">
+              <Home className="w-4 h-4 mr-2" />
+              Properties
             </TabsTrigger>
             <TabsTrigger value="subscription">
               <CreditCard className="w-4 h-4 mr-2" />
@@ -304,6 +310,13 @@ const Profile = () => {
                   </div>
                 )}
               </div>
+            </Card>
+          </TabsContent>
+
+          {/* Properties Tab */}
+          <TabsContent value="properties">
+            <Card className="p-6">
+              <PropertyManager onPropertyUpdate={fetchUserProfile} />
             </Card>
           </TabsContent>
 
