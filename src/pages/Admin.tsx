@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { adminSupabase } from "@/lib/adminSupabase";
 import AdminAuth from "@/components/AdminAuth";
 
 const Admin = () => {
@@ -53,22 +54,18 @@ const Admin = () => {
 
   const loadData = async () => {
     try {
-      console.log('🔧 Admin Debug: Loading data...');
+      console.log('🔧 Admin Debug: Loading data with admin client...');
       
-      // Check current user authentication
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('🔧 Admin Debug: Current user:', user?.email);
-      
-      // Load users
-      const { data: usersData } = await supabase
+      // Load users using admin client
+      const { data: usersData } = await adminSupabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
       console.log('🔧 Admin Debug: Users loaded:', usersData?.length);
 
-      // Load properties with detailed logging
-      const { data: propertiesData, error: propertiesError } = await supabase
+      // Load properties with detailed logging using admin client
+      const { data: propertiesData, error: propertiesError } = await adminSupabase
         .from('properties')
         .select(`
           *,
@@ -81,18 +78,18 @@ const Admin = () => {
         error: propertiesError
       });
 
-      // Load stats with detailed logging
-      const { count: userCount } = await supabase
+      // Load stats with detailed logging using admin client
+      const { count: userCount } = await adminSupabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
-      const { count: propertyCount } = await supabase
+      const { count: propertyCount } = await adminSupabase
         .from('properties')
         .select('*', { count: 'exact', head: true });
 
       console.log('🔧 Admin Debug: Total properties count:', propertyCount);
 
-      const { count: pendingCount, error: pendingError } = await supabase
+      const { count: pendingCount, error: pendingError } = await adminSupabase
         .from('properties')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
@@ -102,7 +99,7 @@ const Admin = () => {
         error: pendingError
       });
 
-      const { count: matchCount } = await supabase
+      const { count: matchCount } = await adminSupabase
         .from('matches')
         .select('*', { count: 'exact', head: true });
 
@@ -148,7 +145,7 @@ const Admin = () => {
 
   const handleApproveProperty = async (propertyId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await adminSupabase
         .from('properties')
         .update({ status: 'approved' })
         .eq('id', propertyId);
@@ -171,7 +168,7 @@ const Admin = () => {
 
   const handleRejectProperty = async (propertyId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await adminSupabase
         .from('properties')
         .update({ status: 'rejected' })
         .eq('id', propertyId);
@@ -194,7 +191,7 @@ const Admin = () => {
 
   const handleDeleteProperty = async (propertyId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await adminSupabase
         .from('properties')
         .delete()
         .eq('id', propertyId);

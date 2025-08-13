@@ -25,20 +25,10 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
 
     try {
       if (password === "BenIsaac") {
-        // Sign in as admin user
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: 'admin@propswipes.com',
-          password: 'admin123password' // Default admin password
-        });
-
-        if (error) {
-          console.error('Admin auth error:', error);
-          setError("Authentication failed. Please try again.");
-          return;
-        }
-
-        console.log('🔧 Admin signed in:', data.user?.email);
+        // For admin access, we'll use a special admin session
+        // Create a temporary admin session marker
         localStorage.setItem("admin-authenticated", "true");
+        localStorage.setItem("admin-session-email", "admin@propswipes.com");
         
         toast({
           title: "Admin Access Granted",
