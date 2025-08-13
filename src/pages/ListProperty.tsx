@@ -281,6 +281,7 @@ const ListProperty = () => {
         toast({
           title: "Property Updated Successfully! 🏠",
           description: "Your property changes are pending admin approval!",
+          duration: 5000
         });
       } else {
         // Create new property
@@ -327,6 +328,7 @@ const ListProperty = () => {
         toast({
           title: "Property Listed Successfully! 🏠",
           description: "Your property is pending approval and will be live soon!",
+          duration: 5000
         });
       }
 
