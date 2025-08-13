@@ -140,28 +140,54 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
           {properties.map((property) => (
             <Card key={property.id} className="overflow-hidden">
               <div className="flex">
-                <div className="relative w-48 flex-shrink-0">
-                  {property.images && property.images.length > 0 ? (
-                    <img 
-                      src={property.images[0]} 
-                      alt={property.title}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-muted flex items-center justify-center">
-                      <Home className="w-8 h-8 text-muted-foreground" />
+                {/* Left Side - Image and Buttons */}
+                <div className="w-48 flex-shrink-0 flex flex-col">
+                  <div className="relative">
+                    {property.images && property.images.length > 0 ? (
+                      <img 
+                        src={property.images[0]} 
+                        alt={property.title}
+                        className="w-full h-40 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-40 bg-muted flex items-center justify-center">
+                        <Home className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 right-3">
+                      {getStatusBadge(property.status)}
                     </div>
-                  )}
-                  <div className="absolute top-3 right-3">
-                    {getStatusBadge(property.status)}
+                  </div>
+                  
+                  {/* Buttons below image */}
+                  <div className="p-3 space-y-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleView(property)}
+                      className="w-full h-8 text-xs"
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      View
+                    </Button>
+                    
+                    <Button
+                      size="sm"
+                      onClick={() => handleEdit(property)}
+                      className="w-full h-8 text-xs"
+                    >
+                      <Edit className="w-3 h-3 mr-1" />
+                      Edit
+                    </Button>
                   </div>
                 </div>
                 
+                {/* Right Side - All Content */}
                 <div className="flex-1 p-6 min-w-0">
-                  <div className="flex flex-col h-full">
+                  <div className="flex flex-col h-full justify-between">
                     {/* Header Section */}
-                    <div className="flex-1 space-y-3">
-                      <h4 className="font-semibold text-xl text-foreground line-clamp-1">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-xl text-foreground line-clamp-2">
                         {property.title}
                       </h4>
                       
@@ -178,8 +204,8 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                       </div>
                     </div>
                     
-                    {/* Features Section - with wrapping */}
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground py-4">
+                    {/* Features Section */}
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground mt-4">
                       {property.bedrooms && (
                         <div className="flex items-center gap-2">
                           <Bed className="w-4 h-4" />
@@ -198,28 +224,6 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                           <span>{property.square_feet.toLocaleString()} sq ft</span>
                         </div>
                       )}
-                    </div>
-                    
-                    {/* Buttons Section */}
-                    <div className="flex gap-3 pt-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleView(property)}
-                        className="flex-1 h-9"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        onClick={() => handleEdit(property)}
-                        className="flex-1 h-9"
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
                     </div>
                   </div>
                 </div>
