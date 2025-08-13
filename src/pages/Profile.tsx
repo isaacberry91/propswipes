@@ -20,7 +20,8 @@ import {
   Smartphone,
   AlertCircle,
   CheckCircle,
-  TrendingUp
+  TrendingUp,
+  LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,7 +32,7 @@ import { useNavigate } from "react-router-dom";
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { subscription, loading, hasUnlimitedLikes, canListProperties, hasAdvancedFilters, hasAnalytics } = useSubscription();
   const [isEditing, setIsEditing] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -127,6 +128,24 @@ const Profile = () => {
 
   const handleUpgradePlan = () => {
     navigate('/subscription');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account.",
+      });
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Error logging out",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading || profileLoading) {
@@ -536,6 +555,24 @@ const Profile = () => {
                   <Button variant="outline" size="sm">
                     View
                   </Button>
+                </div>
+
+                <div className="border-t border-border pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-destructive">Sign Out</h4>
+                      <p className="text-sm text-muted-foreground">Sign out of your PropSwipes account</p>
+                    </div>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={handleLogout}
+                      className="flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Card>
