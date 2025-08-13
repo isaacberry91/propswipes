@@ -16,8 +16,8 @@ serve(async (req) => {
 
     // Get admin credentials from environment variables
     const adminPassword = Deno.env.get('ADMIN_PASSWORD');
-    const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'isaacberry91@yahoo.com';
-    const adminUserPassword = Deno.env.get('ADMIN_USER_PASSWORD') || adminPassword;
+    const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'ankur@furrisic.com';
+    const adminUserPassword = Deno.env.get('ADMIN_USER_PASSWORD') || 'FI@1802';
 
     if (!adminPassword) {
       return new Response(
