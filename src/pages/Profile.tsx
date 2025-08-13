@@ -200,11 +200,11 @@ const Profile = () => {
 
           {/* Profile Tab */}
           <TabsContent value="profile">
-            <Card className="p-6">
+            <Card className="p-6 overflow-hidden">
               <div className="space-y-6">
                 {/* Avatar Section */}
-                <div className="flex items-center gap-6">
-                   <div className="relative">
+                <div className="flex items-start gap-6">
+                   <div className="relative shrink-0">
                      <Avatar className="w-24 h-24">
                        <AvatarImage src={userProfile?.avatar_url} />
                        <AvatarFallback className="text-xl">
@@ -228,16 +228,16 @@ const Profile = () => {
                       </Button>
                     )}
                   </div>
-                   <div>
-                     <h2 className="text-2xl font-bold text-foreground">{userProfile?.display_name || user?.email}</h2>
-                     <p className="text-muted-foreground">{user?.email}</p>
-                     <p className="text-sm text-muted-foreground">{userProfile?.user_type || 'buyer'}</p>
-                     <div className="flex items-center gap-2 mt-2">
-                       <Badge variant={subscription.isActive ? "default" : "secondary"} className="flex items-center gap-1">
+                   <div className="flex-1 min-w-0">
+                     <h2 className="text-2xl font-bold text-foreground truncate">{userProfile?.display_name || user?.email}</h2>
+                     <p className="text-muted-foreground truncate">{user?.email}</p>
+                     <p className="text-sm text-muted-foreground capitalize">{userProfile?.user_type || 'buyer'}</p>
+                     <div className="flex items-center gap-2 mt-2 flex-wrap">
+                       <Badge variant={subscription.isActive ? "default" : "secondary"} className="flex items-center gap-1 shrink-0">
                          {subscription.isActive ? <Crown className="w-3 h-3" /> : <Star className="w-3 h-3" />}
-                         {getTierDisplayName()}
+                         <span className="truncate">{getTierDisplayName()}</span>
                        </Badge>
-                       <Badge variant="outline" className="capitalize">
+                       <Badge variant="outline" className="capitalize shrink-0">
                          {userProfile?.user_type || 'buyer'}
                        </Badge>
                      </div>
@@ -246,28 +246,30 @@ const Profile = () => {
 
                 {/* Profile Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className="space-y-2">
+                   <div className="space-y-2 min-w-0">
                      <Label htmlFor="displayName">Display Name</Label>
                      <Input
                        id="displayName"
                        value={userProfile?.display_name || ''}
                        onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
                        disabled={!isEditing}
+                       className="w-full"
                      />
                    </div>
                    
-                   <div className="space-y-2">
+                   <div className="space-y-2 min-w-0">
                      <Label htmlFor="email">Email</Label>
                      <Input
                        id="email"
                        type="email"
                        value={user?.email || ''}
                        disabled={true}
-                       className="bg-muted"
+                       className="bg-muted w-full"
+                       title={user?.email || ''}
                      />
                    </div>
                    
-                   <div className="space-y-2">
+                   <div className="space-y-2 min-w-0">
                      <Label htmlFor="phone">Phone</Label>
                      <Input
                        id="phone"
@@ -275,10 +277,11 @@ const Profile = () => {
                        onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
                        disabled={!isEditing}
                        placeholder="Enter your phone number"
+                       className="w-full"
                      />
                    </div>
                    
-                   <div className="space-y-2">
+                   <div className="space-y-2 min-w-0">
                      <Label htmlFor="location">Location</Label>
                      <Input
                        id="location"
@@ -286,6 +289,7 @@ const Profile = () => {
                        onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
                        disabled={!isEditing}
                        placeholder="Enter your location"
+                       className="w-full"
                      />
                    </div>
                 </div>
@@ -294,12 +298,13 @@ const Profile = () => {
                    <Label htmlFor="bio">Bio</Label>
                    <textarea
                      id="bio"
-                     className="w-full p-3 border border-border rounded-md bg-background text-foreground disabled:opacity-50"
+                     className="w-full p-3 border border-border rounded-md bg-background text-foreground disabled:opacity-50 resize-none"
                      rows={3}
                      value={userProfile?.bio || ''}
                      onChange={(e) => setUserProfile({...userProfile, bio: e.target.value})}
                      disabled={!isEditing}
                      placeholder="Tell others about yourself and your real estate interests..."
+                     style={{ minHeight: '80px', maxHeight: '120px' }}
                    />
                  </div>
                 {isEditing && (
