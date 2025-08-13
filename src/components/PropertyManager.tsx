@@ -208,7 +208,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
         }
       }
 
-      // Update property in database
+      // Update property in database - set status to pending for admin review
       const { error } = await supabase
         .from('properties')
         .update({
@@ -225,6 +225,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
           description: editingProperty.description,
           images: updatedImageUrls,
           amenities: editingProperty.amenities,
+          status: 'pending',
           updated_at: new Date().toISOString()
         })
         .eq('id', editingProperty.id);
@@ -233,7 +234,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
 
       toast({
         title: "Property updated",
-        description: "Your property has been updated successfully.",
+        description: "Your property has been updated and is pending admin approval.",
       });
 
       setIsEditDialogOpen(false);
