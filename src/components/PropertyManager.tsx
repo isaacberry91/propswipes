@@ -83,7 +83,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
 
   const handleEdit = (property: Property) => {
     // Navigate to ListProperty page with property data for editing
-    navigate('/list-property', { 
+    navigate('/list', { 
       state: { 
         editingProperty: property,
         isEditing: true 
