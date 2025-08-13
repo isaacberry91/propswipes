@@ -169,7 +169,14 @@ const ListProperty = () => {
     if (!formData.address) missingFields.push("Address");
     if (!formData.city) missingFields.push("City");
     if (!formData.state) missingFields.push("State");
-    if (!formData.price) missingFields.push("Price");
+    
+    // Check price or monthly rent based on listing type
+    if (isRental) {
+      if (!formData.monthlyRent) missingFields.push("Monthly Rent");
+    } else {
+      if (!formData.price) missingFields.push("Price");
+    }
+    
     if (!formData.squareFeet) missingFields.push("Square Feet");
     if (!formData.description) missingFields.push("Description");
     
