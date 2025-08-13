@@ -83,7 +83,7 @@ const ListProperty = () => {
         price: editingProperty.price?.toString() || "",
         squareFeet: editingProperty.square_feet?.toString() || "",
         description: editingProperty.description || "",
-        bedrooms: editingProperty.bedrooms?.toString() || "",
+        bedrooms: editingProperty.bedrooms ? (editingProperty.bedrooms >= 5 ? "5+" : editingProperty.bedrooms.toString()) : "",
         bathrooms: editingProperty.bathrooms?.toString() || "",
         parkingSpaces: "",
         yearBuilt: "",
