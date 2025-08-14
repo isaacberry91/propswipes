@@ -40,6 +40,10 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   
   useEffect(() => {
     if (user) {
@@ -152,6 +156,61 @@ const Profile = () => {
         description: "Please try again.",
         variant: "destructive",
         duration: 5000
+      });
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in all password fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure both passwords are identical.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password updated",
+        description: "Your password has been successfully changed."
+      });
+
+      // Reset form
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setChangingPassword(false);
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast({
+        title: "Error changing password",
+        description: error.message || "Please try again or contact support.",
+        variant: "destructive"
       });
     }
   };
@@ -589,14 +648,52 @@ const Profile = () => {
             <Card className="p-6">
               <h3 className="text-xl font-semibold text-foreground mb-6">Security</h3>
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-foreground">Change Password</h4>
-                    <p className="text-sm text-muted-foreground">Update your account password</p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-foreground">Change Password</h4>
+                      <p className="text-sm text-muted-foreground">Update your account password</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setChangingPassword(!changingPassword)}
+                    >
+                      {changingPassword ? 'Cancel' : 'Change'}
+                    </Button>
                   </div>
-                  <Button variant="outline" size="sm">
-                    Change
-                  </Button>
+                  
+                  {changingPassword && (
+                    <div className="bg-muted/50 p-4 rounded-lg space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="newPassword">New Password</Label>
+                        <Input
+                          id="newPassword"
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Confirm new password"
+                        />
+                      </div>
+                      <Button 
+                        onClick={handleChangePassword}
+                        className="w-full"
+                        disabled={!newPassword || !confirmPassword}
+                      >
+                        Update Password
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex items-center justify-between">
