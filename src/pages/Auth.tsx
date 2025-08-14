@@ -374,7 +374,7 @@ const Auth = () => {
                 <div className="space-y-3">
                   <Button
                     type="button"
-                    className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3"
+                    className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3 bg-black text-white hover:bg-black/90"
                     onClick={() => handleSocialSignIn('apple')}
                     disabled={loading}
                   >
@@ -446,7 +446,7 @@ const Auth = () => {
                 <div className="space-y-3">
                   <Button
                     type="button"
-                    className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3"
+                    className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3 bg-black text-white hover:bg-black/90"
                     onClick={() => handleSocialSignIn('apple')}
                     disabled={loading}
                   >
