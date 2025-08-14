@@ -119,14 +119,14 @@ serve(async (req) => {
       console.error('Error deleting push tokens:', pushTokensError);
     }
 
-    // Step 2: Mark profile as deleted (soft delete)
+    // Step 2: Delete the profile record completely
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .update({ deleted_at: new Date().toISOString() })
+      .delete()
       .eq('user_id', user.id);
 
     if (profileError) {
-      console.error('Error marking profile as deleted:', profileError);
+      console.error('Error deleting profile:', profileError);
       throw new Error('Failed to delete profile data');
     }
 
