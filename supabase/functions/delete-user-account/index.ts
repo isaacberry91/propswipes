@@ -45,7 +45,60 @@ serve(async (req) => {
 
     console.log('Deleting account for user:', user.id);
 
-    // Step 1: Mark profile as deleted (soft delete)
+    // Step 1: Delete all user-related data first
+    console.log('Cleaning up user data...');
+    
+    // Delete user properties
+    const { error: propertiesError } = await supabaseAdmin
+      .from('properties')
+      .delete()
+      .eq('owner_id', user.id);
+
+    if (propertiesError) {
+      console.error('Error deleting properties:', propertiesError);
+    }
+
+    // Delete user likes
+    const { error: likesError } = await supabaseAdmin
+      .from('likes')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (likesError) {
+      console.error('Error deleting likes:', likesError);
+    }
+
+    // Delete user matches
+    const { error: matchesError } = await supabaseAdmin
+      .from('matches')
+      .delete()
+      .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+
+    if (matchesError) {
+      console.error('Error deleting matches:', matchesError);
+    }
+
+    // Delete user messages
+    const { error: messagesError } = await supabaseAdmin
+      .from('messages')
+      .delete()
+      .eq('sender_id', user.id);
+
+    if (messagesError) {
+      console.error('Error deleting messages:', messagesError);
+    }
+
+    // Delete user subscriptions
+    const { error: subscribersError } = await supabaseAdmin
+      .from('subscribers')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (subscribersError) {
+      console.error('Error deleting subscriptions:', subscribersError);
+    }
+
+    // Step 2: Mark profile as deleted (soft delete)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({ deleted_at: new Date().toISOString() })
@@ -56,7 +109,7 @@ serve(async (req) => {
       throw new Error('Failed to delete profile data');
     }
 
-    // Step 2: Delete user from auth using admin client
+    // Step 3: Delete user from auth using admin client
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
     if (deleteError) {
