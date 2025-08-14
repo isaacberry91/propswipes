@@ -28,6 +28,9 @@ const config: CapacitorConfig = {
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP"
     },
+    Browser: {
+      presentationStyle: 'popover'
+    },
     NativePurchases: {
       androidPublicKey: '',
       usesStoreKit2IfAvailable: false

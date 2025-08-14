@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Phone, Mail, Lock, User, MapPin, Users, ArrowLeft, Apple } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -201,29 +203,67 @@ const Auth = () => {
     console.log(`🔐 PropSwipes Auth: Starting ${provider} sign in...`);
 
     try {
-      const isCapacitor = window.location.protocol === 'capacitor:';
-      const redirectUrl = isCapacitor 
-        ? 'https://c53d60b9-f832-47ac-aabd-6a1765b647a5.lovableproject.com/discover'
-        : `${window.location.origin}/discover`;
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: redirectUrl,
-        }
-      });
-
-      if (error) {
-        console.error(`🔐 PropSwipes Auth: ${provider} sign in error:`, error);
-        toast({
-          title: "Sign in failed",
-          description: error.message,
-          variant: "destructive",
-          duration: 5000
+      const isNative = Capacitor.isNativePlatform();
+      
+      if (isNative) {
+        // For mobile apps, use in-app browser
+        const redirectUrl = 'https://c53d60b9-f832-47ac-aabd-6a1765b647a5.lovableproject.com/discover';
+        
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: redirectUrl,
+          }
         });
+
+        if (error) {
+          console.error(`🔐 PropSwipes Auth: ${provider} sign in error:`, error);
+          toast({
+            title: "Sign in failed",
+            description: error.message,
+            variant: "destructive",
+            duration: 5000
+          });
+          return;
+        }
+
+        if (data.url) {
+          console.log(`🔐 PropSwipes Auth: Opening ${provider} OAuth URL in in-app browser`);
+          // Open OAuth URL in in-app browser
+          await Browser.open({
+            url: data.url,
+            presentationStyle: 'popover',
+            toolbarColor: '#000000'
+          });
+          
+          // Listen for the redirect back to the app
+          Browser.addListener('browserFinished', () => {
+            console.log('🔐 PropSwipes Auth: OAuth browser finished');
+            // The auth state will be updated automatically by the auth listener
+          });
+        }
       } else {
-        console.log(`🔐 PropSwipes Auth: ${provider} sign in initiated successfully`);
-        // OAuth redirect will handle the rest
+        // For web, use regular OAuth flow
+        const redirectUrl = `${window.location.origin}/discover`;
+        
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: redirectUrl,
+          }
+        });
+
+        if (error) {
+          console.error(`🔐 PropSwipes Auth: ${provider} sign in error:`, error);
+          toast({
+            title: "Sign in failed",
+            description: error.message,
+            variant: "destructive",
+            duration: 5000
+          });
+        } else {
+          console.log(`🔐 PropSwipes Auth: ${provider} sign in initiated successfully`);
+        }
       }
     } catch (error) {
       console.error(`🔐 PropSwipes Auth: Unexpected ${provider} error:`, error);
