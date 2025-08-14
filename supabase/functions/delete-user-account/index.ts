@@ -119,29 +119,21 @@ serve(async (req) => {
       console.error('Error deleting push tokens:', pushTokensError);
     }
 
-    // Step 2: Delete the profile record completely
+    // Step 2: Mark profile as deleted (soft delete)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('user_id', user.id);
 
     if (profileError) {
-      console.error('Error deleting profile:', profileError);
-      throw new Error('Failed to delete profile data');
+      console.error('Error marking profile as deleted:', profileError);
+      throw new Error('Failed to soft delete profile');
     }
 
-    // Step 3: Delete user from auth using admin client
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
-
-    if (deleteError) {
-      console.error('Error deleting user from auth:', deleteError);
-      throw new Error('Failed to delete user account');
-    }
-
-    console.log('Successfully deleted user account:', user.id);
+    console.log('Successfully soft deleted user account:', user.id);
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Account deleted successfully' }),
+      JSON.stringify({ success: true, message: 'Account deactivated successfully. You can reactivate by contacting support.' }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }

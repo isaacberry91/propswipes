@@ -236,8 +236,8 @@ const Profile = () => {
       }
 
       toast({
-        title: "Account deleted successfully",
-        description: "Your account and all associated data have been permanently deleted.",
+        title: "Account deactivated successfully",
+        description: data?.message || "Your account has been deactivated. Contact support to reactivate.",
         duration: 5000
       });
       
