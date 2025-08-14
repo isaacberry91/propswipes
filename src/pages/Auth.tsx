@@ -370,7 +370,8 @@ const Auth = () => {
               </TabsList>
               
               <TabsContent value="signin" className="space-y-4">
-                {/* Social Sign In Buttons */}
+                {/* Social Sign In Buttons - Temporarily disabled for development */}
+                {false && (
                 <div className="space-y-3">
                   <Button
                     type="button"
@@ -400,6 +401,7 @@ const Auth = () => {
                     Continue with Facebook
                   </Button>
                 </div>
+                )}
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -460,7 +462,8 @@ const Auth = () => {
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4">
-                {/* Social Sign Up Buttons */}
+                {/* Social Sign Up Buttons - Temporarily disabled for development */}
+                {false && (
                 <div className="space-y-3">
                   <Button
                     type="button"
@@ -490,6 +493,7 @@ const Auth = () => {
                     Sign up with Facebook
                   </Button>
                 </div>
+                )}
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
