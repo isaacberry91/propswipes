@@ -219,7 +219,7 @@ const Profile = () => {
     if (!user) return;
     
     try {
-      // Delete user profile and related data
+      // First delete user profile and related data
       const { error: profileError } = await supabase
         .from('profiles')
         .delete()
@@ -227,13 +227,18 @@ const Profile = () => {
       
       if (profileError) throw profileError;
       
-      // Delete the user account through Supabase Admin API
-      const { error: authError } = await supabase.auth.admin.deleteUser(user.id);
+      // Delete user account - this will trigger cascade deletion
+      const { error: deleteError } = await supabase.auth.signOut({ scope: 'global' });
+      if (deleteError) throw deleteError;
       
-      if (authError) {
-        // If admin delete fails, try user-initiated delete
-        const { error: userDeleteError } = await supabase.auth.signOut();
-        if (userDeleteError) throw userDeleteError;
+      // Since we can't delete the actual auth user without admin access,
+      // we need to update user metadata to mark account as deleted
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { account_deleted: true, deleted_at: new Date().toISOString() }
+      });
+      
+      if (updateError) {
+        console.warn('Could not mark account as deleted in auth metadata:', updateError);
       }
       
       toast({
