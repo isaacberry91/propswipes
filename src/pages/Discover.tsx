@@ -128,7 +128,7 @@ const Discover = () => {
       await supabase
         .from('property_swipes')
         .insert({
-          user_id: userProfile.id,
+          user_id: user.id,
           property_id: property.id,
           is_liked: direction === 'right'
         });
