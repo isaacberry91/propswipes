@@ -29,8 +29,47 @@ const Chat = () => {
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
+      fetchMessages();
     }
   }, [user, matchId]);
+
+  useEffect(() => {
+    if (!matchId) return;
+
+    // Set up real-time subscription for new messages
+    const channel = supabase
+      .channel('messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `match_id=eq.${matchId}`
+        },
+        (payload) => {
+          const newMessage = payload.new;
+          // Only add to local state if it's not from current user
+          const isFromCurrentUser = newMessage.sender_id === match?.user.profileId;
+          if (!isFromCurrentUser) {
+            setMessages(prev => [...prev, {
+              id: newMessage.id,
+              senderId: newMessage.sender_id,
+              text: newMessage.content,
+              timestamp: new Date(newMessage.created_at).toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })
+            }]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [matchId, match?.user.profileId]);
 
   const fetchMatchData = async () => {
     if (!user || !matchId) return;
@@ -160,6 +199,44 @@ const Chat = () => {
       navigate('/matches');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMessages = async () => {
+    if (!matchId) return;
+
+    try {
+      const { data: messagesData, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('match_id', matchId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching messages:', error);
+        return;
+      }
+
+      // Get current user's profile ID to determine which messages are from "me"
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user?.id)
+        .single();
+
+      const formattedMessages = messagesData?.map(msg => ({
+        id: msg.id,
+        senderId: msg.sender_id === userProfile?.id ? "me" : msg.sender_id,
+        text: msg.content,
+        timestamp: new Date(msg.created_at).toLocaleTimeString([], { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        })
+      })) || [];
+
+      setMessages(formattedMessages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
     }
   };
 
