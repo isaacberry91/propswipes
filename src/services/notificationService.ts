@@ -12,6 +12,7 @@ interface NotificationData {
 
 class NotificationService {
   private initialized = false;
+  private currentToken: string | null = null;
 
   async initialize() {
     if (!Capacitor.isNativePlatform() || this.initialized) {
@@ -43,6 +44,7 @@ class NotificationService {
     // On success, register the token with your backend
     PushNotifications.addListener('registration', async (token: Token) => {
       console.log('📱 Push registration success, token:', token.value);
+      this.currentToken = token.value;
       await this.registerTokenWithBackend(token.value);
     });
 
@@ -184,6 +186,14 @@ class NotificationService {
       }
     } catch (error) {
       console.error('📱 Error removing push token:', error);
+    }
+  }
+
+  // Method to register token when user logs in
+  async registerCurrentToken() {
+    if (this.currentToken && Capacitor.isNativePlatform()) {
+      console.log('📱 Registering current token with new user session');
+      await this.registerTokenWithBackend(this.currentToken);
     }
   }
 }

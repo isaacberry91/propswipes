@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { notificationService } from "@/services/notificationService";
 
 interface AuthContextType {
   user: User | null;
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('🔐 PropSwipes Auth: Auth state changed', { 
           event, 
           hasSession: !!session,
@@ -31,6 +32,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Register push token when user signs in
+        if (session?.user && event === 'SIGNED_IN') {
+          setTimeout(() => {
+            notificationService.registerCurrentToken();
+          }, 1000); // Small delay to ensure session is fully established
+        }
       }
     );
 
@@ -46,6 +54,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Register push token for existing session
+      if (session?.user) {
+        setTimeout(() => {
+          notificationService.registerCurrentToken();
+        }, 2000); // Slightly longer delay for initial session
+      }
     }).catch((error) => {
       console.error('🔐 PropSwipes Auth: Error getting initial session', error);
       setLoading(false);
