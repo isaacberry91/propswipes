@@ -3,10 +3,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, MapPin, Users, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
 
 interface Match {
   id: string;
@@ -45,20 +44,20 @@ const Matches = () => {
     
     setLoading(true);
     try {
-      // Get user's profile ID first
-      const { data: profile } = await supabase
+      // Get user's profile first
+      const { data: userProfile } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, user_type')
         .eq('user_id', user.id)
         .single();
 
-      if (!profile) {
+      if (!userProfile) {
         setLoading(false);
         return;
       }
 
       // Fetch matches where user is either buyer or seller
-      const { data: matchData, error } = await supabase
+      const { data: matchesData, error } = await supabase
         .from('matches')
         .select(`
           id,
@@ -66,45 +65,46 @@ const Matches = () => {
           property_id,
           buyer_id,
           seller_id,
-          properties (
+          properties!inner (
             id,
             title,
-            price,
             city,
             state,
+            price,
             images
           ),
-          buyer_profile:buyer_id (
+          buyer_profile:profiles!buyer_id (
             id,
             display_name,
             avatar_url,
             user_type
           ),
-          seller_profile:seller_id (
+          seller_profile:profiles!seller_id (
             id,
             display_name,
             avatar_url,
             user_type
           )
         `)
-        .or(`buyer_id.eq.${profile.id},seller_id.eq.${profile.id}`);
+        .or(`buyer_id.eq.${userProfile.id},seller_id.eq.${userProfile.id}`)
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching matches:', error);
         toast({
           title: "Error loading matches",
-          description: "Could not load your matches. Please try again.",
+          description: "There was an issue loading your matches.",
           variant: "destructive",
         });
-        setLoading(false);
         return;
       }
 
       // Transform the data to match our interface
-      const transformedMatches: Match[] = (matchData || []).map((match: any) => {
-        const otherUser = match.buyer_id === profile.id ? match.seller_profile : match.buyer_profile;
+      const transformedMatches = matchesData?.map((match: any) => {
+        const isUserBuyer = match.buyer_id === userProfile.id;
+        const otherUser = isUserBuyer ? match.seller_profile : match.buyer_profile;
         const property = match.properties;
-        
+
         return {
           id: match.id,
           property: {
@@ -119,22 +119,22 @@ const Matches = () => {
             image: property.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"
           },
           matchedUser: {
-            name: otherUser?.display_name || "Unknown User",
+            name: otherUser?.display_name || 'Unknown User',
             avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-            type: otherUser?.user_type === 'seller' ? 'Property Owner' : 'Buyer'
+            type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer'
           },
-          lastMessage: "Start a conversation...",
+          lastMessage: "Start the conversation!",
           matchedAt: new Date(match.created_at).toLocaleDateString(),
           unreadCount: 0
         };
-      });
+      }) || [];
 
       setMatches(transformedMatches);
     } catch (error) {
       console.error('Error:', error);
       toast({
         title: "Error",
-        description: "Something went wrong while loading matches.",
+        description: "Failed to load matches.",
         variant: "destructive",
       });
     } finally {
@@ -167,14 +167,9 @@ const Matches = () => {
             <p className="text-muted-foreground mb-4">
               Start swiping to find people interested in the same properties!
             </p>
-            <div className="space-y-2">
-              <Button variant="gradient" onClick={() => navigate('/discover')}>
-                Start Discovering
-              </Button>
-              <Button variant="outline" onClick={fetchMatches}>
-                Refresh
-              </Button>
-            </div>
+            <Button variant="gradient" onClick={() => navigate('/discover')}>
+              Start Discovering
+            </Button>
           </Card>
         ) : (
           <div className="space-y-4">

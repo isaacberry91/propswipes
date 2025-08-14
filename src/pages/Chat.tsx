@@ -7,62 +7,159 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 
 const Chat = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showPropertyDetails, setShowPropertyDetails] = useState(false);
+  const [match, setMatch] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // TODO: Fetch actual match data from API
-  const match = {
-    id: matchId,
-    user: {
-      name: "Sarah Chen",
-      avatar: "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-      type: "Real Estate Agent"
-    },
-    property: {
-      title: "Modern Downtown Condo",
-      location: "Downtown Seattle",
-      price: "$850,000",
-      image: "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"
+  useEffect(() => {
+    if (user && matchId) {
+      fetchMatchData();
+    }
+  }, [user, matchId]);
+
+  const fetchMatchData = async () => {
+    if (!user || !matchId) return;
+    
+    setLoading(true);
+    try {
+      // Get user's profile first
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id, user_type')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!userProfile) {
+        toast({
+          title: "Error",
+          description: "Could not find your profile.",
+          variant: "destructive",
+        });
+        navigate('/matches');
+        return;
+      }
+
+      // Fetch match data
+      const { data: matchData, error } = await supabase
+        .from('matches')
+        .select(`
+          id,
+          created_at,
+          property_id,
+          buyer_id,
+          seller_id,
+          properties!inner (
+            id,
+            title,
+            city,
+            state,
+            price,
+            images,
+            bedrooms,
+            bathrooms,
+            square_feet,
+            property_type,
+            amenities,
+            address,
+            description
+          ),
+          buyer_profile:profiles!buyer_id (
+            id,
+            display_name,
+            avatar_url,
+            user_type,
+            bio,
+            phone,
+            location
+          ),
+          seller_profile:profiles!seller_id (
+            id,
+            display_name,
+            avatar_url,
+            user_type,
+            bio,
+            phone,
+            location
+          )
+        `)
+        .eq('id', matchId)
+        .or(`buyer_id.eq.${userProfile.id},seller_id.eq.${userProfile.id}`)
+        .single();
+
+      if (error || !matchData) {
+        console.error('Error fetching match:', error);
+        toast({
+          title: "Match not found",
+          description: "This match could not be found or you don't have access to it.",
+          variant: "destructive",
+        });
+        navigate('/matches');
+        return;
+      }
+
+      // Transform the data
+      const isUserBuyer = matchData.buyer_id === userProfile.id;
+      const otherUser = isUserBuyer ? matchData.seller_profile : matchData.buyer_profile;
+      const property = matchData.properties;
+
+      const transformedMatch = {
+        id: matchData.id,
+        user: {
+          name: otherUser?.display_name || 'Unknown User',
+          avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+          type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer',
+          bio: otherUser?.bio || 'No bio available',
+          phone: otherUser?.phone || 'No phone provided',
+          location: otherUser?.location || 'Location not provided'
+        },
+        property: {
+          title: property.title,
+          location: `${property.city}, ${property.state}`,
+          price: new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+          }).format(property.price),
+          image: property.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          sqft: property.square_feet,
+          type: property.property_type,
+          amenities: property.amenities || [],
+          address: property.address,
+          description: property.description
+        }
+      };
+
+      setMatch(transformedMatch);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load match data.",
+        variant: "destructive",
+      });
+      navigate('/matches');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // TODO: Fetch actual user and property data from API
-  const userProfile = {
-    name: "Sarah Chen",
-    avatar: "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-    type: "Real Estate Agent",
-    verified: true,
-    company: "Premier Realty",
-    position: "Senior Agent",
-    email: "sarah.chen@premierrealty.com",
-    phone: "(555) 123-4567",
-    bio: "Experienced real estate professional with 8+ years helping clients find their perfect home.",
-    memberSince: "January 2020"
-  };
-  
-  const propertyDetails = {
-    title: "Modern Downtown Condo",
-    image: "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-    bedrooms: "2",
-    bathrooms: "2",
-    sqft: "1,200",
-    yearBuilt: "2019",
-    location: "Downtown Seattle, WA",
-    price: "$850,000",
-    amenities: ["Pool", "Gym", "Concierge", "Rooftop Deck"],
-    features: ["Hardwood Floors", "Stainless Appliances", "City Views"],
-    hoaFees: "$350/month",
-    parking: "1 Garage Space",
-    petPolicy: "Cats & Dogs Allowed"
-  };
+  // User profile and property details are now loaded from the match data
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -82,6 +179,17 @@ const Chat = () => {
     setMessages(prev => [...prev, newMessage]);
     setMessage("");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading chat...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!match) {
     return (
@@ -226,46 +334,35 @@ const Chat = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <Avatar className="w-12 h-12">
-                <AvatarImage src={userProfile.avatar} />
-                <AvatarFallback>SC</AvatarFallback>
+                <AvatarImage src={match.user.avatar} />
+                <AvatarFallback>{match.user.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
                 <div className="flex items-center gap-2">
-                  <span>{userProfile.name}</span>
-                  {userProfile.verified && (
-                    <Badge variant="secondary" className="text-xs">Verified</Badge>
-                  )}
+                  <span>{match.user.name}</span>
                 </div>
-                <p className="text-sm text-muted-foreground font-normal">{userProfile.type}</p>
+                <p className="text-sm text-muted-foreground font-normal">{match.user.type}</p>
               </div>
             </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <Building className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">Company</span>
-                </div>
-                <p className="text-sm text-muted-foreground pl-6">{userProfile.company}</p>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <User className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-medium">Position</span>
-                </div>
-                <p className="text-sm text-muted-foreground pl-6">{userProfile.position}</p>
-              </div>
-            </div>
-
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
-                <Mail className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium">Email</span>
+                <User className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">Type</span>
               </div>
-              <p className="text-sm text-muted-foreground pl-6">{userProfile.email}</p>
+              <p className="text-sm text-muted-foreground pl-6">{match.user.type}</p>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium">Location</span>
+              </div>
+              <p className="text-sm text-muted-foreground pl-6">{match.user.location}</p>
+            </div>
             </div>
 
             <div className="space-y-2">
@@ -273,16 +370,12 @@ const Chat = () => {
                 <Phone className="w-4 h-4 text-muted-foreground" />
                 <span className="font-medium">Phone</span>
               </div>
-              <p className="text-sm text-muted-foreground pl-6">{userProfile.phone}</p>
+              <p className="text-sm text-muted-foreground pl-6">{match.user.phone}</p>
             </div>
 
             <div className="space-y-2">
               <h4 className="font-medium text-sm">About</h4>
-              <p className="text-sm text-muted-foreground">{userProfile.bio}</p>
-            </div>
-
-            <div className="text-xs text-muted-foreground pt-2 border-t">
-              Member since {userProfile.memberSince}
+              <p className="text-sm text-muted-foreground">{match.user.bio}</p>
             </div>
           </div>
         </DialogContent>
@@ -292,32 +385,28 @@ const Chat = () => {
       <Dialog open={showPropertyDetails} onOpenChange={setShowPropertyDetails}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{propertyDetails.title}</DialogTitle>
+            <DialogTitle>{match.property.title}</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6">
             <img 
-              src={propertyDetails.image} 
-              alt={propertyDetails.title}
+              src={match.property.image} 
+              alt={match.property.title}
               className="w-full h-48 object-cover rounded-lg"
             />
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="text-center">
-                <p className="text-lg font-semibold text-foreground">{propertyDetails.bedrooms}</p>
+                <p className="text-lg font-semibold text-foreground">{match.property.bedrooms}</p>
                 <p className="text-sm text-muted-foreground">Bedrooms</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-semibold text-foreground">{propertyDetails.bathrooms}</p>
+                <p className="text-lg font-semibold text-foreground">{match.property.bathrooms}</p>
                 <p className="text-sm text-muted-foreground">Bathrooms</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-semibold text-foreground">{propertyDetails.sqft}</p>
+                <p className="text-lg font-semibold text-foreground">{match.property.sqft ? new Intl.NumberFormat().format(match.property.sqft) : 'N/A'}</p>
                 <p className="text-sm text-muted-foreground">Sq Ft</p>
-              </div>
-              <div className="text-center">
-                <p className="text-lg font-semibold text-foreground">{propertyDetails.yearBuilt}</p>
-                <p className="text-sm text-muted-foreground">Year Built</p>
               </div>
             </div>
 
@@ -326,42 +415,37 @@ const Chat = () => {
                 <h4 className="font-semibold mb-2">Location & Price</h4>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                   <MapPin className="w-4 h-4" />
-                  {propertyDetails.location}
+                  {match.property.location}
                 </div>
-                <p className="text-xl font-bold text-primary">{propertyDetails.price}</p>
+                <p className="text-xl font-bold text-primary">{match.property.price}</p>
               </div>
 
               <div>
-                <h4 className="font-semibold mb-2">Amenities</h4>
-                <div className="flex flex-wrap gap-2">
-                  {propertyDetails.amenities.map((amenity, index) => (
-                    <Badge key={index} variant="secondary">{amenity}</Badge>
-                  ))}
-                </div>
+                <h4 className="font-semibold mb-2">Type</h4>
+                <Badge variant="secondary">{match.property.type}</Badge>
               </div>
 
-              <div>
-                <h4 className="font-semibold mb-2">Features</h4>
-                <div className="flex flex-wrap gap-2">
-                  {propertyDetails.features.map((feature, index) => (
-                    <Badge key={index} variant="outline">{feature}</Badge>
-                  ))}
+              {match.property.amenities && match.property.amenities.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-2">Amenities</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {match.property.amenities.map((amenity, index) => (
+                      <Badge key={index} variant="outline">{amenity}</Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              {match.property.description && (
                 <div>
-                  <span className="font-medium">HOA Fees:</span>
-                  <span className="ml-2 text-muted-foreground">{propertyDetails.hoaFees}</span>
+                  <h4 className="font-semibold mb-2">Description</h4>
+                  <p className="text-sm text-muted-foreground">{match.property.description}</p>
                 </div>
-                <div>
-                  <span className="font-medium">Parking:</span>
-                  <span className="ml-2 text-muted-foreground">{propertyDetails.parking}</span>
-                </div>
-                <div>
-                  <span className="font-medium">Pet Policy:</span>
-                  <span className="ml-2 text-muted-foreground">{propertyDetails.petPolicy}</span>
-                </div>
+              )}
+
+              <div className="text-sm">
+                <span className="font-medium">Address:</span>
+                <span className="ml-2 text-muted-foreground">{match.property.address}</span>
               </div>
             </div>
           </div>
