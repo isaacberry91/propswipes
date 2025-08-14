@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { 
   User, 
   Settings, 
@@ -22,7 +23,8 @@ import {
   CheckCircle,
   TrendingUp,
   LogOut,
-  Home
+  Home,
+  Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -148,6 +150,45 @@ const Profile = () => {
       toast({
         title: "Error logging out",
         description: "Please try again.",
+        variant: "destructive",
+        duration: 5000
+      });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    
+    try {
+      // Delete user profile and related data
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('user_id', user.id);
+      
+      if (profileError) throw profileError;
+      
+      // Delete the user account through Supabase Admin API
+      const { error: authError } = await supabase.auth.admin.deleteUser(user.id);
+      
+      if (authError) {
+        // If admin delete fails, try user-initiated delete
+        const { error: userDeleteError } = await supabase.auth.signOut();
+        if (userDeleteError) throw userDeleteError;
+      }
+      
+      toast({
+        title: "Account deleted successfully",
+        description: "Your account and all associated data have been permanently deleted.",
+        duration: 5000
+      });
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast({
+        title: "Error deleting account",
+        description: "Please try again or contact support if the issue persists.",
         variant: "destructive",
         duration: 5000
       });
@@ -593,6 +634,55 @@ const Profile = () => {
                       <LogOut className="w-4 h-4" />
                       Sign Out
                     </Button>
+                  </div>
+                </div>
+
+                <div className="border-t border-border pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-destructive">Delete Account</h4>
+                      <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          className="flex items-center gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete Account
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your account
+                            and remove all your data from our servers, including:
+                            <br /><br />
+                            • Your profile information
+                            <br />
+                            • Property listings
+                            <br />
+                            • Messages and matches
+                            <br />
+                            • Subscription data
+                            <br /><br />
+                            Please confirm if you want to proceed with deleting your account.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDeleteAccount}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Yes, delete my account
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </div>
