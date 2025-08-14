@@ -196,7 +196,7 @@ const Auth = () => {
     }
   };
 
-  const handleSocialSignIn = async (provider: 'google' | 'facebook') => {
+  const handleSocialSignIn = async (provider: 'google' | 'apple') => {
     setLoading(true);
     console.log(`🔐 PropSwipes Auth: Starting ${provider} sign in...`);
 
@@ -370,8 +370,7 @@ const Auth = () => {
               </TabsList>
               
               <TabsContent value="signin" className="space-y-4">
-                {/* Social Sign In Buttons - Temporarily disabled for development */}
-                {false && (
+                {/* Social Sign In Buttons - Google and Apple */}
                 <div className="space-y-3">
                   <Button
                     type="button"
@@ -392,16 +391,15 @@ const Auth = () => {
                     type="button"
                     variant="outline"
                     className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3"
-                    onClick={() => handleSocialSignIn('facebook')}
+                    onClick={() => handleSocialSignIn('apple')}
                     disabled={loading}
                   >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#1877F2">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.042-3.441.219-.937 1.404-5.965 1.404-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.083.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.748-1.378 0 0-.599 2.283-.744 2.845-.269 1.041-1.024 2.35-1.519 3.145 1.14.344 2.356.535 3.623.535 6.624 0 11.99-5.367 11.99-11.99C24.007 5.367 18.641.001 12.017.001z"/>
                     </svg>
-                    Continue with Facebook
+                    Continue with Apple
                   </Button>
                 </div>
-                )}
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -462,8 +460,7 @@ const Auth = () => {
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4">
-                {/* Social Sign Up Buttons - Temporarily disabled for development */}
-                {false && (
+                {/* Social Sign Up Buttons - Google and Apple */}
                 <div className="space-y-3">
                   <Button
                     type="button"
@@ -484,16 +481,15 @@ const Auth = () => {
                     type="button"
                     variant="outline"
                     className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3"
-                    onClick={() => handleSocialSignIn('facebook')}
+                    onClick={() => handleSocialSignIn('apple')}
                     disabled={loading}
                   >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#1877F2">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.042-3.441.219-.937 1.404-5.965 1.404-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.083.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.748-1.378 0 0-.599 2.283-.744 2.845-.269 1.041-1.024 2.35-1.519 3.145 1.14.344 2.356.535 3.623.535 6.624 0 11.99-5.367 11.99-11.99C24.007 5.367 18.641.001 12.017.001z"/>
                     </svg>
-                    Sign up with Facebook
+                    Sign up with Apple
                   </Button>
                 </div>
-                )}
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
