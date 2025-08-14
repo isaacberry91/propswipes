@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import { useEffect } from "react";
 import { iapService } from "./services/iapService";
+import { notificationService } from "./services/notificationService";
 import Index from "./pages/Index";
 import Discover from "./pages/Discover";
 import ListProperty from "./pages/ListProperty";
@@ -53,8 +54,19 @@ const App = () => {
         }
       }
     };
+
+    const initializePushNotifications = async () => {
+      try {
+        console.log('PropSwipes Main App: Starting push notifications initialization...');
+        await notificationService.initialize();
+        console.log('PropSwipes Main App: Push notifications ready');
+      } catch (error) {
+        console.log('PropSwipes Main App: Push notifications initialization error (non-fatal):', error);
+      }
+    };
     
     initializeIAP();
+    initializePushNotifications();
     
     // Cleanup function
     return () => {

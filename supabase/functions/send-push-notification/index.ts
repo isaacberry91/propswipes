@@ -53,21 +53,35 @@ serve(async (req) => {
     const results = []
     for (const token of tokens) {
       try {
-        // For now, just log the notification - you'll need to implement actual push service
-        console.log(`Sending push notification to ${token.platform}:`, {
-          token: token.push_token,
-          notification
-        })
-        
-        // TODO: Implement actual push notification sending based on platform
-        // iOS: Use Apple Push Notification service (APNs)
-        // Android: Use Firebase Cloud Messaging (FCM)
-        
-        results.push({
-          platform: token.platform,
-          success: true,
-          message: 'Notification queued (mock)'
-        })
+        if (token.platform === 'ios') {
+          // Send to Apple Push Notification Service (APNs)
+          const apnsResult = await sendAPNSNotification(token.push_token, notification)
+          results.push({
+            platform: token.platform,
+            success: apnsResult.success,
+            message: apnsResult.message || 'iOS notification sent'
+          })
+        } else if (token.platform === 'android') {
+          // Send to Firebase Cloud Messaging (FCM)
+          const fcmResult = await sendFCMNotification(token.push_token, notification)
+          results.push({
+            platform: token.platform,
+            success: fcmResult.success,
+            message: fcmResult.message || 'Android notification sent'
+          })
+        } else {
+          // For web or unknown platforms, just log
+          console.log(`Sending push notification to ${token.platform}:`, {
+            token: token.push_token,
+            notification
+          })
+          
+          results.push({
+            platform: token.platform,
+            success: true,
+            message: 'Notification logged (unsupported platform)'
+          })
+        }
       } catch (error) {
         console.error(`Error sending to ${token.platform}:`, error)
         results.push({
@@ -100,3 +114,99 @@ serve(async (req) => {
     )
   }
 })
+
+// Helper function to send APNs notification
+async function sendAPNSNotification(deviceToken: string, notification: any) {
+  try {
+    // For production, you would need:
+    // 1. Apple Developer Account
+    // 2. APNs key or certificate
+    // 3. Your app's bundle ID
+    
+    // For now, return a mock response
+    console.log('📱 Sending APNs notification:', {
+      deviceToken,
+      title: notification.title,
+      body: notification.body,
+      data: notification.data
+    })
+    
+    return {
+      success: true,
+      message: 'APNs notification sent (mock implementation)'
+    }
+    
+    // TODO: Implement real APNs call
+    // const apnsResponse = await fetch('https://api.push.apple.com/3/device/' + deviceToken, {
+    //   method: 'POST',
+    //   headers: {
+    //     'authorization': `bearer ${JWT_TOKEN}`,
+    //     'apns-topic': 'your.bundle.id',
+    //     'content-type': 'application/json'
+    //   },
+    //   body: JSON.stringify({
+    //     aps: {
+    //       alert: {
+    //         title: notification.title,
+    //         body: notification.body
+    //       },
+    //       sound: 'default'
+    //     },
+    //     data: notification.data
+    //   })
+    // })
+    
+  } catch (error) {
+    console.error('APNs error:', error)
+    return {
+      success: false,
+      message: error.message
+    }
+  }
+}
+
+// Helper function to send FCM notification
+async function sendFCMNotification(deviceToken: string, notification: any) {
+  try {
+    // For production, you would need:
+    // 1. Firebase project
+    // 2. Server key or service account key
+    
+    // For now, return a mock response
+    console.log('📱 Sending FCM notification:', {
+      deviceToken,
+      title: notification.title,
+      body: notification.body,
+      data: notification.data
+    })
+    
+    return {
+      success: true,
+      message: 'FCM notification sent (mock implementation)'
+    }
+    
+    // TODO: Implement real FCM call
+    // const fcmResponse = await fetch('https://fcm.googleapis.com/fcm/send', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Authorization': `key=${SERVER_KEY}`,
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify({
+    //     to: deviceToken,
+    //     notification: {
+    //       title: notification.title,
+    //       body: notification.body
+    //     },
+    //     data: notification.data
+    //   })
+    // })
+    
+  } catch (error) {
+    console.error('FCM error:', error)
+    return {
+      success: false,
+      message: error.message
+    }
+  }
+}

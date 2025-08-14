@@ -10,6 +10,7 @@ import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building,
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { notificationService } from "@/services/notificationService";
 
 
 const Chat = () => {
@@ -118,13 +119,16 @@ const Chat = () => {
 
       const transformedMatch = {
         id: matchData.id,
+        buyerId: matchData.buyer_id,
+        sellerId: matchData.seller_id,
         user: {
           name: otherUser?.display_name || 'Unknown User',
           avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
           type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer',
           bio: otherUser?.bio || 'No bio available',
           phone: otherUser?.phone || 'No phone provided',
-          location: otherUser?.location || 'Location not provided'
+          location: otherUser?.location || 'Location not provided',
+          profileId: otherUser?.id
         },
         property: {
           title: property.title,
@@ -165,19 +169,79 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || !user || !match) return;
 
-    const newMessage = {
-      id: messages.length + 1,
-      senderId: "me",
-      text: message,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+    try {
+      // Get current user's profile
+      const { data: senderProfile } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .eq('user_id', user.id)
+        .single();
 
-    setMessages(prev => [...prev, newMessage]);
-    setMessage("");
+      if (!senderProfile) {
+        toast({
+          title: "Error",
+          description: "Could not find your profile.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Save message to database
+      const { data: messageData, error } = await supabase
+        .from('messages')
+        .insert({
+          match_id: matchId,
+          sender_id: senderProfile.id,
+          content: message.trim()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error sending message:', error);
+        toast({
+          title: "Error",
+          description: "Failed to send message.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Add message to local state for immediate UI update
+      const newMessage = {
+        id: messageData.id,
+        senderId: "me",
+        text: message.trim(),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+      setMessage("");
+
+      // Determine recipient profile ID (the other user in the match)
+      const recipientProfileId = match.user.profileId;
+      
+      // Send push notification to the recipient
+      await notificationService.sendMessageNotification(
+        recipientProfileId,
+        senderProfile.display_name || 'Someone',
+        message.trim(),
+        matchId!,
+        match.property.title
+      );
+
+    } catch (error) {
+      console.error('Error in handleSendMessage:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
