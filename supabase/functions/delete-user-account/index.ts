@@ -45,6 +45,17 @@ serve(async (req) => {
 
     console.log('Deleting account for user:', user.id);
 
+    // Get user's profile ID first
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!profile) {
+      throw new Error('User profile not found');
+    }
+
     // Step 1: Delete all user-related data first
     console.log('Cleaning up user data...');
     
@@ -52,27 +63,27 @@ serve(async (req) => {
     const { error: propertiesError } = await supabaseAdmin
       .from('properties')
       .delete()
-      .eq('owner_id', user.id);
+      .eq('owner_id', profile.id);
 
     if (propertiesError) {
       console.error('Error deleting properties:', propertiesError);
     }
 
-    // Delete user likes
-    const { error: likesError } = await supabaseAdmin
-      .from('likes')
+    // Delete user property swipes
+    const { error: swipesError } = await supabaseAdmin
+      .from('property_swipes')
       .delete()
-      .eq('user_id', user.id);
+      .eq('user_id', profile.id);
 
-    if (likesError) {
-      console.error('Error deleting likes:', likesError);
+    if (swipesError) {
+      console.error('Error deleting property swipes:', swipesError);
     }
 
-    // Delete user matches
+    // Delete user matches (where user is buyer or seller)
     const { error: matchesError } = await supabaseAdmin
       .from('matches')
       .delete()
-      .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`);
+      .or(`buyer_id.eq.${profile.id},seller_id.eq.${profile.id}`);
 
     if (matchesError) {
       console.error('Error deleting matches:', matchesError);
@@ -82,7 +93,7 @@ serve(async (req) => {
     const { error: messagesError } = await supabaseAdmin
       .from('messages')
       .delete()
-      .eq('sender_id', user.id);
+      .eq('sender_id', profile.id);
 
     if (messagesError) {
       console.error('Error deleting messages:', messagesError);
@@ -96,6 +107,16 @@ serve(async (req) => {
 
     if (subscribersError) {
       console.error('Error deleting subscriptions:', subscribersError);
+    }
+
+    // Delete push tokens
+    const { error: pushTokensError } = await supabaseAdmin
+      .from('user_push_tokens')
+      .delete()
+      .eq('user_id', profile.id);
+
+    if (pushTokensError) {
+      console.error('Error deleting push tokens:', pushTokensError);
     }
 
     // Step 2: Mark profile as deleted (soft delete)
