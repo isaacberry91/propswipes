@@ -106,6 +106,7 @@ export type Database = {
           created_at: string
           daily_likes_reset_date: string | null
           daily_likes_used: number | null
+          deleted_at: string | null
           display_name: string | null
           id: string
           location: string | null
@@ -121,6 +122,7 @@ export type Database = {
           created_at?: string
           daily_likes_reset_date?: string | null
           daily_likes_used?: number | null
+          deleted_at?: string | null
           display_name?: string | null
           id?: string
           location?: string | null
@@ -136,6 +138,7 @@ export type Database = {
           created_at?: string
           daily_likes_reset_date?: string | null
           daily_likes_used?: number | null
+          deleted_at?: string | null
           display_name?: string | null
           id?: string
           location?: string | null

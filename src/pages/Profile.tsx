@@ -219,40 +219,36 @@ const Profile = () => {
     if (!user) return;
     
     try {
-      // First delete user profile and related data
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('user_id', user.id);
-      
-      if (profileError) throw profileError;
-      
-      // Delete user account - this will trigger cascade deletion
-      const { error: deleteError } = await supabase.auth.signOut({ scope: 'global' });
-      if (deleteError) throw deleteError;
-      
-      // Since we can't delete the actual auth user without admin access,
-      // we need to update user metadata to mark account as deleted
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: { account_deleted: true, deleted_at: new Date().toISOString() }
+      // Call the edge function to delete the account
+      const { data, error } = await supabase.functions.invoke('delete-user-account', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
       });
-      
-      if (updateError) {
-        console.warn('Could not mark account as deleted in auth metadata:', updateError);
+
+      if (error) {
+        console.error('Error calling delete function:', error);
+        throw new Error(error.message || 'Failed to delete account');
       }
-      
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
       toast({
         title: "Account deleted successfully",
         description: "Your account and all associated data have been permanently deleted.",
         duration: 5000
       });
       
+      // Sign out and redirect
+      await supabase.auth.signOut();
       navigate('/');
     } catch (error) {
       console.error('Error deleting account:', error);
       toast({
         title: "Error deleting account",
-        description: "Please try again or contact support if the issue persists.",
+        description: error.message || "Please try again or contact support if the issue persists.",
         variant: "destructive",
         duration: 5000
       });
