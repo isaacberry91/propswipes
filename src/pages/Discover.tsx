@@ -110,10 +110,19 @@ const Discover = () => {
   };
 
   const handleSwipe = async (direction: 'left' | 'right') => {
-    if (isAnimating || !user || !userProfile) return;
+    console.log('🚀 HandleSwipe called with direction:', direction);
+    console.log('🚀 User exists:', !!user);
+    console.log('🚀 UserProfile exists:', !!userProfile);
+    console.log('🚀 IsAnimating:', isAnimating);
+    
+    if (isAnimating || !user || !userProfile) {
+      console.log('🚀 Early return due to conditions');
+      return;
+    }
     
     // Check like limits for non-subscribers
     if (direction === 'right' && !hasUnlimitedLikes() && dailyLikesUsed >= 10) {
+      console.log('🚀 Like limit reached, showing prompt');
       setShowLikePrompt(true);
       return;
     }
@@ -122,16 +131,20 @@ const Discover = () => {
     setSwipeDirection(direction);
     
     const property = properties[currentIndex];
+    console.log('🚀 Current property:', property?.id, property?.title);
     
     try {
+      console.log('🚀 About to insert swipe to database');
       // Record the swipe
-      await supabase
+      const { data, error } = await supabase
         .from('property_swipes')
         .insert({
           user_id: user.id,
           property_id: property.id,
           is_liked: direction === 'right'
         });
+      
+      console.log('🚀 Swipe insert result:', { data, error });
 
       if (direction === 'right') {
         // Update daily likes counter for non-subscribers
