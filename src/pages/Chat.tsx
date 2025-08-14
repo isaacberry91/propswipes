@@ -19,11 +19,50 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // TODO: Fetch actual match data from API
-  const match = null;
+  const match = {
+    id: matchId,
+    user: {
+      name: "Sarah Chen",
+      avatar: "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+      type: "Real Estate Agent"
+    },
+    property: {
+      title: "Modern Downtown Condo",
+      location: "Downtown Seattle",
+      price: "$850,000",
+      image: "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"
+    }
+  };
 
   // TODO: Fetch actual user and property data from API
-  const userProfile = null;
-  const propertyDetails = null;
+  const userProfile = {
+    name: "Sarah Chen",
+    avatar: "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+    type: "Real Estate Agent",
+    verified: true,
+    company: "Premier Realty",
+    position: "Senior Agent",
+    email: "sarah.chen@premierrealty.com",
+    phone: "(555) 123-4567",
+    bio: "Experienced real estate professional with 8+ years helping clients find their perfect home.",
+    memberSince: "January 2020"
+  };
+  
+  const propertyDetails = {
+    title: "Modern Downtown Condo",
+    image: "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+    bedrooms: "2",
+    bathrooms: "2",
+    sqft: "1,200",
+    yearBuilt: "2019",
+    location: "Downtown Seattle, WA",
+    price: "$850,000",
+    amenities: ["Pool", "Gym", "Concierge", "Rooftop Deck"],
+    features: ["Hardwood Floors", "Stainless Appliances", "City Views"],
+    hoaFees: "$350/month",
+    parking: "1 Garage Space",
+    petPolicy: "Cats & Dogs Allowed"
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
