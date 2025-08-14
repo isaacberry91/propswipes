@@ -34,7 +34,22 @@ const Chat = () => {
   }, [user, matchId]);
 
   useEffect(() => {
-    if (!matchId) return;
+    if (!matchId || !user) return;
+
+    let currentUserProfileId: string | null = null;
+
+    // Get current user's profile ID first
+    const getCurrentUserProfile = async () => {
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      currentUserProfileId = userProfile?.id || null;
+    };
+
+    getCurrentUserProfile();
 
     // Set up real-time subscription for new messages
     const channel = supabase
@@ -50,7 +65,7 @@ const Chat = () => {
         (payload) => {
           const newMessage = payload.new;
           // Only add to local state if it's not from current user
-          const isFromCurrentUser = newMessage.sender_id === match?.user.profileId;
+          const isFromCurrentUser = newMessage.sender_id === currentUserProfileId;
           if (!isFromCurrentUser) {
             setMessages(prev => [...prev, {
               id: newMessage.id,
@@ -69,7 +84,7 @@ const Chat = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [matchId, match?.user.profileId]);
+  }, [matchId, user]);
 
   const fetchMatchData = async () => {
     if (!user || !matchId) return;
