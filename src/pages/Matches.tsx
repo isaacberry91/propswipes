@@ -1,15 +1,148 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, MapPin, Users, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
+
+interface Match {
+  id: string;
+  property: {
+    id: string;
+    title: string;
+    location: string;
+    price: string;
+    image: string;
+  };
+  matchedUser: {
+    name: string;
+    avatar: string;
+    type: string;
+  };
+  lastMessage: string;
+  matchedAt: string;
+  unreadCount: number;
+}
 
 const Matches = () => {
   const navigate = useNavigate();
-  const [matches] = useState([]); // TODO: Fetch actual matches from API
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleChatClick = (matchId: number) => {
+  useEffect(() => {
+    if (user) {
+      fetchMatches();
+    }
+  }, [user]);
+
+  const fetchMatches = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      // Get user's profile ID first
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch matches where user is either buyer or seller
+      const { data: matchData, error } = await supabase
+        .from('matches')
+        .select(`
+          id,
+          created_at,
+          property_id,
+          buyer_id,
+          seller_id,
+          properties (
+            id,
+            title,
+            price,
+            city,
+            state,
+            images
+          ),
+          buyer_profile:buyer_id (
+            id,
+            display_name,
+            avatar_url,
+            user_type
+          ),
+          seller_profile:seller_id (
+            id,
+            display_name,
+            avatar_url,
+            user_type
+          )
+        `)
+        .or(`buyer_id.eq.${profile.id},seller_id.eq.${profile.id}`);
+
+      if (error) {
+        console.error('Error fetching matches:', error);
+        toast({
+          title: "Error loading matches",
+          description: "Could not load your matches. Please try again.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Transform the data to match our interface
+      const transformedMatches: Match[] = (matchData || []).map((match: any) => {
+        const otherUser = match.buyer_id === profile.id ? match.seller_profile : match.buyer_profile;
+        const property = match.properties;
+        
+        return {
+          id: match.id,
+          property: {
+            id: property.id,
+            title: property.title,
+            location: `${property.city}, ${property.state}`,
+            price: new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              minimumFractionDigits: 0,
+            }).format(property.price),
+            image: property.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"
+          },
+          matchedUser: {
+            name: otherUser?.display_name || "Unknown User",
+            avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+            type: otherUser?.user_type === 'seller' ? 'Property Owner' : 'Buyer'
+          },
+          lastMessage: "Start a conversation...",
+          matchedAt: new Date(match.created_at).toLocaleDateString(),
+          unreadCount: 0
+        };
+      });
+
+      setMatches(transformedMatches);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong while loading matches.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChatClick = (matchId: string) => {
     navigate(`/chat/${matchId}`);
   };
 
@@ -22,16 +155,26 @@ const Matches = () => {
           <p className="text-muted-foreground">Connect with people interested in the same properties</p>
         </div>
 
-        {matches.length === 0 ? (
+        {loading ? (
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+            <p className="text-muted-foreground">Loading your matches...</p>
+          </div>
+        ) : matches.length === 0 ? (
           <Card className="p-8 text-center shadow-card border-0">
             <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-foreground mb-2">No matches yet</h3>
             <p className="text-muted-foreground mb-4">
               Start swiping to find people interested in the same properties!
             </p>
-            <Button variant="gradient" onClick={() => navigate('/discover')}>
-              Start Discovering
-            </Button>
+            <div className="space-y-2">
+              <Button variant="gradient" onClick={() => navigate('/discover')}>
+                Start Discovering
+              </Button>
+              <Button variant="outline" onClick={fetchMatches}>
+                Refresh
+              </Button>
+            </div>
           </Card>
         ) : (
           <div className="space-y-4">
