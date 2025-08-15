@@ -15,17 +15,25 @@ class NotificationService {
   private currentToken: string | null = null;
 
   async initialize() {
+    console.log('📱 === NOTIFICATION SERVICE INITIALIZE START ===');
     console.log('📱 NotificationService.initialize() called');
     console.log('📱 Platform check - isNativePlatform:', Capacitor.isNativePlatform());
     console.log('📱 Platform:', Capacitor.getPlatform());
     console.log('📱 Already initialized:', this.initialized);
     
-    if (!Capacitor.isNativePlatform() || this.initialized) {
-      console.log('📱 Skipping initialization - not native platform or already initialized');
+    // Force re-initialization for debugging
+    console.log('📱 FORCING INITIALIZATION FOR DEBUGGING');
+    
+    if (!Capacitor.isNativePlatform()) {
+      console.log('📱 Not a native platform, exiting');
       return;
     }
 
     try {
+      console.log('📱 Setting up listeners first...');
+      // Set up listeners BEFORE registration
+      this.setupListeners();
+      
       console.log('📱 Requesting push notification permissions...');
       // Request permission to use push notifications
       const permission = await PushNotifications.requestPermissions();
@@ -36,9 +44,6 @@ class NotificationService {
         // Register with Apple / Google to receive push via APNS/FCM
         await PushNotifications.register();
         console.log('📱 PushNotifications.register() called successfully');
-        
-        // Set up listeners
-        this.setupListeners();
         
         this.initialized = true;
         console.log('📱 Push notifications initialized successfully');
