@@ -51,13 +51,25 @@ class NotificationService {
   }
 
   private setupListeners() {
+    console.log('📱 Setting up push notification listeners...');
+    
     // On success, register the token with your backend
     PushNotifications.addListener('registration', async (token: Token) => {
-      console.log('📱 Push registration success, token:', token.value);
+      console.log('📱 === PUSH REGISTRATION SUCCESS ===');
+      console.log('📱 Full token object:', token);
+      console.log('📱 Token value:', token.value);
+      console.log('📱 Token value type:', typeof token.value);
+      console.log('📱 Token value exists:', !!token.value);
       console.log('📱 MOBILE APP PUSH TOKEN:', token.value);
-      console.log('📱 Token length:', token.value.length);
-      this.currentToken = token.value;
-      await this.registerTokenWithBackend(token.value);
+      console.log('📱 Token length:', token.value?.length);
+      console.log('📱 === END TOKEN INFO ===');
+      
+      if (token.value) {
+        this.currentToken = token.value;
+        await this.registerTokenWithBackend(token.value);
+      } else {
+        console.error('📱 Token value is empty or undefined!');
+      }
     });
 
     // Some issue with the registration
