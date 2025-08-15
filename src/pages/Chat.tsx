@@ -322,8 +322,22 @@ const Chat = () => {
       setMessages(prev => [...prev, newMessage]);
       setMessage("");
 
-      // Note: Push notifications are now automatically sent via database trigger
-      // when the message is inserted into the messages table
+      // Send push notification to recipient
+      try {
+        const recipientId = match.buyerId === senderProfile.id ? match.sellerId : match.buyerId;
+        
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            recipientUserId: recipientId,
+            senderId: senderProfile.id,
+            messageContent: message.trim(),
+            matchId: matchId
+          }
+        });
+      } catch (notificationError) {
+        console.error('Failed to send push notification:', notificationError);
+        // Don't show error to user as the message was sent successfully
+      }
 
     } catch (error) {
       console.error('Error in handleSendMessage:', error);
