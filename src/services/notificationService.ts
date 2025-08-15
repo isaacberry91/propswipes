@@ -15,17 +15,27 @@ class NotificationService {
   private currentToken: string | null = null;
 
   async initialize() {
+    console.log('📱 NotificationService.initialize() called');
+    console.log('📱 Platform check - isNativePlatform:', Capacitor.isNativePlatform());
+    console.log('📱 Platform:', Capacitor.getPlatform());
+    console.log('📱 Already initialized:', this.initialized);
+    
     if (!Capacitor.isNativePlatform() || this.initialized) {
+      console.log('📱 Skipping initialization - not native platform or already initialized');
       return;
     }
 
     try {
+      console.log('📱 Requesting push notification permissions...');
       // Request permission to use push notifications
       const permission = await PushNotifications.requestPermissions();
+      console.log('📱 Permission result:', permission);
       
       if (permission.receive === 'granted') {
+        console.log('📱 Permission granted, registering for push notifications...');
         // Register with Apple / Google to receive push via APNS/FCM
         await PushNotifications.register();
+        console.log('📱 PushNotifications.register() called successfully');
         
         // Set up listeners
         this.setupListeners();
@@ -33,7 +43,7 @@ class NotificationService {
         this.initialized = true;
         console.log('📱 Push notifications initialized successfully');
       } else {
-        console.log('📱 Push notification permission denied');
+        console.log('📱 Push notification permission denied:', permission);
       }
     } catch (error) {
       console.error('📱 Error initializing push notifications:', error);
