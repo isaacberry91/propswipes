@@ -93,16 +93,30 @@ const Discover = () => {
         return;
       }
 
-      // Get properties excluding those already swiped by the user
-      const { data, error } = await supabase
+      // 1) Get all property IDs the user has already swiped (liked or disliked)
+      const { data: swipes, error: swipesError } = await supabase
+        .from('property_swipes')
+        .select('property_id')
+        .eq('user_id', userProfile.id);
+
+      if (swipesError) {
+        console.error('Error fetching user swipes:', swipesError);
+      }
+
+      const swipedIds = (swipes || []).map((s: any) => s.property_id);
+
+      // 2) Fetch approved properties excluding those swiped
+      let query = supabase
         .from('properties')
-        .select(`
-          *,
-          property_swipes!left(id)
-        `)
+        .select('*')
         .eq('status', 'approved')
-        .is('property_swipes.id', null)
         .limit(20);
+
+      if (swipedIds.length > 0) {
+        query = query.not('id', 'in', `(${swipedIds.join(',')})`);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching properties:', error);
@@ -112,7 +126,6 @@ const Discover = () => {
           variant: "destructive",
           duration: 5000
         });
-        // Fallback to sample data
         setProperties([]);
       } else {
         setProperties(data || []);
@@ -223,17 +236,31 @@ const Discover = () => {
         return;
       }
 
-      // Search by address first, then fallback to city, excluding already swiped properties
-      const { data, error } = await supabase
+      // 1) Get all property IDs the user has already swiped (liked or disliked)
+      const { data: swipes, error: swipesError } = await supabase
+        .from('property_swipes')
+        .select('property_id')
+        .eq('user_id', userProfile.id);
+
+      if (swipesError) {
+        console.error('Error fetching user swipes (location search):', swipesError);
+      }
+
+      const swipedIds = (swipes || []).map((s: any) => s.property_id);
+
+      // 2) Fetch approved properties for location excluding those swiped
+      let query = supabase
         .from('properties')
-        .select(`
-          *,
-          property_swipes!left(id)
-        `)
+        .select('*')
         .eq('status', 'approved')
         .or(`address.ilike.%${location}%,city.ilike.%${location.split(',')[0].trim()}%`)
-        .is('property_swipes.id', null)
         .limit(20);
+
+      if (swipedIds.length > 0) {
+        query = query.not('id', 'in', `(${swipedIds.join(',')})`);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       
