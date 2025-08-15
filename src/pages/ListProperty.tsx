@@ -587,15 +587,6 @@ const ListProperty = () => {
                 </div>
               </label>
             )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={addSampleImage}
-              className="w-full text-xs"
-            >
-              Add Sample Photo
-            </Button>
           </div>
         )}
       </div>
