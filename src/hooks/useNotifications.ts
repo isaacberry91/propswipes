@@ -9,6 +9,8 @@ export const useNotifications = () => {
     if (user) {
       // Initialize notifications when user is authenticated
       notificationService.initialize();
+      // Also try to register any existing token with the new user session
+      notificationService.registerCurrentToken();
     } else {
       // Remove push token when user signs out
       notificationService.removePushToken();
