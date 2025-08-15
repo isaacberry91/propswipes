@@ -33,6 +33,7 @@ const Matches = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState<string | null>(null);
+  const [hasProperties, setHasProperties] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -58,6 +59,15 @@ const Matches = () => {
       }
 
       setUserType(userProfile.user_type);
+
+      // Check if user has any properties (making them a seller)
+      const { data: userProperties } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('owner_id', userProfile.id)
+        .limit(1);
+
+      setHasProperties(userProperties && userProperties.length > 0);
 
       // Fetch matches where user is either buyer or seller
       const { data: matchesData, error } = await supabase
@@ -157,7 +167,7 @@ const Matches = () => {
           <h1 className="text-3xl font-bold text-foreground mb-2">Your Matches</h1>
           <p className="text-muted-foreground">Connect with people interested in the same properties</p>
           
-          {userType === 'seller' && (
+          {(userType === 'seller' || hasProperties) && (
             <div className="mt-6">
               <Button 
                 variant="outline" 
