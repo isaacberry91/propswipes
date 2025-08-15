@@ -198,49 +198,118 @@ serve(async (req) => {
 // Helper function to send APNs notification
 async function sendAPNSNotification(deviceToken: string, notification: any) {
   try {
-    // For production, you would need:
-    // 1. Apple Developer Account
-    // 2. APNs key or certificate
-    // 3. Your app's bundle ID
-    
-    // For now, return a mock response
     console.log('📱 Sending APNs notification:', {
       deviceToken,
       title: notification.title,
       body: notification.body,
       data: notification.data
     })
-    
-    return {
-      success: true,
-      message: 'APNs notification sent (mock implementation)'
+
+    const apnsKeyString = Deno.env.get('APNS_KEY')
+    if (!apnsKeyString) {
+      console.error('APNS_KEY environment variable not found')
+      return { success: false, message: 'APNs key not configured' }
     }
+
+    const apnsKey = JSON.parse(apnsKeyString)
+    const { team_id, key_id, private_key } = apnsKey
+
+    if (!team_id || !key_id || !private_key) {
+      console.error('Invalid APNs key format. Missing team_id, key_id, or private_key')
+      return { success: false, message: 'Invalid APNs key format' }
+    }
+
+    // Create JWT for APNs authentication
+    const header = {
+      alg: 'ES256',
+      kid: key_id
+    }
+
+    const payload = {
+      iss: team_id,
+      iat: Math.floor(Date.now() / 1000)
+    }
+
+    // Import the private key
+    const keyData = private_key.replace(/\\n/g, '\n')
     
-    // TODO: Implement real APNs call
-    // const apnsResponse = await fetch('https://api.push.apple.com/3/device/' + deviceToken, {
-    //   method: 'POST',
-    //   headers: {
-    //     'authorization': `bearer ${JWT_TOKEN}`,
-    //     'apns-topic': 'your.bundle.id',
-    //     'content-type': 'application/json'
-    //   },
-    //   body: JSON.stringify({
-    //     aps: {
-    //       alert: {
-    //         title: notification.title,
-    //         body: notification.body
-    //       },
-    //       sound: 'default'
-    //     },
-    //     data: notification.data
-    //   })
-    // })
+    const privateKeyBuffer = new TextEncoder().encode(keyData)
+    
+    const cryptoKey = await crypto.subtle.importKey(
+      'pkcs8',
+      privateKeyBuffer,
+      {
+        name: 'ECDSA',
+        namedCurve: 'P-256'
+      },
+      false,
+      ['sign']
+    )
+
+    // Create JWT
+    const headerEncoded = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+    const payloadEncoded = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+    const dataToSign = `${headerEncoded}.${payloadEncoded}`
+    
+    const signature = await crypto.subtle.sign(
+      {
+        name: 'ECDSA',
+        hash: 'SHA-256'
+      },
+      cryptoKey,
+      new TextEncoder().encode(dataToSign)
+    )
+
+    const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+      .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+    
+    const jwt = `${dataToSign}.${signatureBase64}`
+
+    // Prepare APNs payload
+    const apnsPayload = {
+      aps: {
+        alert: {
+          title: notification.title,
+          body: notification.body
+        },
+        sound: 'default',
+        badge: 1
+      },
+      ...notification.data
+    }
+
+    // Send to APNs
+    const apnsUrl = `https://api.push.apple.com/3/device/${deviceToken}`
+    
+    const response = await fetch(apnsUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${jwt}`,
+        'Content-Type': 'application/json',
+        'apns-topic': 'app.lovable.c53d60b9f83247acaabd6a1765b647a5', // Your app bundle ID
+        'apns-priority': '10',
+        'apns-push-type': 'alert'
+      },
+      body: JSON.stringify(apnsPayload)
+    })
+
+    if (response.ok) {
+      console.log('✅ APNs notification sent successfully')
+      return { success: true, message: 'APNs notification sent successfully' }
+    } else {
+      const errorText = await response.text()
+      console.error('❌ APNs Error Response:', response.status, errorText)
+      return { 
+        success: false, 
+        message: `APNs HTTP ${response.status}: ${errorText}` 
+      }
+    }
     
   } catch (error) {
     console.error('APNs error:', error)
     return {
       success: false,
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown APNs error'
     }
   }
 }
