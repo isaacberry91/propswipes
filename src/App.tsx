@@ -12,6 +12,7 @@ import Discover from "./pages/Discover";
 import ListProperty from "./pages/ListProperty";
 import Matches from "./pages/Matches";
 import Chat from "./pages/Chat";
+import ChatManagement from "./pages/ChatManagement";
 import Profile from "./pages/Profile";
 import Subscription from "./pages/Subscription";
 import TestSubscription from "./pages/TestSubscription";
@@ -104,6 +105,16 @@ const App = () => {
               <Route path="/chat/:matchId" element={
                 <ProtectedRoute>
                   <Chat />
+                </ProtectedRoute>
+              } />
+              <Route path="/chat-management" element={
+                <ProtectedRoute>
+                  <ChatManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/chat-management/:matchId" element={
+                <ProtectedRoute>
+                  <ChatManagement />
                 </ProtectedRoute>
               } />
               <Route path="/profile" element={

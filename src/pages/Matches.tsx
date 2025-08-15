@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageCircle, MapPin, Users, Clock } from "lucide-react";
+import { Heart, MessageCircle, MapPin, Users, Clock, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +32,7 @@ const Matches = () => {
   const { toast } = useToast();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userType, setUserType] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -55,6 +56,8 @@ const Matches = () => {
         setLoading(false);
         return;
       }
+
+      setUserType(userProfile.user_type);
 
       // Fetch matches where user is either buyer or seller
       const { data: matchesData, error } = await supabase
@@ -153,6 +156,19 @@ const Matches = () => {
           <Heart className="w-12 h-12 text-love mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-foreground mb-2">Your Matches</h1>
           <p className="text-muted-foreground">Connect with people interested in the same properties</p>
+          
+          {userType === 'seller' && (
+            <div className="mt-6">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/chat-management')}
+                className="gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Manage All Conversations
+              </Button>
+            </div>
+          )}
         </div>
 
         {loading ? (
