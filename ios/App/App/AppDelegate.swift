@@ -92,12 +92,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
             // You can save this token to UserDefaults or send it to your server
             UserDefaults.standard.set(token, forKey: "fcm_token")
             
-            // Notify JavaScript about the new FCM token
-            NotificationCenter.default.post(
-                name: NSNotification.Name("FCMTokenReceived"),
-                object: nil,
-                userInfo: ["token": token]
-            )
+            // Send FCM token to JavaScript via Capacitor bridge
+            DispatchQueue.main.async {
+                if let bridge = (self.window?.rootViewController as? CAPBridgeViewController)?.bridge {
+                    bridge.eval(js: """
+                        window.dispatchEvent(new CustomEvent('FCMTokenReceived', {
+                            detail: { token: '\(token)' }
+                        }));
+                    """)
+                    print("📱 FCM token sent to JavaScript: \(token)")
+                } else {
+                    print("📱 Unable to get bridge reference")
+                }
+            }
         }
     }
     

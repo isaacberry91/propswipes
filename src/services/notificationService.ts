@@ -33,6 +33,8 @@ class NotificationService {
       console.log('📱 Setting up listeners first...');
       // Set up listeners BEFORE registration
       this.setupListeners();
+      this.setupNativeListeners();
+      
       
       console.log('📱 Requesting push notification permissions...');
       // Request permission to use push notifications
@@ -114,6 +116,33 @@ class NotificationService {
     PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
       console.log('📱 Push action performed:', notification);
       this.handleNotificationTap(notification);
+    });
+  }
+
+  private setupNativeListeners() {
+    console.log('📱 Setting up native FCM listeners...');
+    
+    // Listen for FCM token from native side (iOS AppDelegate)
+    window.addEventListener('FCMTokenReceived', (event: any) => {
+      console.log('📱 === FCM TOKEN RECEIVED FROM NATIVE ===');
+      const fcmToken = event.detail?.token;
+      console.log('📱 FCM Token:', fcmToken);
+      
+      if (fcmToken) {
+        this.currentToken = fcmToken;
+        this.registerTokenWithBackend(fcmToken);
+      } else {
+        console.error('📱 FCM token is empty!');
+      }
+    });
+    
+    // Also listen for native notification events  
+    window.addEventListener('capacitorDidRegisterForRemoteNotifications', (event: any) => {
+      console.log('📱 Capacitor did register for remote notifications:', event);
+    });
+    
+    window.addEventListener('capacitorDidFailToRegisterForRemoteNotifications', (event: any) => {
+      console.error('📱 Capacitor did fail to register for remote notifications:', event);
     });
   }
 
