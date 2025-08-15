@@ -93,13 +93,37 @@ serve(async (req) => {
   }
 
   try {
-    const { recipientUserId, notification } = await req.json()
+    const { recipientUserId, senderId, messageContent, matchId, notification } = await req.json()
+    
+    console.log('📨 Processing message notification:', {
+      recipientUserId,
+      senderId,
+      matchId,
+      messageContent: messageContent?.substring(0, 50) + '...'
+    })
     
     // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
+
+    // Get sender's profile for notification
+    const { data: senderProfile } = await supabaseClient
+      .from('profiles')
+      .select('display_name')
+      .eq('id', senderId)
+      .single()
+
+    // Get match and property details for context
+    const { data: matchData } = await supabaseClient
+      .from('matches')
+      .select(`
+        *,
+        properties(title, address, city)
+      `)
+      .eq('id', matchId)
+      .single()
 
     // Get the recipient's push tokens
     const { data: tokens, error: tokensError } = await supabaseClient
@@ -129,13 +153,35 @@ serve(async (req) => {
       )
     }
 
+    // Create notification content
+    const senderName = senderProfile?.display_name || 'Someone'
+    const propertyTitle = matchData?.properties?.title || 'Property'
+    
+    const messageNotification = notification || {
+      title: `💬 New message from ${senderName}`,
+      body: messageContent || 'Sent you a message',
+      data: {
+        type: 'message',
+        matchId: matchId,
+        senderId: senderId,
+        propertyTitle: propertyTitle,
+        timestamp: new Date().toISOString()
+      }
+    }
+
+    console.log('📱 Sending notification:', {
+      title: messageNotification.title,
+      body: messageNotification.body,
+      tokensCount: tokens.length
+    })
+
     // Send notifications to all user's devices
     const results = []
     for (const token of tokens) {
       try {
         if (token.platform === 'fcm' || token.platform === 'ios' || token.platform === 'android') {
           // Send to Firebase Cloud Messaging (FCM) for all platforms
-          const fcmResult = await sendFCMNotification(token.push_token, notification)
+          const fcmResult = await sendFCMNotification(token.push_token, messageNotification)
           results.push({
             platform: token.platform,
             success: fcmResult.success,
@@ -145,7 +191,7 @@ serve(async (req) => {
           // For web or unknown platforms, just log
           console.log(`Sending push notification to ${token.platform}:`, {
             token: token.push_token,
-            notification
+            notification: messageNotification
           })
           
           results.push({
@@ -166,8 +212,9 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        message: 'Push notifications processed',
-        results 
+        message: 'Message notification sent',
+        results,
+        notification: messageNotification
       }),
       { 
         status: 200, 
@@ -178,7 +225,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in send-push-notification function:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error', details: error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
