@@ -7,7 +7,7 @@ import { AuthProvider } from "./hooks/useAuth";
 import { useEffect } from "react";
 import { iapService } from "./services/iapService";
 import { notificationService } from "./services/notificationService";
-import { useNotifications } from "./hooks/useNotifications";
+import { NotificationProvider } from "./components/NotificationProvider";
 import Index from "./pages/Index";
 import Discover from "./pages/Discover";
 import ListProperty from "./pages/ListProperty";
@@ -28,9 +28,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Initialize push notifications for authenticated users
-  useNotifications();
-  
   // Initialize IAP service on app startup with improved error handling
   useEffect(() => {
     let isCancelled = false;
@@ -82,7 +79,8 @@ const App = () => {
   return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
+      <NotificationProvider>
+        <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
@@ -144,6 +142,7 @@ const App = () => {
           <Navigation />
         </BrowserRouter>
       </TooltipProvider>
+      </NotificationProvider>
     </AuthProvider>
   </QueryClientProvider>
   );
