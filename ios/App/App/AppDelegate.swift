@@ -56,18 +56,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print("📱 iOS: didRegisterForRemoteNotificationsWithDeviceToken called")
         print("📱 iOS: Device token: \(deviceToken.map { String(format: "%02.2hhx", $0) }.joined())")
-        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
+        ApplicationDelegateProxy.shared.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("📱 iOS: didFailToRegisterForRemoteNotificationsWithError: \(error)")
-        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+        ApplicationDelegateProxy.shared.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
     }
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         print("📱 iOS: didReceiveRemoteNotification called")
-        NotificationCenter.default.post(name: .capacitorDidReceiveRemoteNotification, object: userInfo)
-        completionHandler(UIBackgroundFetchResult.newData)
+        ApplicationDelegateProxy.shared.application(application, didReceiveRemoteNotification: userInfo, fetchCompletionHandler: completionHandler)
     }
 
 }
