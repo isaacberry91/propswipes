@@ -130,13 +130,13 @@ class NotificationService {
           .single();
 
         if (profile) {
-          // Store the push token for this user
+          // Store the push token for this user - use 'fcm' platform for FCM tokens
           const { error } = await supabase
             .from('user_push_tokens')
             .upsert({ 
               user_id: profile.id, 
               push_token: token,
-              platform: Capacitor.getPlatform(),
+              platform: 'fcm', // Always use 'fcm' for Firebase Cloud Messaging
               created_at: new Date().toISOString()
             }, { 
               onConflict: 'user_id,platform' 

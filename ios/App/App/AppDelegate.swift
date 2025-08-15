@@ -1,13 +1,21 @@
 import UIKit
 import Capacitor
 import UserNotifications
+import Firebase
+import FirebaseMessaging
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, MessagingDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Initialize Firebase
+        FirebaseApp.configure()
+        
+        // Set FCM messaging delegate
+        Messaging.messaging().delegate = self
+        
         // Create window and set up Capacitor bridge programmatically
         window = UIWindow(frame: UIScreen.main.bounds)
         let bridgeViewController = CAPBridgeViewController()
@@ -52,10 +60,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 
-    // MARK: - Push Notifications
+    // MARK: - Push Notifications (FCM)
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print("📱 iOS: didRegisterForRemoteNotificationsWithDeviceToken called")
         print("📱 iOS: Device token: \(deviceToken.map { String(format: "%02.2hhx", $0) }.joined())")
+        
+        // Pass device token to FCM
+        Messaging.messaging().apnsToken = deviceToken
+        
+        // Also pass to Capacitor for compatibility
         ApplicationDelegateProxy.shared.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
     
@@ -66,7 +79,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         print("📱 iOS: didReceiveRemoteNotification called")
+        print("📱 iOS: Notification payload: \(userInfo)")
         ApplicationDelegateProxy.shared.application(application, didReceiveRemoteNotification: userInfo, fetchCompletionHandler: completionHandler)
+    }
+    
+    // MARK: - FCM MessagingDelegate
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        print("📱 FCM registration token: \(fcmToken ?? "nil")")
+        
+        // Send FCM token to your backend or store locally
+        if let token = fcmToken {
+            // You can save this token to UserDefaults or send it to your server
+            UserDefaults.standard.set(token, forKey: "fcm_token")
+            
+            // Notify JavaScript about the new FCM token
+            NotificationCenter.default.post(
+                name: NSNotification.Name("FCMTokenReceived"),
+                object: nil,
+                userInfo: ["token": token]
+            )
+        }
+    }
+    
+    func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
+        print("📱 FCM: Received data message: \(remoteMessage.appData)")
     }
 
 }

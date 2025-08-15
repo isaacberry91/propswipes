@@ -133,21 +133,13 @@ serve(async (req) => {
     const results = []
     for (const token of tokens) {
       try {
-        if (token.platform === 'ios') {
-          // Send to Apple Push Notification Service (APNs)
-          const apnsResult = await sendAPNSNotification(token.push_token, notification)
-          results.push({
-            platform: token.platform,
-            success: apnsResult.success,
-            message: apnsResult.message || 'iOS notification sent'
-          })
-        } else if (token.platform === 'android') {
-          // Send to Firebase Cloud Messaging (FCM)
+        if (token.platform === 'fcm' || token.platform === 'ios' || token.platform === 'android') {
+          // Send to Firebase Cloud Messaging (FCM) for all platforms
           const fcmResult = await sendFCMNotification(token.push_token, notification)
           results.push({
             platform: token.platform,
             success: fcmResult.success,
-            message: fcmResult.message || 'Android notification sent'
+            message: fcmResult.message || 'FCM notification sent'
           })
         } else {
           // For web or unknown platforms, just log

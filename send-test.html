@@ -22,11 +22,12 @@
                     body: JSON.stringify({
                         recipientUserId: '49f03e24-943b-434a-875f-e192c86bd1d0',
                         notification: {
-                            title: 'Test Push Notification',
-                            body: 'This is a test from PropSwipes to verify APNs is working!',
+                            title: 'Test FCM Push Notification',
+                            body: 'This is a test from PropSwipes using Firebase Cloud Messaging!',
                             data: {
                                 type: 'test',
-                                timestamp: new Date().toISOString()
+                                timestamp: new Date().toISOString(),
+                                source: 'fcm-test'
                             }
                         }
                     })
