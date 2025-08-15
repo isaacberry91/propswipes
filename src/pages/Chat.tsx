@@ -283,6 +283,14 @@ const Chat = () => {
       }
 
       // Save message to database
+      console.log('🔍 Message send debug info:', {
+        matchId,
+        senderProfileId: senderProfile.id,
+        senderUserAuth: user.id,
+        matchBuyerId: match.buyerId,
+        matchSellerId: match.sellerId
+      });
+
       const { data: messageData, error } = await supabase
         .from('messages')
         .insert({
