@@ -322,17 +322,8 @@ const Chat = () => {
       setMessages(prev => [...prev, newMessage]);
       setMessage("");
 
-      // Determine recipient profile ID (the other user in the match)
-      const recipientProfileId = match.user.profileId;
-      
-      // Send push notification to the recipient
-      await notificationService.sendMessageNotification(
-        recipientProfileId,
-        senderProfile.display_name || 'Someone',
-        message.trim(),
-        matchId!,
-        match.property.title
-      );
+      // Note: Push notifications are now automatically sent via database trigger
+      // when the message is inserted into the messages table
 
     } catch (error) {
       console.error('Error in handleSendMessage:', error);
