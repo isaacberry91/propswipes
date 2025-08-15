@@ -38,20 +38,40 @@ class NotificationService {
       // Request permission to use push notifications
       const permission = await PushNotifications.requestPermissions();
       console.log('📱 Permission result:', permission);
+      console.log('📱 Permission receive:', permission.receive);
+      console.log('📱 Full permission object:', JSON.stringify(permission));
       
       if (permission.receive === 'granted') {
         console.log('📱 Permission granted, registering for push notifications...');
+        
+        // Add a small delay to ensure listeners are properly set up
+        console.log('📱 Waiting 100ms before registration...');
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        console.log('📱 About to call PushNotifications.register()...');
         // Register with Apple / Google to receive push via APNS/FCM
-        await PushNotifications.register();
-        console.log('📱 PushNotifications.register() called successfully');
+        try {
+          await PushNotifications.register();
+          console.log('📱 PushNotifications.register() completed successfully');
+          
+          // Wait a bit to see if registration listener fires
+          console.log('📱 Waiting 2 seconds to see if registration listener fires...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          console.log('📱 2 second wait completed. Did registration listener fire?');
+          
+        } catch (registerError) {
+          console.error('📱 Error during PushNotifications.register():', registerError);
+        }
         
         this.initialized = true;
         console.log('📱 Push notifications initialized successfully');
       } else {
         console.log('📱 Push notification permission denied:', permission);
+        console.log('📱 Permission receive value was:', permission.receive);
       }
     } catch (error) {
       console.error('📱 Error initializing push notifications:', error);
+      console.error('📱 Error stack:', error.stack);
     }
   }
 
