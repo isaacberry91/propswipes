@@ -44,6 +44,8 @@ class NotificationService {
     // On success, register the token with your backend
     PushNotifications.addListener('registration', async (token: Token) => {
       console.log('📱 Push registration success, token:', token.value);
+      console.log('📱 MOBILE APP PUSH TOKEN:', token.value);
+      console.log('📱 Token length:', token.value.length);
       this.currentToken = token.value;
       await this.registerTokenWithBackend(token.value);
     });
