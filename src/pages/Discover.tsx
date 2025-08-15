@@ -43,9 +43,14 @@ const Discover = () => {
   useEffect(() => {
     if (user) {
       fetchUserProfile();
-      fetchProperties();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && userProfile) {
+      fetchProperties();
+    }
+  }, [user, userProfile]);
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -82,10 +87,21 @@ const Discover = () => {
   const fetchProperties = async () => {
     setLoading(true);
     try {
+      if (!userProfile) {
+        setProperties([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get properties excluding those already swiped by the user
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(`
+          *,
+          property_swipes!left(id)
+        `)
         .eq('status', 'approved')
+        .is('property_swipes.id', null)
         .limit(20);
 
       if (error) {
@@ -202,12 +218,21 @@ const Discover = () => {
     setLoading(true);
     
     try {
-      // Search by address first, then fallback to city  
+      if (!userProfile) {
+        setLoading(false);
+        return;
+      }
+
+      // Search by address first, then fallback to city, excluding already swiped properties
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(`
+          *,
+          property_swipes!left(id)
+        `)
         .eq('status', 'approved')
         .or(`address.ilike.%${location}%,city.ilike.%${location.split(',')[0].trim()}%`)
+        .is('property_swipes.id', null)
         .limit(20);
 
       if (error) throw error;
