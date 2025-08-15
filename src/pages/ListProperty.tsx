@@ -282,7 +282,7 @@ const ListProperty = () => {
 
         toast({
           title: "Property Updated Successfully! 🏠",
-          description: "Your property changes are pending admin approval!",
+          description: "Your property changes have been submitted for admin approval and will be visible once approved.",
           duration: 5000
         });
       } else {
