@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone } from "lucide-react";
+import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -24,7 +24,10 @@ const Chat = () => {
   const [showPropertyDetails, setShowPropertyDetails] = useState(false);
   const [match, setMatch] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user && matchId) {
@@ -243,6 +246,11 @@ const Chat = () => {
         id: msg.id,
         senderId: msg.sender_id === userProfile?.id ? "me" : msg.sender_id,
         text: msg.content,
+        attachment: msg.attachment_url ? {
+          url: msg.attachment_url,
+          type: msg.attachment_type,
+          name: msg.attachment_name
+        } : null,
         timestamp: new Date(msg.created_at).toLocaleTimeString([], { 
           hour: '2-digit', 
           minute: '2-digit' 
@@ -261,9 +269,59 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() || !user || !match) return;
+  const uploadFile = async (file: File) => {
+    if (!user) return null;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('chat-attachments')
+        .upload(fileName, file);
+
+      if (error) {
+        console.error('Upload error:', error);
+        toast({
+          title: "Upload Error",
+          description: "Failed to upload file.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('chat-attachments')
+        .getPublicUrl(fileName);
+
+      return {
+        url: publicUrl,
+        type: file.type,
+        name: file.name
+      };
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload Error",
+        description: "Failed to upload file.",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = async (file: File) => {
+    const attachment = await uploadFile(file);
+    if (attachment) {
+      await sendMessageWithAttachment("", attachment);
+    }
+  };
+
+  const sendMessageWithAttachment = async (messageText: string, attachment?: any) => {
+    if (!user || !match) return;
 
     try {
       // Get current user's profile
@@ -283,20 +341,15 @@ const Chat = () => {
       }
 
       // Save message to database
-      console.log('🔍 Message send debug info:', {
-        matchId,
-        senderProfileId: senderProfile.id,
-        senderUserAuth: user.id,
-        matchBuyerId: match.buyerId,
-        matchSellerId: match.sellerId
-      });
-
       const { data: messageData, error } = await supabase
         .from('messages')
         .insert({
           match_id: matchId,
           sender_id: senderProfile.id,
-          content: message.trim()
+          content: messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''),
+          attachment_url: attachment?.url || null,
+          attachment_type: attachment?.type || null,
+          attachment_name: attachment?.name || null
         })
         .select()
         .single();
@@ -315,7 +368,8 @@ const Chat = () => {
       const newMessage = {
         id: messageData.id,
         senderId: "me",
-        text: message.trim(),
+        text: messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''),
+        attachment: attachment || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -330,7 +384,7 @@ const Chat = () => {
           body: {
             recipientUserId: recipientId,
             senderId: senderProfile.id,
-            messageContent: message.trim(),
+            messageContent: messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''),
             matchId: matchId
           }
         });
@@ -340,13 +394,20 @@ const Chat = () => {
       }
 
     } catch (error) {
-      console.error('Error in handleSendMessage:', error);
+      console.error('Error in sendMessageWithAttachment:', error);
       toast({
         title: "Error",
         description: "Failed to send message.",
         variant: "destructive",
       });
     }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim() || !user || !match) return;
+
+    await sendMessageWithAttachment(message.trim());
   };
 
   if (loading) {
@@ -449,7 +510,34 @@ const Chat = () => {
                     : 'bg-card text-card-foreground border border-border'
                 }`}
               >
-                <p className="text-sm">{msg.text}</p>
+                {msg.text && <p className="text-sm">{msg.text}</p>}
+                
+                {msg.attachment && (
+                  <div className="mt-2">
+                    {msg.attachment.type.startsWith('image/') ? (
+                      <img 
+                        src={msg.attachment.url} 
+                        alt={msg.attachment.name}
+                        className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(msg.attachment.url, '_blank')}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
+                        <Paperclip className="w-4 h-4" />
+                        <span className="text-sm truncate flex-1">{msg.attachment.name}</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-auto p-1"
+                          onClick={() => window.open(msg.attachment.url, '_blank')}
+                        >
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 <p className={`text-xs mt-1 ${
                   msg.senderId === 'me' 
                     ? 'text-primary-foreground/70' 
@@ -468,11 +556,33 @@ const Chat = () => {
       <div className="border-t border-border bg-card p-4">
         <form onSubmit={handleSendMessage} className="max-w-2xl mx-auto">
           <div className="flex gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileSelect(file);
+              }}
+              accept="*/*"
+            />
+            <input
+              type="file"
+              ref={imageInputRef}
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileSelect(file);
+              }}
+              accept="image/*"
+            />
             <Button 
               type="button" 
               variant="ghost" 
               size="icon"
               className="shrink-0"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
             >
               <Paperclip className="w-4 h-4" />
             </Button>
@@ -481,16 +591,24 @@ const Chat = () => {
               variant="ghost" 
               size="icon"
               className="shrink-0"
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploading}
             >
               <Image className="w-4 h-4" />
             </Button>
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type a message..."
+              placeholder={uploading ? "Uploading..." : "Type a message..."}
               className="flex-1"
+              disabled={uploading}
             />
-            <Button type="submit" variant="default" size="icon">
+            <Button 
+              type="submit" 
+              variant="default" 
+              size="icon"
+              disabled={uploading || (!message.trim())}
+            >
               <Send className="w-4 h-4" />
             </Button>
           </div>
