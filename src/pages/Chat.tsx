@@ -74,6 +74,11 @@ const Chat = () => {
               id: newMessage.id,
               senderId: newMessage.sender_id,
               text: newMessage.content,
+              attachment: newMessage.attachment_url ? {
+                url: newMessage.attachment_url,
+                type: newMessage.attachment_type,
+                name: newMessage.attachment_name
+              } : null,
               timestamp: new Date(newMessage.created_at).toLocaleTimeString([], { 
                 hour: '2-digit', 
                 minute: '2-digit' 
