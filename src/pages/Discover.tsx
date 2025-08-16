@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock } from "lucide-react";
@@ -36,6 +36,10 @@ const Discover = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
   const [showLikePrompt, setShowLikePrompt] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const { subscription, hasUnlimitedLikes } = useSubscription();
@@ -226,6 +230,62 @@ const Discover = () => {
     return new Intl.NumberFormat('en-US').format(sqft);
   };
 
+  // Swipe gesture handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setDragOffset({ x: 0, y: 0 });
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    const touch = e.touches[0];
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+    setDragOffset({ x: 0, y: 0 });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    
+    setDragOffset({ x: deltaX, y: deltaY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - dragStart.x;
+    const deltaY = touch.clientY - dragStart.y;
+    
+    setDragOffset({ x: deltaX, y: deltaY });
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    
+    setIsDragging(false);
+    
+    const threshold = 100; // Minimum distance to trigger swipe
+    const { x } = dragOffset;
+    
+    if (Math.abs(x) > threshold) {
+      if (x > 0) {
+        // Swiped right - like
+        handleSwipe('right');
+      } else {
+        // Swiped left - dislike
+        handleSwipe('left');
+      }
+    }
+    
+    // Reset drag state
+    setDragOffset({ x: 0, y: 0 });
+    setDragStart({ x: 0, y: 0 });
+  };
+
   const getPropertiesForLocation = async (location: string, radius: number = 10) => {
     setSelectedLocation(location);
     setLoading(true);
@@ -366,11 +426,27 @@ const Discover = () => {
           </div>
         ) : (
           <div className="max-w-sm w-full">
-            <Card className={`
-              relative overflow-hidden bg-card shadow-card rounded-2xl border-0 h-[500px]
-              ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
-              ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
-            `}>
+            <Card 
+              ref={cardRef}
+              className={`
+                relative overflow-hidden bg-card shadow-card rounded-2xl border-0 h-[500px] cursor-grab select-none transition-transform
+                ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
+                ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
+                ${isDragging ? 'cursor-grabbing' : ''}
+              `}
+              style={{
+                transform: isDragging && !isAnimating ? 
+                  `translateX(${dragOffset.x}px) translateY(${dragOffset.y * 0.1}px) rotate(${dragOffset.x * 0.1}deg)` : 
+                  'none'
+              }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleDragEnd}
+              onMouseLeave={handleDragEnd}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleDragEnd}
+            >
               <div className="relative h-64">
                 <img 
                   src={properties[currentIndex].images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=600&fit=crop"} 
@@ -380,6 +456,22 @@ const Discover = () => {
                 <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1">
                   <span className="text-sm font-semibold text-primary">{formatPrice(properties[currentIndex].price)}</span>
                 </div>
+                
+                {/* Swipe Direction Indicators */}
+                {isDragging && dragOffset.x > 50 && (
+                  <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
+                    <div className="bg-green-500 rounded-full p-4">
+                      <Heart className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                )}
+                {isDragging && dragOffset.x < -50 && (
+                  <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                    <div className="bg-red-500 rounded-full p-4">
+                      <X className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="p-4 h-[236px] flex flex-col">
