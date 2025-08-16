@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Send, MessageCircle, Search, User, Building } from "lucide-react";
+import { ArrowLeft, Send, MessageCircle, Search, User, Building, Paperclip, Image, Download } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -27,6 +27,11 @@ interface Message {
   id: string;
   senderId: string;
   text: string;
+  attachment?: {
+    url: string;
+    type: string;
+    name: string;
+  } | null;
   timestamp: string;
 }
 
@@ -41,7 +46,10 @@ const ChatManagement = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -170,6 +178,11 @@ const ChatManagement = () => {
         id: msg.id,
         senderId: msg.sender_id === userProfile?.id ? "me" : msg.sender_id,
         text: msg.content,
+        attachment: msg.attachment_url ? {
+          url: msg.attachment_url,
+          type: msg.attachment_type,
+          name: msg.attachment_name
+        } : null,
         timestamp: new Date(msg.created_at).toLocaleTimeString([], { 
           hour: '2-digit', 
           minute: '2-digit' 
@@ -182,9 +195,69 @@ const ChatManagement = () => {
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim() || !user || !selectedConversation) return;
+  const uploadFile = async (file: File) => {
+    if (!user) return null;
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { data, error } = await supabase.storage
+        .from('chat-attachments')
+        .upload(fileName, file);
+
+      if (error) {
+        console.error('Upload error:', error);
+        toast({
+          title: "Upload Error",
+          description: "Failed to upload file.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from('chat-attachments')
+        .createSignedUrl(fileName, 3600); // 1 hour expiry
+
+      if (urlError) {
+        console.error('Signed URL error:', urlError);
+        toast({
+          title: "Upload Error",
+          description: "Failed to generate file URL.",
+          variant: "destructive",
+        });
+        return null;
+      }
+
+      return {
+        url: signedUrlData.signedUrl,
+        type: file.type,
+        name: file.name
+      };
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload Error",
+        description: "Failed to upload file.",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = async (file: File) => {
+    const attachment = await uploadFile(file);
+    if (attachment) {
+      await sendMessageWithAttachment("", attachment);
+    }
+  };
+
+  const sendMessageWithAttachment = async (messageText: string, attachment?: any) => {
+    if (!user || !selectedConversation) return;
 
     try {
       // Get current user's profile
@@ -209,7 +282,10 @@ const ChatManagement = () => {
         .insert({
           match_id: selectedConversation.matchId,
           sender_id: senderProfile.id,
-          content: message.trim()
+          content: messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''),
+          attachment_url: attachment?.url || null,
+          attachment_type: attachment?.type || null,
+          attachment_name: attachment?.name || null
         })
         .select()
         .single();
@@ -228,7 +304,8 @@ const ChatManagement = () => {
       const newMessage = {
         id: messageData.id,
         senderId: "me",
-        text: message.trim(),
+        text: messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''),
+        attachment: attachment || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -238,7 +315,7 @@ const ChatManagement = () => {
       // Update conversation's last message
       setConversations(prev => prev.map(conv => 
         conv.matchId === selectedConversation.matchId 
-          ? { ...conv, lastMessage: message.trim(), lastMessageTime: new Date().toLocaleDateString() }
+          ? { ...conv, lastMessage: messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''), lastMessageTime: new Date().toLocaleDateString() }
           : conv
       ));
 
@@ -246,19 +323,26 @@ const ChatManagement = () => {
       await notificationService.sendMessageNotification(
         selectedConversation.buyerId,
         senderProfile.display_name || 'Real Estate Agent',
-        message.trim(),
+        messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''),
         selectedConversation.matchId,
         selectedConversation.propertyTitle
       );
 
     } catch (error) {
-      console.error('Error in handleSendMessage:', error);
+      console.error('Error in sendMessageWithAttachment:', error);
       toast({
         title: "Error",
         description: "Failed to send message.",
         variant: "destructive",
       });
     }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim() || !user || !selectedConversation) return;
+
+    await sendMessageWithAttachment(message.trim());
   };
 
   const filteredConversations = conversations.filter(conv =>
@@ -396,7 +480,34 @@ const ChatManagement = () => {
                           : 'bg-card text-card-foreground border border-border'
                       }`}
                     >
-                      <p className="text-sm">{msg.text}</p>
+                      {msg.text && <p className="text-sm">{msg.text}</p>}
+                      
+                      {msg.attachment && (
+                        <div className="mt-2">
+                          {msg.attachment.type.startsWith('image/') ? (
+                            <img 
+                              src={msg.attachment.url} 
+                              alt={msg.attachment.name}
+                              className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => window.open(msg.attachment.url, '_blank')}
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
+                              <Paperclip className="w-4 h-4" />
+                              <span className="text-sm truncate flex-1">{msg.attachment.name}</span>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-auto p-1"
+                                onClick={() => window.open(msg.attachment.url, '_blank')}
+                              >
+                                <Download className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
                       <p className={`text-xs mt-1 ${
                         msg.senderId === 'me' 
                           ? 'text-primary-foreground/70' 
@@ -414,13 +525,59 @@ const ChatManagement = () => {
             <div className="border-t border-border bg-card p-4">
               <form onSubmit={handleSendMessage}>
                 <div className="flex gap-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(file);
+                    }}
+                    accept="*/*"
+                  />
+                  <input
+                    type="file"
+                    ref={imageInputRef}
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(file);
+                    }}
+                    accept="image/*"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => imageInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    <Image className="w-4 h-4" />
+                  </Button>
                   <Input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type a message..."
+                    placeholder={uploading ? "Uploading..." : "Type a message..."}
                     className="flex-1"
+                    disabled={uploading}
                   />
-                  <Button type="submit" variant="default" size="icon">
+                  <Button 
+                    type="submit" 
+                    variant="default" 
+                    size="icon"
+                    disabled={uploading || (!message.trim())}
+                  >
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>
