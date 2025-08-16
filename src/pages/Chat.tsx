@@ -296,12 +296,22 @@ const Chat = () => {
         return null;
       }
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data: signedUrlData, error: urlError } = await supabase.storage
         .from('chat-attachments')
-        .getPublicUrl(fileName);
+        .createSignedUrl(fileName, 3600); // 1 hour expiry
+
+      if (urlError) {
+        console.error('Signed URL error:', urlError);
+        toast({
+          title: "Upload Error",
+          description: "Failed to generate file URL.",
+          variant: "destructive",
+        });
+        return null;
+      }
 
       return {
-        url: publicUrl,
+        url: signedUrlData.signedUrl,
         type: file.type,
         name: file.name
       };
