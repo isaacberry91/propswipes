@@ -164,10 +164,10 @@ const Privacy = () => {
             </p>
             <div className="mt-4 p-4 bg-muted rounded-lg">
               <p className="text-muted-foreground">
-                <strong>Email:</strong> privacy@propswipes.com<br />
+                <strong>Email:</strong> support@propswipes.com<br />
                 <strong>Address:</strong> PropSwipes Privacy Team<br />
-                123 App Street<br />
-                Tech City, TC 12345
+                5 Willow road<br />
+                Woodmere, NY 11598
               </p>
             </div>
           </section>
