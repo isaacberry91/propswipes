@@ -169,14 +169,23 @@ const Subscription = () => {
 
   const PlanCard = ({ plan, type }: { plan: any, type: 'buyer' | 'seller' }) => {
     const Icon = plan.icon;
+    const isCurrentPlan = subscription.tier === getPlanTierFromProductId(plan.id);
+    const canUpgrade = subscription.isActive && !isCurrentPlan && isHigherTier(plan.id, subscription.tier);
+    const isDowngrade = subscription.isActive && !isCurrentPlan && !isHigherTier(plan.id, subscription.tier);
     
     return (
-      <Card className="p-6 relative overflow-hidden">
+      <Card className={`p-6 relative overflow-hidden ${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}>
         {plan.badge && (
           <Badge 
             className={`absolute top-4 right-4 text-white ${plan.badgeColor}`}
           >
             {plan.badge}
+          </Badge>
+        )}
+        
+        {isCurrentPlan && (
+          <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground">
+            Current Plan
           </Badge>
         )}
         
@@ -208,17 +217,54 @@ const Subscription = () => {
 
         <Button 
           onClick={() => handleSubscribe(plan.id)}
+          disabled={isCurrentPlan || isDowngrade}
           className={`w-full ${
+            isCurrentPlan ? "bg-muted text-muted-foreground cursor-not-allowed" :
+            isDowngrade ? "bg-muted text-muted-foreground cursor-not-allowed" :
             plan.badge === "Popular" ? "bg-blue-500 hover:bg-blue-600" :
             plan.badge === "Value" ? "bg-emerald-500 hover:bg-emerald-600" :
             plan.badge === "Pro" ? "bg-purple-500 hover:bg-purple-600" :
             "bg-amber-500 hover:bg-amber-600"
           } text-white`}
         >
-          Subscribe Now
+          {isCurrentPlan ? "Current Plan" : 
+           canUpgrade ? "Upgrade" : 
+           isDowngrade ? "Downgrade (Contact Support)" :
+           "Subscribe Now"}
         </Button>
       </Card>
     );
+  };
+
+  // Helper functions for subscription tier comparison
+  const getPlanTierFromProductId = (productId: string): string => {
+    switch (productId) {
+      case PRODUCT_IDS.BUYER_PRO:
+        return 'buyer_pro';
+      case PRODUCT_IDS.SELLER_BASIC:
+        return 'seller_basic';
+      case PRODUCT_IDS.SELLER_PROFESSIONAL:
+        return 'seller_professional';
+      case PRODUCT_IDS.SELLER_ENTERPRISE:
+        return 'seller_enterprise';
+      default:
+        return '';
+    }
+  };
+
+  const isHigherTier = (newProductId: string, currentTier: string | null): boolean => {
+    const tierHierarchy = {
+      'buyer_pro': 1,
+      'seller_basic': 2,
+      'seller_professional': 3,
+      'seller_enterprise': 4
+    };
+    
+    const newTier = getPlanTierFromProductId(newProductId);
+    const currentLevel = currentTier ? tierHierarchy[currentTier as keyof typeof tierHierarchy] || 0 : 0;
+    const newLevel = tierHierarchy[newTier as keyof typeof tierHierarchy] || 0;
+    
+    return newLevel > currentLevel;
   };
 
   if (!isReady) {
@@ -236,10 +282,20 @@ const Subscription = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Choose Your Plan</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-4">
+            {subscription.isActive ? 'Manage Your Subscription' : 'Choose Your Plan'}
+          </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Unlock the full potential of PropSwipes with our subscription plans
+            {subscription.isActive 
+              ? `You're currently on ${subscription.tier?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} plan. Upgrade to unlock more features!`
+              : 'Unlock the full potential of PropSwipes with our subscription plans'
+            }
           </p>
+          {subscription.isActive && subscription.subscriptionEnd && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Your subscription expires on {new Date(subscription.subscriptionEnd).toLocaleDateString()}
+            </p>
+          )}
         </div>
 
         {/* Platform Notice */}
