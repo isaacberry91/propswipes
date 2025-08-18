@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, MapPin, Bed, Bath, Square, DollarSign, Home } from "lucide-react";
+import { Edit, Eye, MapPin, Bed, Bath, Square, DollarSign, Home, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface Property {
   id: string;
@@ -97,6 +98,48 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
     navigate(`/property/${property.id}`);
   };
 
+  const handleDelete = async (property: Property) => {
+    try {
+      // Get user profile first
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (!profile) {
+        throw new Error('Profile not found');
+      }
+
+      // Soft delete the property by setting deleted_at timestamp
+      const { error } = await supabase
+        .from('properties')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', property.id)
+        .eq('owner_id', profile.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Property deleted",
+        description: "Your property has been deleted successfully.",
+        duration: 5000
+      });
+
+      // Refresh the properties list
+      fetchUserProperties();
+      onPropertyUpdate?.();
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      toast({
+        title: "Error deleting property",
+        description: "Could not delete your property. Please try again.",
+        variant: "destructive",
+        duration: 5000
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
@@ -179,6 +222,36 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                       <Edit className="w-3 h-3 mr-1" />
                       Edit
                     </Button>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="w-full h-8 text-xs"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "{property.title}"? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(property)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete Property
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
                 

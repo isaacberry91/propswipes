@@ -32,11 +32,13 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
+  const [deletedProperties, setDeletedProperties] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalProperties: 0,
     pendingProperties: 0,
-    totalMatches: 0
+    totalMatches: 0,
+    deletedProperties: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -63,14 +65,25 @@ const Admin = () => {
 
       console.log('🔧 Admin Debug: Users loaded:', usersData?.length);
 
-      // Load properties with detailed logging
+      // Load active properties with detailed logging
       const { data: propertiesData, error: propertiesError } = await supabase
         .from('properties')
         .select(`
           *,
           profiles!properties_owner_id_fkey(display_name)
         `)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
+
+      // Load deleted properties
+      const { data: deletedPropertiesData } = await supabase
+        .from('properties')
+        .select(`
+          *,
+          profiles!properties_owner_id_fkey(display_name)
+        `)
+        .not('deleted_at', 'is', null)
+        .order('deleted_at', { ascending: false });
 
       console.log('🔧 Admin Debug: Properties query result:', {
         data: propertiesData?.length,
@@ -84,14 +97,21 @@ const Admin = () => {
 
       const { count: propertyCount } = await supabase
         .from('properties')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .is('deleted_at', null);
 
       console.log('🔧 Admin Debug: Total properties count:', propertyCount);
 
       const { count: pendingCount, error: pendingError } = await supabase
         .from('properties')
         .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
+        .eq('status', 'pending')
+        .is('deleted_at', null);
+
+      const { count: deletedCount } = await supabase
+        .from('properties')
+        .select('*', { count: 'exact', head: true })
+        .not('deleted_at', 'is', null);
 
       console.log('🔧 Admin Debug: Pending count query result:', {
         count: pendingCount,
@@ -104,11 +124,13 @@ const Admin = () => {
 
       setUsers(usersData || []);
       setProperties(propertiesData || []);
+      setDeletedProperties(deletedPropertiesData || []);
       setStats({
         totalUsers: userCount || 0,
         totalProperties: propertyCount || 0,
         pendingProperties: pendingCount || 0,
-        totalMatches: matchCount || 0
+        totalMatches: matchCount || 0,
+        deletedProperties: deletedCount || 0
       });
     } catch (error) {
       console.error('Error loading admin data:', error);
@@ -294,10 +316,14 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="properties" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="properties">
               <Home className="w-4 h-4 mr-2" />
               Properties
+            </TabsTrigger>
+            <TabsTrigger value="deleted-properties">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Deleted
             </TabsTrigger>
             <TabsTrigger value="users">
               <Users className="w-4 h-4 mr-2" />
@@ -436,6 +462,88 @@ const Admin = () => {
                   ))}
                 </TableBody>
               </Table>
+            </Card>
+          </TabsContent>
+
+          {/* Deleted Properties Tab */}
+          <TabsContent value="deleted-properties">
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold">Deleted Properties</h3>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">
+                    {stats.deletedProperties} deleted properties
+                  </Badge>
+                </div>
+              </div>
+
+              {deletedProperties.length === 0 ? (
+                <div className="text-center py-12">
+                  <Trash2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">No deleted properties found</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Property</TableHead>
+                      <TableHead>Owner</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Deleted Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {deletedProperties.map((property) => (
+                      <TableRow key={property.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            {property.images && property.images.length > 0 && (
+                              <img 
+                                src={property.images[0]} 
+                                alt={property.title}
+                                className="w-16 h-12 object-cover rounded opacity-50"
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium text-muted-foreground">{property.title}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {property.city}, {property.state}
+                              </p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <p className="font-medium">{property.profiles?.display_name || 'Unknown'}</p>
+                        </TableCell>
+                        <TableCell>
+                          <p className="font-semibold text-muted-foreground">${property.price?.toLocaleString()}</p>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            Deleted
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <p className="text-sm text-muted-foreground">
+                            {property.deleted_at ? new Date(property.deleted_at).toLocaleDateString() : 'Unknown'}
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => window.open(`/property/${property.id}`, '_blank')}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </Card>
           </TabsContent>
 

@@ -167,6 +167,7 @@ export type Database = {
           bedrooms: number | null
           city: string
           created_at: string
+          deleted_at: string | null
           description: string | null
           id: string
           images: string[] | null
@@ -189,6 +190,7 @@ export type Database = {
           bedrooms?: number | null
           city: string
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           images?: string[] | null
@@ -211,6 +213,7 @@ export type Database = {
           bedrooms?: number | null
           city?: string
           created_at?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           images?: string[] | null
