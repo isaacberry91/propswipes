@@ -27,6 +27,7 @@ interface Property {
   status: string;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 interface PropertyManagerProps {
@@ -140,7 +141,11 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, deletedAt: string | null) => {
+    if (deletedAt) {
+      return <Badge className="bg-gray-100 text-gray-800 border-gray-200">Deleted</Badge>;
+    }
+    
     switch (status) {
       case 'approved':
         return <Badge className="bg-green-100 text-green-800 border-green-200">Live</Badge>;
@@ -198,7 +203,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                       </div>
                     )}
                     <div className="absolute top-3 right-3">
-                      {getStatusBadge(property.status)}
+                      {getStatusBadge(property.status, property.deleted_at)}
                     </div>
                   </div>
                   
@@ -218,40 +223,43 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                       size="sm"
                       onClick={() => handleEdit(property)}
                       className="w-full h-8 text-xs"
+                      disabled={!!property.deleted_at}
                     >
                       <Edit className="w-3 h-3 mr-1" />
                       Edit
                     </Button>
                     
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="w-full h-8 text-xs"
-                        >
-                          <Trash2 className="w-3 h-3 mr-1" />
-                          Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Property</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete "{property.title}"? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(property)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    {!property.deleted_at && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="w-full h-8 text-xs"
                           >
-                            Delete Property
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            <Trash2 className="w-3 h-3 mr-1" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{property.title}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(property)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete Property
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
                 </div>
                 
