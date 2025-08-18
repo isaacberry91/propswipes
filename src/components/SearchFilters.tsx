@@ -33,18 +33,14 @@ interface SearchFilters {
   sortBy: string;
 }
 
-const SearchFilters = () => {
+interface SearchFiltersProps {
+  filters: SearchFilters;
+  onFiltersChange: (filters: SearchFilters) => void;
+}
+
+const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [filters, setFilters] = useState<SearchFilters>({
-    priceRange: [200000, 2000000],
-    bedrooms: 'any',
-    bathrooms: 'any',
-    propertyType: 'any',
-    sqftRange: [500, 15000],
-    yearBuilt: [1950, 2024],
-    features: [],
-    sortBy: 'relevant'
-  });
+  const [localFilters, setLocalFilters] = useState<SearchFilters>(filters);
 
   const propertyTypes = [
     { value: 'any', label: 'Any Type' },
@@ -119,7 +115,7 @@ const SearchFilters = () => {
   };
 
   const toggleFeature = (feature: string) => {
-    setFilters(prev => ({
+    setLocalFilters(prev => ({
       ...prev,
       features: prev.features.includes(feature)
         ? prev.features.filter(f => f !== feature)
@@ -128,32 +124,34 @@ const SearchFilters = () => {
   };
 
   const resetFilters = () => {
-    setFilters({
-      priceRange: [200000, 2000000],
+    const defaultFilters = {
+      priceRange: [200000, 2000000] as [number, number],
       bedrooms: 'any',
       bathrooms: 'any',
       propertyType: 'any',
-      sqftRange: [500, 15000],
-      yearBuilt: [1950, 2024],
+      sqftRange: [500, 15000] as [number, number],
+      yearBuilt: [1950, 2024] as [number, number],
       features: [],
       sortBy: 'relevant'
-    });
+    };
+    setLocalFilters(defaultFilters);
   };
 
   const applyFilters = () => {
-    console.log('Applying filters:', filters);
+    console.log('Applying filters:', localFilters);
+    onFiltersChange(localFilters);
     setIsOpen(false);
   };
 
   const activeFiltersCount = () => {
     let count = 0;
-    if (filters.bedrooms !== 'any') count++;
-    if (filters.bathrooms !== 'any') count++;
-    if (filters.propertyType !== 'any') count++;
-    if (filters.features.length > 0) count++;
-    if (filters.priceRange[0] !== 200000 || filters.priceRange[1] !== 2000000) count++;
-    if (filters.sqftRange[0] !== 500 || filters.sqftRange[1] !== 15000) count++;
-    if (filters.yearBuilt[0] !== 1950 || filters.yearBuilt[1] !== 2024) count++;
+    if (localFilters.bedrooms !== 'any') count++;
+    if (localFilters.bathrooms !== 'any') count++;
+    if (localFilters.propertyType !== 'any') count++;
+    if (localFilters.features.length > 0) count++;
+    if (localFilters.priceRange[0] !== 200000 || localFilters.priceRange[1] !== 2000000) count++;
+    if (localFilters.sqftRange[0] !== 500 || localFilters.sqftRange[1] !== 15000) count++;
+    if (localFilters.yearBuilt[0] !== 1950 || localFilters.yearBuilt[1] !== 2024) count++;
     return count;
   };
 
@@ -196,16 +194,16 @@ const SearchFilters = () => {
             </Label>
             <div className="px-2">
               <Slider
-                value={filters.priceRange}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, priceRange: value as [number, number] }))}
+                value={localFilters.priceRange}
+                onValueChange={(value) => setLocalFilters(prev => ({ ...prev, priceRange: value as [number, number] }))}
                 min={50000}
                 max={5000000}
                 step={25000}
                 className="w-full"
               />
               <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>{formatPrice(filters.priceRange[0])}</span>
-                <span>{formatPrice(filters.priceRange[1])}</span>
+                <span>{formatPrice(localFilters.priceRange[0])}</span>
+                <span>{formatPrice(localFilters.priceRange[1])}</span>
               </div>
             </div>
           </div>
@@ -217,7 +215,7 @@ const SearchFilters = () => {
                 <Bed className="w-4 h-4" />
                 Bedrooms
               </Label>
-              <Select value={filters.bedrooms} onValueChange={(value) => setFilters(prev => ({ ...prev, bedrooms: value }))}>
+              <Select value={localFilters.bedrooms} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, bedrooms: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -236,7 +234,7 @@ const SearchFilters = () => {
                 <Bath className="w-4 h-4" />
                 Bathrooms
               </Label>
-              <Select value={filters.bathrooms} onValueChange={(value) => setFilters(prev => ({ ...prev, bathrooms: value }))}>
+              <Select value={localFilters.bathrooms} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, bathrooms: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -257,7 +255,7 @@ const SearchFilters = () => {
               <Home className="w-4 h-4" />
               Property Type
             </Label>
-            <Select value={filters.propertyType} onValueChange={(value) => setFilters(prev => ({ ...prev, propertyType: value }))}>
+            <Select value={localFilters.propertyType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, propertyType: value }))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -279,16 +277,16 @@ const SearchFilters = () => {
             </Label>
             <div className="px-2">
               <Slider
-                value={filters.sqftRange}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, sqftRange: value as [number, number] }))}
+                value={localFilters.sqftRange}
+                onValueChange={(value) => setLocalFilters(prev => ({ ...prev, sqftRange: value as [number, number] }))}
                 min={200}
                 max={25000}
                 step={100}
                 className="w-full"
               />
               <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>{formatSqft(filters.sqftRange[0])}</span>
-                <span>{formatSqft(filters.sqftRange[1])}</span>
+                <span>{formatSqft(localFilters.sqftRange[0])}</span>
+                <span>{formatSqft(localFilters.sqftRange[1])}</span>
               </div>
             </div>
           </div>
@@ -301,16 +299,16 @@ const SearchFilters = () => {
             </Label>
             <div className="px-2">
               <Slider
-                value={filters.yearBuilt}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, yearBuilt: value as [number, number] }))}
+                value={localFilters.yearBuilt}
+                onValueChange={(value) => setLocalFilters(prev => ({ ...prev, yearBuilt: value as [number, number] }))}
                 min={1900}
                 max={2024}
                 step={5}
                 className="w-full"
               />
               <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>{filters.yearBuilt[0]}</span>
-                <span>{filters.yearBuilt[1]}</span>
+                <span>{localFilters.yearBuilt[0]}</span>
+                <span>{localFilters.yearBuilt[1]}</span>
               </div>
             </div>
           </div>
@@ -323,7 +321,7 @@ const SearchFilters = () => {
                 <Card
                   key={feature.name}
                   className={`p-3 cursor-pointer transition-all hover:shadow-md hover-scale text-center ${
-                    filters.features.includes(feature.name)
+                    localFilters.features.includes(feature.name)
                       ? 'ring-2 ring-primary bg-primary/5 scale-105' 
                       : 'hover:bg-accent/50'
                   }`}
@@ -342,7 +340,7 @@ const SearchFilters = () => {
               <TrendingUp className="w-4 h-4" />
               Sort By
             </Label>
-            <Select value={filters.sortBy} onValueChange={(value) => setFilters(prev => ({ ...prev, sortBy: value }))}>
+            <Select value={localFilters.sortBy} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, sortBy: value }))}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

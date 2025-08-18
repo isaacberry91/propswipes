@@ -5,7 +5,7 @@ import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import SearchFilters from "@/components/SearchFilters";
+import SearchFiltersComponent from "@/components/SearchFilters";
 import LocationSearch from "@/components/LocationSearch";
 import SubscriptionPrompt from "@/components/SubscriptionPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -26,12 +26,33 @@ interface Property {
   property_type: string;
 }
 
+interface SearchFiltersType {
+  priceRange: [number, number];
+  bedrooms: string;
+  bathrooms: string;
+  propertyType: string;
+  sqftRange: [number, number];
+  yearBuilt: [number, number];
+  features: string[];
+  sortBy: string;
+}
+
 const Discover = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [selectedLocation, setSelectedLocation] = useState("Seattle, WA");
+  const [searchFilters, setSearchFilters] = useState<SearchFiltersType>({
+    priceRange: [200000, 2000000],
+    bedrooms: 'any',
+    bathrooms: 'any',
+    propertyType: 'any',
+    sqftRange: [500, 15000],
+    yearBuilt: [1950, 2024],
+    features: [],
+    sortBy: 'relevant'
+  });
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [dailyLikesUsed, setDailyLikesUsed] = useState(0);
@@ -54,7 +75,7 @@ const Discover = () => {
     if (user && userProfile) {
       fetchProperties();
     }
-  }, [user, userProfile]);
+  }, [user, userProfile, selectedLocation, searchFilters]);
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -109,16 +130,93 @@ const Discover = () => {
 
       const swipedIds = (swipes || []).map((s: any) => s.property_id);
 
-      // 2) Fetch approved properties excluding those swiped
+      // 2) Build query with location and filters
       let query = supabase
         .from('properties')
         .select('*')
         .eq('status', 'approved')
-        .limit(20);
+        .is('deleted_at', null); // Exclude soft-deleted properties
 
+      // Location filtering - extract city/state from selected location
+      if (selectedLocation && selectedLocation !== 'All') {
+        const locationParts = selectedLocation.split(', ');
+        if (locationParts.length >= 2) {
+          const city = locationParts[0].trim();
+          const state = locationParts[1].trim();
+          query = query.ilike('city', `%${city}%`).ilike('state', `%${state}%`);
+        } else {
+          // If only one part, search in both city and state
+          const location = locationParts[0].trim();
+          query = query.or(`city.ilike.%${location}%,state.ilike.%${location}%`);
+        }
+      }
+
+      // Price range filtering
+      if (searchFilters.priceRange[0] > 50000 || searchFilters.priceRange[1] < 5000000) {
+        query = query.gte('price', searchFilters.priceRange[0]).lte('price', searchFilters.priceRange[1]);
+      }
+
+      // Property type filtering
+      if (searchFilters.propertyType !== 'any') {
+        query = query.eq('property_type', searchFilters.propertyType as any);
+      }
+
+      // Bedrooms filtering
+      if (searchFilters.bedrooms !== 'any') {
+        if (searchFilters.bedrooms === 'studio') {
+          query = query.or('bedrooms.is.null,bedrooms.eq.0');
+        } else {
+          const bedroomCount = parseInt(searchFilters.bedrooms);
+          if (!isNaN(bedroomCount)) {
+            query = query.gte('bedrooms', bedroomCount);
+          }
+        }
+      }
+
+      // Bathrooms filtering
+      if (searchFilters.bathrooms !== 'any') {
+        const bathroomCount = parseFloat(searchFilters.bathrooms);
+        if (!isNaN(bathroomCount)) {
+          query = query.gte('bathrooms', bathroomCount);
+        }
+      }
+
+      // Square footage filtering
+      if (searchFilters.sqftRange[0] > 200 || searchFilters.sqftRange[1] < 25000) {
+        query = query.gte('square_feet', searchFilters.sqftRange[0]).lte('square_feet', searchFilters.sqftRange[1]);
+      }
+
+      // Exclude properties the user has already swiped
       if (swipedIds.length > 0) {
         query = query.not('id', 'in', `(${swipedIds.join(',')})`);
       }
+
+      // Exclude user's own properties
+      query = query.neq('owner_id', userProfile.id);
+
+      // Sorting
+      switch (searchFilters.sortBy) {
+        case 'price-low':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price-high':
+          query = query.order('price', { ascending: false });
+          break;
+        case 'newest':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'sqft-large':
+          query = query.order('square_feet', { ascending: false });
+          break;
+        case 'sqft-small':
+          query = query.order('square_feet', { ascending: true });
+          break;
+        default:
+          query = query.order('created_at', { ascending: false });
+      }
+
+      // Limit results
+      query = query.limit(20);
 
       const { data, error } = await query;
 
@@ -126,13 +224,28 @@ const Discover = () => {
         console.error('Error fetching properties:', error);
         toast({
           title: "Error loading properties",
-          description: "We'll show you some sample properties instead.",
+          description: "Failed to load properties. Please try again.",
           variant: "destructive",
           duration: 5000
         });
         setProperties([]);
       } else {
-        setProperties(data || []);
+        let filteredData = data || [];
+
+        // Features/amenities filtering (client-side since it's array-based)
+        if (searchFilters.features.length > 0) {
+          filteredData = filteredData.filter((property: any) => {
+            const propertyFeatures = property.amenities || [];
+            return searchFilters.features.some(feature => 
+              propertyFeatures.some((amenity: string) => 
+                amenity.toLowerCase().includes(feature.toLowerCase())
+              )
+            );
+          });
+        }
+
+        setProperties(filteredData);
+        console.log(`🔍 Loaded ${filteredData.length} properties for location: ${selectedLocation}`);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -368,7 +481,14 @@ const Discover = () => {
                   {10 - dailyLikesUsed} likes left
                 </div>
               )}
-              <SearchFilters />
+              <SearchFiltersComponent 
+                filters={searchFilters}
+                onFiltersChange={(newFilters) => {
+                  console.log('🔍 Filters changed:', newFilters);
+                  setSearchFilters(newFilters);
+                  setCurrentIndex(0);
+                }}
+              />
             </div>
           </div>
           
