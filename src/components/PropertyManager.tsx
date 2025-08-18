@@ -219,52 +219,57 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                       View
                     </Button>
                     
-                    <Button
-                      size="sm"
-                      onClick={() => handleEdit(property)}
-                      className="w-full h-8 text-xs"
-                      disabled={!!property.deleted_at}
-                    >
-                      <Edit className="w-3 h-3 mr-1" />
-                      Edit
-                    </Button>
-                    
-                    {!property.deleted_at && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="w-full h-8 text-xs"
-                          >
-                            <Trash2 className="w-3 h-3 mr-1" />
-                            Delete
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Property</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{property.title}"? This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDelete(property)}
-                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    {!property.deleted_at ? (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleEdit(property)}
+                          className="w-full h-8 text-xs"
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          Edit
+                        </Button>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="w-full h-8 text-xs"
                             >
-                              Delete Property
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete "{property.title}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(property)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Delete Property
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </>
+                    ) : (
+                      <div className="text-center text-sm text-muted-foreground py-2">
+                        Property Deleted
+                      </div>
                     )}
                   </div>
                 </div>
                 
                 {/* Right Side - All Content */}
-                <div className="flex-1 p-6 min-w-0">
+                <div className={`flex-1 p-6 min-w-0 ${property.deleted_at ? 'opacity-60' : ''}`}>
                   <div className="flex flex-col h-full justify-between">
                     {/* Header Section */}
                     <div className="space-y-3">
