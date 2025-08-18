@@ -65,6 +65,7 @@ const Matches = () => {
         .from('properties')
         .select('id')
         .eq('owner_id', userProfile.id)
+        .is('deleted_at', null) // Exclude soft-deleted properties
         .limit(1);
 
       setHasProperties(userProperties && userProperties.length > 0);

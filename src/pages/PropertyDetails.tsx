@@ -88,6 +88,7 @@ const PropertyDetails = () => {
           )
         `)
         .eq('id', propertyId)
+        .is('deleted_at', null) // Exclude soft-deleted properties
         .single();
 
       if (error) throw error;

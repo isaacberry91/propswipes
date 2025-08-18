@@ -426,6 +426,7 @@ const Discover = () => {
         .from('properties')
         .select('*')
         .eq('status', 'approved')
+        .is('deleted_at', null) // Exclude soft-deleted properties
         .or(`address.ilike.%${location}%,city.ilike.%${location.split(',')[0].trim()}%`)
         .limit(20);
 
