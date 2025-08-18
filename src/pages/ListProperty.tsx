@@ -73,7 +73,9 @@ const ListProperty = () => {
 
   // Pre-fill form data when editing
   useEffect(() => {
+    console.log('🔧 ListProperty useEffect - isEditing:', isEditing, 'editingProperty:', editingProperty);
     if (isEditing && editingProperty) {
+      console.log('🔧 Pre-filling form data with:', editingProperty);
       setFormData({
         title: editingProperty.title || "",
         propertyType: editingProperty.property_type || "",
@@ -103,6 +105,7 @@ const ListProperty = () => {
         features: [],
       });
       setImageUrls(editingProperty.images || []);
+      console.log('🔧 Form data and images populated');
     }
   }, [isEditing, editingProperty]);
 

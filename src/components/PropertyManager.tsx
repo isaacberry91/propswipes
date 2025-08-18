@@ -85,6 +85,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
   };
 
   const handleEdit = (property: Property) => {
+    console.log('🔧 Edit button clicked for property:', property);
     // Navigate to ListProperty page with property data for editing
     navigate('/list', { 
       state: { 
@@ -92,6 +93,7 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
         isEditing: true 
       } 
     });
+    console.log('🔧 Navigation initiated to /list with editing data');
   };
 
   const handleView = (property: Property) => {
