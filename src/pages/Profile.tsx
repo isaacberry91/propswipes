@@ -327,26 +327,26 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="profile" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+          <TabsList className="flex flex-wrap justify-center gap-1 p-1 h-auto">
+            <TabsTrigger value="profile" className="flex items-center gap-1 py-2 px-3 text-xs">
               <User className="w-4 h-4" />
-              <span className="text-xs sm:text-sm truncate">Profile</span>
+              <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="properties" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+            <TabsTrigger value="properties" className="flex items-center gap-1 py-2 px-3 text-xs">
               <Home className="w-4 h-4" />
-              <span className="text-xs sm:text-sm truncate">Properties</span>
+              <span>Properties</span>
             </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+            <TabsTrigger value="subscription" className="flex items-center gap-1 py-2 px-3 text-xs">
               <CreditCard className="w-4 h-4" />
-              <span className="text-xs sm:text-sm truncate">Subscription</span>
+              <span>Subscription</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+            <TabsTrigger value="settings" className="flex items-center gap-1 py-2 px-3 text-xs">
               <Settings className="w-4 h-4" />
-              <span className="text-xs sm:text-sm truncate">Settings</span>
+              <span>Settings</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+            <TabsTrigger value="security" className="flex items-center gap-1 py-2 px-3 text-xs">
               <Shield className="w-4 h-4" />
-              <span className="text-xs sm:text-sm truncate">Security</span>
+              <span>Security</span>
             </TabsTrigger>
           </TabsList>
 
