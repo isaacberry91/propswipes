@@ -60,10 +60,27 @@ const Profile = () => {
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
         
       if (error) throw error;
-      setUserProfile(data);
+
+      if (!data) {
+        const { data: created, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            display_name: (user.user_metadata as any)?.display_name || user.email?.split('@')[0] || null,
+            user_type: (user.user_metadata as any)?.user_type || 'buyer',
+            phone: (user.user_metadata as any)?.phone || null,
+            location: (user.user_metadata as any)?.location || null,
+          })
+          .select('*')
+          .single();
+        if (insertError) throw insertError;
+        setUserProfile(created);
+      } else {
+        setUserProfile(data);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
