@@ -42,7 +42,7 @@ const Discover = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState("Seattle, WA");
+  const [selectedLocation, setSelectedLocation] = useState("");
   const [searchFilters, setSearchFilters] = useState<SearchFiltersType>({
     priceRange: [200000, 2000000],
     bedrooms: 'any',
@@ -103,6 +103,14 @@ const Discover = () => {
       }
 
       setUserProfile(data);
+
+      // Set user's location as default search location if available
+      if (data?.location && !selectedLocation) {
+        setSelectedLocation(data.location);
+      } else if (!selectedLocation) {
+        // Fallback to Seattle, WA if no user location
+        setSelectedLocation("Seattle, WA");
+      }
 
       // Daily likes reset logic
       const today = new Date().toDateString();
