@@ -142,6 +142,7 @@ const Chat = () => {
           ),
           buyer_profile:profiles!buyer_id (
             id,
+            user_id,
             display_name,
             avatar_url,
             user_type,
@@ -151,6 +152,7 @@ const Chat = () => {
           ),
           seller_profile:profiles!seller_id (
             id,
+            user_id,
             display_name,
             avatar_url,
             user_type,
@@ -174,9 +176,18 @@ const Chat = () => {
         return;
       }
 
+      // Fetch profile data with emails using RPC
+      const [buyerProfileResult, sellerProfileResult] = await Promise.all([
+        supabase.rpc('get_profile_with_email', { profile_user_id: matchData.buyer_profile.user_id }),
+        supabase.rpc('get_profile_with_email', { profile_user_id: matchData.seller_profile.user_id })
+      ]);
+
+      const buyerProfile = buyerProfileResult.data?.[0];
+      const sellerProfile = sellerProfileResult.data?.[0];
+
       // Transform the data
       const isUserBuyer = matchData.buyer_id === userProfile.id;
-      const otherUser = isUserBuyer ? matchData.seller_profile : matchData.buyer_profile;
+      const otherUser = isUserBuyer ? sellerProfile : buyerProfile;
       const property = matchData.properties;
 
       const transformedMatch = {
@@ -184,7 +195,7 @@ const Chat = () => {
         buyerId: matchData.buyer_id,
         sellerId: matchData.seller_id,
         user: {
-          name: otherUser?.display_name || `User ${otherUser?.id?.slice(-8)}` || 'Unknown User',
+          name: otherUser?.display_name || otherUser?.email || 'Unknown User',
           avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
           type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer',
           bio: otherUser?.bio || 'No bio available',

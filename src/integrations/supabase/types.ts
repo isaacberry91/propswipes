@@ -363,6 +363,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_profile_with_email: {
+        Args: { profile_user_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          email: string
+          id: string
+          location: string
+          phone: string
+          user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }[]
+      }
       get_user_profile_id_for_auth_user: {
         Args: Record<PropertyKey, never>
         Returns: string
