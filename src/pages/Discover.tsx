@@ -81,7 +81,8 @@ const Discover = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      // 1) Try to get active (non-deleted) profile
+      let { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -91,6 +92,22 @@ const Discover = () => {
         console.error('Error fetching profile on Discover:', error);
       }
 
+      // 2) If not found, try to reactivate a soft-deleted profile
+      if (!data) {
+        await supabase
+          .from('profiles')
+          .update({ deleted_at: null })
+          .eq('user_id', user.id);
+
+        const { data: reFetched } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (reFetched) data = reFetched;
+      }
+
+      // 3) If still not found, create one; handle 409 by refetching
       if (!data) {
         const { data: created, error: insertError } = await supabase
           .from('profiles')
@@ -105,21 +122,28 @@ const Discover = () => {
           .single();
 
         if (insertError) {
-          console.error('Error creating profile on Discover:', insertError);
-          return;
+          // Duplicate or other error; attempt final fetch (covers 409 unique violation)
+          const { data: finalFetch } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          if (finalFetch) {
+            data = finalFetch;
+          } else {
+            console.error('Error creating profile on Discover:', insertError);
+            return;
+          }
+        } else {
+          data = created;
         }
-        setUserProfile(created);
-      } else {
-        setUserProfile(data);
       }
 
-      // Check daily likes usage
-      const profileRow = data as any || (await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle()).data;
+      // Set local state
+      if (data) setUserProfile(data);
 
+      // 4) Daily likes reset logic based on the profile we've got
+      const profileRow: any = data;
       if (profileRow) {
         const today = new Date().toDateString();
         const resetDate = profileRow.daily_likes_reset_date ? new Date(profileRow.daily_likes_reset_date).toDateString() : null;
