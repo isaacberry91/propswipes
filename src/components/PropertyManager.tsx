@@ -52,8 +52,8 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
     
     try {
       // Get user profile first
-      // Get or create user profile first
-      const { data: profile, error: profileError } = await supabase
+      // Get or create/reactivate user profile first
+      let { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('user_id', user.id)
@@ -62,21 +62,41 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
       if (profileError) throw profileError;
 
       let profileId = profile?.id as string | undefined;
+
+      if (!profileId) {
+        // Attempt to reactivate soft-deleted profile
+        await supabase.from('profiles').update({ deleted_at: null }).eq('user_id', user.id);
+        const { data: reFetched } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        profileId = reFetched?.id;
+      }
+
       if (!profileId) {
         const { data: created, error: insertError } = await supabase
           .from('profiles')
           .insert({
             user_id: user.id,
             display_name: user.user_metadata?.display_name ?? user.email?.split('@')[0] ?? null,
-            user_type: (user.user_metadata as any)?.user_type ?? 'buyer',
-            phone: (user.user_metadata as any)?.phone ?? null,
-            location: (user.user_metadata as any)?.location ?? null,
           })
           .select('id')
           .single();
-        if (insertError) throw insertError;
-        profileId = created!.id;
+        if (insertError) {
+          // if conflict, fetch again
+          const { data: fetchAgain } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          profileId = fetchAgain?.id;
+        } else {
+          profileId = created!.id;
+        }
       }
+
+      if (!profileId) throw new Error('Profile not found');
 
       // Fetch properties owned by the user
       const { data, error } = await supabase
@@ -119,9 +139,8 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
 
   const handleDelete = async (property: Property) => {
     try {
-      // Get user profile first
-      // Get or create user profile first
-      const { data: profile, error: profileError } = await supabase
+      // Get user profile first (reactivate/create if needed)
+      let { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('user_id', user?.id as string)
@@ -131,13 +150,31 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
 
       let profileId = profile?.id as string | undefined;
       if (!profileId && user?.id) {
+        await supabase.from('profiles').update({ deleted_at: null }).eq('user_id', user.id);
+        const { data: reFetched } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        profileId = reFetched?.id;
+      }
+
+      if (!profileId && user?.id) {
         const { data: created, error: insertError } = await supabase
           .from('profiles')
           .insert({ user_id: user.id })
           .select('id')
           .single();
-        if (insertError) throw insertError;
-        profileId = created!.id;
+        if (insertError) {
+          const { data: fetchAgain } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          profileId = fetchAgain?.id;
+        } else {
+          profileId = created!.id;
+        }
       }
 
       // Soft delete the property by setting deleted_at timestamp

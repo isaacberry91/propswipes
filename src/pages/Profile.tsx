@@ -56,7 +56,8 @@ const Profile = () => {
     if (!user) return;
     
     try {
-      const { data, error } = await supabase
+      // Try to get active profile (RLS hides soft-deleted rows)
+      let { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -65,6 +66,24 @@ const Profile = () => {
       if (error) throw error;
 
       if (!data) {
+        // Attempt to reactivate if a soft-deleted row exists
+        await supabase
+          .from('profiles')
+          .update({ deleted_at: null })
+          .eq('user_id', user.id);
+
+        const { data: reFetched } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (reFetched) {
+          setUserProfile(reFetched);
+          return;
+        }
+
+        // Create a fresh profile if still missing
         const { data: created, error: insertError } = await supabase
           .from('profiles')
           .insert({
@@ -76,8 +95,18 @@ const Profile = () => {
           })
           .select('*')
           .single();
-        if (insertError) throw insertError;
-        setUserProfile(created);
+
+        if (insertError) {
+          // If conflict (already exists), just fetch again
+          const { data: finalFetch } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          if (finalFetch) setUserProfile(finalFetch);
+        } else {
+          setUserProfile(created);
+        }
       } else {
         setUserProfile(data);
       }
