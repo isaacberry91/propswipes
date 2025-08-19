@@ -184,7 +184,7 @@ const Chat = () => {
         buyerId: matchData.buyer_id,
         sellerId: matchData.seller_id,
         user: {
-          name: otherUser?.display_name || 'Unknown User',
+          name: otherUser?.display_name || `User ${otherUser?.id?.slice(-8)}` || 'Unknown User',
           avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
           type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer',
           bio: otherUser?.bio || 'No bio available',
