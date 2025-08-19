@@ -26,21 +26,11 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedRadius, setSelectedRadius] = useState(10);
   const [databaseSuggestions, setDatabaseSuggestions] = useState<LocationSuggestion[]>([]);
+  const [popularLocations, setPopularLocations] = useState<LocationSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [recentSearches] = useState([
     "1234 Main St, Seattle, WA", "456 Oak Ave, Portland, OR", "789 Pine St, San Francisco, CA"
   ]);
-
-  const popularLocations = [
-    { name: "Seattle, WA", properties: "2,400+ properties" },
-    { name: "Portland, OR", properties: "1,800+ properties" },
-    { name: "San Francisco, CA", properties: "3,200+ properties" },
-    { name: "Los Angeles, CA", properties: "5,100+ properties" },
-    { name: "New York, NY", properties: "4,800+ properties" },
-    { name: "Chicago, IL", properties: "2,900+ properties" },
-    { name: "Austin, TX", properties: "2,100+ properties" },
-    { name: "Denver, CO", properties: "1,900+ properties" }
-  ];
 
   // Debounced search function
   const searchLocationsInDatabase = useCallback(async (query: string) => {
@@ -119,6 +109,53 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
       setLoading(false);
     }
   }, []);
+
+  // Load popular locations from database
+  const loadPopularLocations = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('city, state')
+        .eq('status', 'approved')
+        .is('deleted_at', null);
+
+      if (error) {
+        console.error('Error loading popular locations:', error);
+        return;
+      }
+
+      // Group by city, state and count properties
+      const locationMap = new Map<string, number>();
+      data?.forEach((property) => {
+        const cityState = `${property.city}, ${property.state}`;
+        locationMap.set(cityState, (locationMap.get(cityState) || 0) + 1);
+      });
+
+      // Convert to array and sort by count, take top 8
+      const popular = Array.from(locationMap.entries())
+        .map(([location, count]) => {
+          const [city, state] = location.split(', ');
+          return {
+            address: '',
+            city,
+            state,
+            count,
+            full_location: location
+          };
+        })
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8);
+
+      setPopularLocations(popular);
+    } catch (error) {
+      console.error('Error loading popular locations:', error);
+    }
+  }, []);
+
+  // Load popular locations on mount
+  useEffect(() => {
+    loadPopularLocations();
+  }, [loadPopularLocations]);
 
   // Debounce the search
   useEffect(() => {
@@ -256,25 +293,25 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
             )}
 
             {/* Popular Locations */}
-            {!searchValue && (
+            {!searchValue && popularLocations.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">
                   Popular Areas
                 </h4>
                 <div className="grid gap-2">
-                  {popularLocations.map((location) => (
+                  {popularLocations.map((location, index) => (
                     <div
-                      key={location.name}
+                      key={`${location.full_location}-${index}`}
                       className="p-3 hover:bg-accent cursor-pointer rounded-md border border-border/50 hover:border-primary/50 transition-colors"
-                      onClick={() => handleLocationSelect(location.name)}
+                      onClick={() => handleLocationSelect(location.full_location)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-primary" />
-                          <span className="font-medium">{location.name}</span>
+                          <span className="font-medium">{location.full_location}</span>
                         </div>
                         <Badge variant="secondary" className="text-xs">
-                          {location.properties}
+                          {location.count} {location.count === 1 ? 'property' : 'properties'}
                         </Badge>
                       </div>
                     </div>
