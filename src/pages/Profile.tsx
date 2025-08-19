@@ -453,23 +453,23 @@ const Profile = () => {
           <TabsList className="flex justify-between gap-0 p-0.5 h-auto">
             <TabsTrigger value="profile" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
               <User className="w-2.5 h-2.5" />
-              <span className="hidden xs:inline sm:inline">Profile</span>
+              <span>Profile</span>
             </TabsTrigger>
             <TabsTrigger value="properties" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
               <Home className="w-2.5 h-2.5" />
-              <span className="hidden xs:inline sm:inline">Properties</span>
+              <span>Properties</span>
             </TabsTrigger>
             <TabsTrigger value="subscription" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
               <CreditCard className="w-2.5 h-2.5" />
-              <span className="hidden xs:inline sm:inline">Subscription</span>
+              <span>Subscription</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
               <Settings className="w-2.5 h-2.5" />
-              <span className="hidden xs:inline sm:inline">Settings</span>
+              <span>Settings</span>
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
               <Shield className="w-2.5 h-2.5" />
-              <span className="hidden xs:inline sm:inline">Security</span>
+              <span>Security</span>
             </TabsTrigger>
           </TabsList>
 
