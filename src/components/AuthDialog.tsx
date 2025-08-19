@@ -124,6 +124,7 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
     toast({
       title: "Welcome back! 🎉",
       description: "You've been successfully signed in to PropSwipes.",
+      duration: 5000
     });
     setIsOpen(false);
   };
@@ -146,6 +147,7 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
     toast({
       title: "Account created! 🚀",
       description: `Welcome to PropSwipes, ${formData.firstName}! Your profile is ready.`,
+      duration: 5000
     });
     setIsOpen(false);
     setCurrentStep(1);
