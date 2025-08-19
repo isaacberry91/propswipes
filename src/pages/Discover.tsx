@@ -43,6 +43,7 @@ const Discover = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedRadius, setSelectedRadius] = useState(10);
   const [searchFilters, setSearchFilters] = useState<SearchFiltersType>({
     priceRange: [200000, 2000000],
     bedrooms: 'any',
@@ -75,7 +76,7 @@ const Discover = () => {
     if (user && userProfile) {
       fetchProperties();
     }
-  }, [user, userProfile, selectedLocation, searchFilters]);
+  }, [user, userProfile, selectedLocation, selectedRadius, searchFilters]);
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -131,6 +132,40 @@ const Discover = () => {
       console.error('Unexpected error in fetchUserProfile:', e);
     }
   };
+  // Helper function to calculate distance between two coordinates
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
+
+  // Helper function to geocode an address
+  const geocodeAddress = async (address: string): Promise<{ lat: number; lng: number } | null> => {
+    try {
+      // Simple geocoding using a free service (you may want to use a more robust solution)
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
+      );
+      const data = await response.json();
+      
+      if (data && data[0]) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return null;
+    }
+  };
+
   const fetchProperties = async () => {
     setLoading(true);
     try {
@@ -148,6 +183,8 @@ const Discover = () => {
 
       if (swipesError) {
         console.error('Error fetching user swipes:', swipesError);
+        setLoading(false);
+        return;
       }
 
       const swipedIds = (swipes || []).map((s: any) => s.property_id);
@@ -158,20 +195,6 @@ const Discover = () => {
         .select('*')
         .eq('status', 'approved')
         .is('deleted_at', null); // Exclude soft-deleted properties
-
-      // Location filtering - extract city/state from selected location
-      if (selectedLocation && selectedLocation !== 'All') {
-        const locationParts = selectedLocation.split(', ');
-        if (locationParts.length >= 2) {
-          const city = locationParts[0].trim();
-          const state = locationParts[1].trim();
-          query = query.ilike('city', `%${city}%`).ilike('state', `%${state}%`);
-        } else {
-          // If only one part, search in both city and state
-          const location = locationParts[0].trim();
-          query = query.or(`city.ilike.%${location}%,state.ilike.%${location}%`);
-        }
-      }
 
       // Price range filtering
       if (searchFilters.priceRange[0] > 50000 || searchFilters.priceRange[1] < 5000000) {
@@ -253,6 +276,40 @@ const Discover = () => {
         setProperties([]);
       } else {
         let filteredData = data || [];
+
+        // Location-based radius filtering (client-side)
+        if (selectedLocation && selectedLocation !== 'All') {
+          const searchCoords = await geocodeAddress(selectedLocation);
+          if (searchCoords) {
+            // Filter properties within radius
+            filteredData = filteredData.filter((property: any) => {
+              if (property.latitude && property.longitude) {
+                const distance = calculateDistance(
+                  searchCoords.lat, 
+                  searchCoords.lng, 
+                  property.latitude, 
+                  property.longitude
+                );
+                return distance <= selectedRadius;
+              }
+              
+              // Fallback to text-based matching if no coordinates
+              const addressMatch = property.address?.toLowerCase().includes(selectedLocation.toLowerCase());
+              const cityMatch = property.city?.toLowerCase().includes(selectedLocation.split(',')[0]?.trim().toLowerCase());
+              const stateMatch = property.state?.toLowerCase().includes(selectedLocation.split(',')[1]?.trim().toLowerCase());
+              return addressMatch || cityMatch || stateMatch;
+            });
+          } else {
+            // Fallback to text-based search if geocoding fails
+            filteredData = filteredData.filter((property: any) => {
+              const addressMatch = property.address?.toLowerCase().includes(selectedLocation.toLowerCase());
+              const cityMatch = property.city?.toLowerCase().includes(selectedLocation.split(',')[0]?.trim().toLowerCase());
+              const stateMatch = selectedLocation.split(',')[1] ? 
+                property.state?.toLowerCase().includes(selectedLocation.split(',')[1]?.trim().toLowerCase()) : false;
+              return addressMatch || cityMatch || stateMatch;
+            });
+          }
+        }
 
         // Features/amenities filtering (client-side since it's array-based)
         if (searchFilters.features.length > 0) {
@@ -423,62 +480,9 @@ const Discover = () => {
 
   const getPropertiesForLocation = async (location: string, radius: number = 10) => {
     setSelectedLocation(location);
-    setLoading(true);
-    
-    try {
-      if (!userProfile) {
-        setLoading(false);
-        return;
-      }
-
-      // 1) Get all property IDs the user has already swiped (liked or disliked)
-      const { data: swipes, error: swipesError } = await supabase
-        .from('property_swipes')
-        .select('property_id')
-        .eq('user_id', userProfile.id);
-
-      if (swipesError) {
-        console.error('Error fetching user swipes (location search):', swipesError);
-      }
-
-      const swipedIds = (swipes || []).map((s: any) => s.property_id);
-
-      // 2) Fetch approved properties for location excluding those swiped
-      let query = supabase
-        .from('properties')
-        .select('*')
-        .eq('status', 'approved')
-        .is('deleted_at', null) // Exclude soft-deleted properties
-        .or(`address.ilike.%${location}%,city.ilike.%${location.split(',')[0].trim()}%`)
-        .limit(20);
-
-      if (swipedIds.length > 0) {
-        query = query.not('id', 'in', `(${swipedIds.join(',')})`);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      
-      setProperties(data || []);
-      setCurrentIndex(0);
-      
-      toast({
-        title: "Location Updated! 📍", 
-        description: `Found ${data?.length || 0} properties within ${radius} miles of ${location}`,
-        duration: 5000
-      });
-    } catch (error) {
-      console.error('Error fetching properties by location:', error);
-      toast({
-        title: "Error",
-        description: "Could not load properties for that location.",
-        variant: "destructive",
-        duration: 5000
-      });
-    } finally {
-      setLoading(false);
-    }
+    setSelectedRadius(radius);
+    console.log(`🔍 Searching for properties near "${location}" within ${radius} miles`);
+    // The main fetchProperties function will handle the filtering based on the new selectedLocation
   };
 
   return (

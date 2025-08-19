@@ -174,6 +174,14 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
     setShowSuggestions(false);
   };
 
+  // Update the selected radius and trigger onChange
+  const handleRadiusChange = (newRadius: number) => {
+    setSelectedRadius(newRadius);
+    if (searchValue) {
+      onChange(searchValue, newRadius);
+    }
+  };
+
   const getCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -235,7 +243,7 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
                 Search Radius
               </h4>
-              <Select value={selectedRadius.toString()} onValueChange={(value) => setSelectedRadius(parseInt(value))}>
+              <Select value={selectedRadius.toString()} onValueChange={(value) => handleRadiusChange(parseInt(value))}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
