@@ -6,6 +6,7 @@ import { Edit, Eye, MapPin, Bed, Bath, Square, DollarSign, Home, Trash2 } from "
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { adminSupabase, isAdminAuthenticated } from "@/lib/adminSupabase";
 import { useNavigate } from "react-router-dom";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
@@ -32,81 +33,97 @@ interface Property {
 
 interface PropertyManagerProps {
   onPropertyUpdate?: () => void;
+  adminMode?: boolean; // Add prop to indicate admin mode
 }
 
-const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
+const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManagerProps) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Check if we're in admin mode or have admin authentication
+  const isAdmin = adminMode || isAdminAuthenticated();
+  
   useEffect(() => {
-    if (user) {
+    if (isAdmin || user) {
       fetchUserProperties();
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   const fetchUserProperties = async () => {
-    if (!user) return;
-    
     try {
-      // Get user profile first
-      // Get or create/reactivate user profile first
-      let { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      if (isAdmin) {
+        // Admin mode: fetch all properties
+        const { data, error } = await adminSupabase
+          .from('properties')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (profileError) throw profileError;
-
-      let profileId = profile?.id as string | undefined;
-
-      if (!profileId) {
-        // Attempt to reactivate soft-deleted profile
-        await supabase.from('profiles').update({ deleted_at: null }).eq('user_id', user.id);
-        const { data: reFetched } = await supabase
+        if (error) throw error;
+        setProperties(data || []);
+      } else {
+        // Regular user mode: fetch only user's properties
+        if (!user) return;
+        
+        // Get user profile first
+        // Get or create/reactivate user profile first
+        let { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id')
           .eq('user_id', user.id)
           .maybeSingle();
-        profileId = reFetched?.id;
-      }
 
-      if (!profileId) {
-        const { data: created, error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: user.id,
-            display_name: user.user_metadata?.display_name ?? user.email?.split('@')[0] ?? null,
-          })
-          .select('id')
-          .single();
-        if (insertError) {
-          // if conflict, fetch again
-          const { data: fetchAgain } = await supabase
+        if (profileError) throw profileError;
+
+        let profileId = profile?.id as string | undefined;
+
+        if (!profileId) {
+          // Attempt to reactivate soft-deleted profile
+          await supabase.from('profiles').update({ deleted_at: null }).eq('user_id', user.id);
+          const { data: reFetched } = await supabase
             .from('profiles')
             .select('id')
             .eq('user_id', user.id)
             .maybeSingle();
-          profileId = fetchAgain?.id;
-        } else {
-          profileId = created!.id;
+          profileId = reFetched?.id;
         }
+
+        if (!profileId) {
+          const { data: created, error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: user.id,
+              display_name: user.user_metadata?.display_name ?? user.email?.split('@')[0] ?? null,
+            })
+            .select('id')
+            .single();
+          if (insertError) {
+            // if conflict, fetch again
+            const { data: fetchAgain } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('user_id', user.id)
+              .maybeSingle();
+            profileId = fetchAgain?.id;
+          } else {
+            profileId = created!.id;
+          }
+        }
+
+        if (!profileId) throw new Error('Profile not found');
+
+        // Fetch properties owned by the user
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('owner_id', profileId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setProperties(data || []);
       }
-
-      if (!profileId) throw new Error('Profile not found');
-
-      // Fetch properties owned by the user
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('owner_id', profileId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setProperties(data || []);
     } catch (error) {
       console.error('Error fetching properties:', error);
       toast({
