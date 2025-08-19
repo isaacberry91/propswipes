@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Search, Navigation, Target } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LocationSearchProps {
   value: string;
@@ -12,10 +13,20 @@ interface LocationSearchProps {
   placeholder?: string;
 }
 
+interface LocationSuggestion {
+  address: string;
+  city: string;
+  state: string;
+  count: number;
+  full_location: string;
+}
+
 const LocationSearch = ({ value, onChange, placeholder = "Search any address, city, or area..." }: LocationSearchProps) => {
   const [searchValue, setSearchValue] = useState(value);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedRadius, setSelectedRadius] = useState(10);
+  const [databaseSuggestions, setDatabaseSuggestions] = useState<LocationSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
   const [recentSearches] = useState([
     "1234 Main St, Seattle, WA", "456 Oak Ave, Portland, OR", "789 Pine St, San Francisco, CA"
   ]);
@@ -31,27 +42,94 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
     { name: "Denver, CO", properties: "1,900+ properties" }
   ];
 
-  const allLocations = [
-    "Seattle, WA", "Bellevue, WA", "Redmond, WA", "Tacoma, WA", "Spokane, WA",
-    "Portland, OR", "Eugene, OR", "Salem, OR", "Bend, OR",
-    "San Francisco, CA", "Los Angeles, CA", "San Diego, CA", "Sacramento, CA", "Oakland, CA",
-    "New York, NY", "Brooklyn, NY", "Manhattan, NY", "Queens, NY", "Bronx, NY",
-    "Chicago, IL", "Aurora, IL", "Rockford, IL", "Joliet, IL",
-    "Houston, TX", "Dallas, TX", "Austin, TX", "San Antonio, TX", "Fort Worth, TX",
-    "Phoenix, AZ", "Tucson, AZ", "Mesa, AZ", "Chandler, AZ",
-    "Philadelphia, PA", "Pittsburgh, PA", "Allentown, PA",
-    "Miami, FL", "Tampa, FL", "Orlando, FL", "Jacksonville, FL",
-    "Atlanta, GA", "Columbus, GA", "Augusta, GA",
-    "Boston, MA", "Worcester, MA", "Springfield, MA",
-    "Detroit, MI", "Grand Rapids, MI", "Warren, MI",
-    "Nashville, TN", "Memphis, TN", "Knoxville, TN",
-    "Denver, CO", "Colorado Springs, CO", "Aurora, CO",
-    "Las Vegas, NV", "Henderson, NV", "Reno, NV"
-  ];
+  // Debounced search function
+  const searchLocationsInDatabase = useCallback(async (query: string) => {
+    if (!query || query.length < 2) {
+      setDatabaseSuggestions([]);
+      return;
+    }
 
-  const filteredLocations = allLocations.filter(location =>
-    location.toLowerCase().includes(searchValue.toLowerCase())
-  ).slice(0, 8);
+    setLoading(true);
+    try {
+      // Search for addresses, cities, and states in the database
+      const { data, error } = await supabase
+        .from('properties')
+        .select('address, city, state')
+        .eq('status', 'approved')
+        .is('deleted_at', null)
+        .or(`address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`)
+        .limit(15);
+
+      if (error) {
+        console.error('Error searching locations:', error);
+        setDatabaseSuggestions([]);
+        return;
+      }
+
+      // Process and group the results
+      const locationMap = new Map<string, LocationSuggestion>();
+
+      data?.forEach((property) => {
+        // Add full address
+        const fullAddress = `${property.address}, ${property.city}, ${property.state}`;
+        if (fullAddress.toLowerCase().includes(query.toLowerCase())) {
+          locationMap.set(fullAddress, {
+            address: property.address,
+            city: property.city,
+            state: property.state,
+            count: (locationMap.get(fullAddress)?.count || 0) + 1,
+            full_location: fullAddress
+          });
+        }
+
+        // Add city, state combination
+        const cityState = `${property.city}, ${property.state}`;
+        if (cityState.toLowerCase().includes(query.toLowerCase())) {
+          locationMap.set(cityState, {
+            address: '',
+            city: property.city,
+            state: property.state,
+            count: (locationMap.get(cityState)?.count || 0) + 1,
+            full_location: cityState
+          });
+        }
+
+        // Add state if query matches
+        if (property.state.toLowerCase().includes(query.toLowerCase())) {
+          locationMap.set(property.state, {
+            address: '',
+            city: '',
+            state: property.state,
+            count: (locationMap.get(property.state)?.count || 0) + 1,
+            full_location: property.state
+          });
+        }
+      });
+
+      // Convert map to array and sort by count (most properties first)
+      const suggestions = Array.from(locationMap.values())
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8);
+
+      setDatabaseSuggestions(suggestions);
+    } catch (error) {
+      console.error('Database search error:', error);
+      setDatabaseSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Debounce the search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchValue && showSuggestions) {
+        searchLocationsInDatabase(searchValue);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchValue, showSuggestions, searchLocationsInDatabase]);
 
   const handleLocationSelect = (location: string) => {
     setSearchValue(location);
@@ -151,21 +229,26 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
               </Button>
             </div>
 
-            {/* Search Results */}
-            {searchValue && filteredLocations.length > 0 && (
+            {/* Database Search Results */}
+            {searchValue && databaseSuggestions.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  Search Results
+                  {loading ? "Searching..." : "Available Locations"}
                 </h4>
                 <div className="space-y-1">
-                  {filteredLocations.map((location) => (
+                  {databaseSuggestions.map((suggestion, index) => (
                     <div
-                      key={location}
-                      className="p-2 hover:bg-accent cursor-pointer rounded-md text-sm flex items-center gap-2"
-                      onClick={() => handleLocationSelect(location)}
+                      key={`${suggestion.full_location}-${index}`}
+                      className="p-2 hover:bg-accent cursor-pointer rounded-md text-sm flex items-center justify-between group"
+                      onClick={() => handleLocationSelect(suggestion.full_location)}
                     >
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      {location}
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <span>{suggestion.full_location}</span>
+                      </div>
+                      <Badge variant="secondary" className="text-xs opacity-70 group-hover:opacity-100">
+                        {suggestion.count} {suggestion.count === 1 ? 'property' : 'properties'}
+                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -222,11 +305,11 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
             )}
 
             {/* No Results */}
-            {searchValue && filteredLocations.length === 0 && (
+            {searchValue && !loading && databaseSuggestions.length === 0 && searchValue.length >= 2 && (
               <div className="text-center py-4">
                 <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground mb-2">
-                  No exact matches found
+                  No properties found for this location
                 </p>
                 <Button
                   size="sm"
@@ -235,6 +318,14 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
                 >
                   Search "{searchValue}" anyway
                 </Button>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {loading && searchValue && (
+              <div className="text-center py-4">
+                <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                <p className="text-sm text-muted-foreground">Searching properties...</p>
               </div>
             )}
           </div>
