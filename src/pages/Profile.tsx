@@ -45,6 +45,7 @@ const Profile = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   useEffect(() => {
     if (user) {
@@ -302,6 +303,93 @@ const Profile = () => {
     }
   };
 
+  const handleAvatarUpload = async (file: File) => {
+    if (!user || !file) return;
+    
+    try {
+      setUploadingAvatar(true);
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image under 5MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Create unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+        
+      if (uploadError) throw uploadError;
+      
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+      
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('user_id', user.id);
+        
+      if (updateError) throw updateError;
+      
+      // Update local state
+      setUserProfile(prev => ({ ...prev, avatar_url: publicUrl }));
+      
+      toast({
+        title: "Profile photo updated",
+        description: "Your profile photo has been successfully updated.",
+        duration: 5000
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Error uploading photo",
+        description: "Please try again later.",
+        variant: "destructive",
+        duration: 5000
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const triggerFileUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        handleAvatarUpload(file);
+      }
+    };
+    input.click();
+  };
+
   if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -363,22 +451,16 @@ const Profile = () => {
                          {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
                        </AvatarFallback>
                      </Avatar>
-                    {isEditing && (
-                      <Button
-                        size="sm"
-                        className="absolute -bottom-1 -right-1 rounded-full w-6 h-6 p-0"
-                        onClick={() => {
-                          // TODO: Implement image upload
-                          toast({
-                            title: "Upload photo",
-                            description: "Photo upload feature coming soon!",
-                            duration: 5000
-                          });
-                        }}
-                      >
-                        <Camera className="w-3 h-3" />
-                      </Button>
-                    )}
+                     {isEditing && (
+                       <Button
+                         size="sm"
+                         className="absolute -bottom-1 -right-1 rounded-full w-6 h-6 p-0"
+                         onClick={triggerFileUpload}
+                         disabled={uploadingAvatar}
+                       >
+                         <Camera className="w-3 h-3" />
+                       </Button>
+                     )}
                   </div>
                    <div className="flex-1 min-w-0">
                      <h2 className="text-xl font-bold text-foreground truncate">{userProfile?.display_name || user?.email}</h2>
