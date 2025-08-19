@@ -81,84 +81,43 @@ const Discover = () => {
     if (!user) return;
     
     try {
-      // 1) Try to get active (non-deleted) profile
-      let { data, error } = await supabase
+      // Use upsert to safely create or reactivate a profile without 409s
+      const payload: any = {
+        user_id: user.id,
+        display_name: (user.user_metadata as any)?.display_name || user.email?.split('@')[0] || null,
+        user_type: (user.user_metadata as any)?.user_type || 'buyer',
+        phone: (user.user_metadata as any)?.phone || null,
+        location: (user.user_metadata as any)?.location || null,
+        deleted_at: null,
+      };
+
+      const { data, error } = await supabase
         .from('profiles')
+        .upsert(payload, { onConflict: 'user_id' })
         .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .single();
 
       if (error) {
-        console.error('Error fetching profile on Discover:', error);
+        console.error('Discover: upsert profile error:', error);
+        return;
       }
 
-      // 2) If not found, try to reactivate a soft-deleted profile
-      if (!data) {
+      setUserProfile(data);
+
+      // Daily likes reset logic
+      const today = new Date().toDateString();
+      const resetDate = data.daily_likes_reset_date ? new Date(data.daily_likes_reset_date).toDateString() : null;
+      if (resetDate !== today) {
         await supabase
           .from('profiles')
-          .update({ deleted_at: null })
-          .eq('user_id', user.id);
-
-        const { data: reFetched } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (reFetched) data = reFetched;
-      }
-
-      // 3) If still not found, create one; handle 409 by refetching
-      if (!data) {
-        const { data: created, error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: user.id,
-            display_name: (user.user_metadata as any)?.display_name || user.email?.split('@')[0] || null,
-            user_type: (user.user_metadata as any)?.user_type || 'buyer',
-            phone: (user.user_metadata as any)?.phone || null,
-            location: (user.user_metadata as any)?.location || null,
+          .update({ 
+            daily_likes_used: 0, 
+            daily_likes_reset_date: new Date().toISOString().split('T')[0]
           })
-          .select('*')
-          .single();
-
-        if (insertError) {
-          // Duplicate or other error; attempt final fetch (covers 409 unique violation)
-          const { data: finalFetch } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', user.id)
-            .maybeSingle();
-          if (finalFetch) {
-            data = finalFetch;
-          } else {
-            console.error('Error creating profile on Discover:', insertError);
-            return;
-          }
-        } else {
-          data = created;
-        }
-      }
-
-      // Set local state
-      if (data) setUserProfile(data);
-
-      // 4) Daily likes reset logic based on the profile we've got
-      const profileRow: any = data;
-      if (profileRow) {
-        const today = new Date().toDateString();
-        const resetDate = profileRow.daily_likes_reset_date ? new Date(profileRow.daily_likes_reset_date).toDateString() : null;
-        if (resetDate !== today) {
-          await supabase
-            .from('profiles')
-            .update({ 
-              daily_likes_used: 0, 
-              daily_likes_reset_date: new Date().toISOString().split('T')[0]
-            })
-            .eq('user_id', user.id);
-          setDailyLikesUsed(0);
-        } else {
-          setDailyLikesUsed(profileRow.daily_likes_used || 0);
-        }
+          .eq('user_id', user.id);
+        setDailyLikesUsed(0);
+      } else {
+        setDailyLikesUsed(data.daily_likes_used || 0);
       }
     } catch (e) {
       console.error('Unexpected error in fetchUserProfile:', e);
