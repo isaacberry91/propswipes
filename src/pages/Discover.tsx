@@ -196,8 +196,8 @@ const Discover = () => {
         .eq('status', 'approved')
         .is('deleted_at', null); // Exclude soft-deleted properties
 
-      // Price range filtering
-      if (searchFilters.priceRange[0] > 50000 || searchFilters.priceRange[1] < 5000000) {
+      // Price range filtering - only apply if user has changed from defaults
+      if (searchFilters.priceRange[0] > 200000 || searchFilters.priceRange[1] < 2000000) {
         query = query.gte('price', searchFilters.priceRange[0]).lte('price', searchFilters.priceRange[1]);
       }
 
@@ -277,12 +277,13 @@ const Discover = () => {
       } else {
         let filteredData = data || [];
 
-        // Location-based radius filtering (client-side)
+        // Location-based radius filtering (client-side) - more lenient approach
         if (selectedLocation && selectedLocation !== 'All') {
           const searchCoords = await geocodeAddress(selectedLocation);
           if (searchCoords) {
-            // Filter properties within radius
+            // Filter properties within radius, but include fallbacks
             filteredData = filteredData.filter((property: any) => {
+              // If property has coordinates, check distance
               if (property.latitude && property.longitude) {
                 const distance = calculateDistance(
                   searchCoords.lat, 
@@ -290,28 +291,42 @@ const Discover = () => {
                   property.latitude, 
                   property.longitude
                 );
-                return distance <= selectedRadius;
+                if (distance <= selectedRadius) {
+                  return true;
+                }
               }
               
-              // Fallback to text-based matching if no coordinates
-              const addressMatch = property.address?.toLowerCase().includes(selectedLocation.toLowerCase());
-              const cityMatch = property.city?.toLowerCase().includes(selectedLocation.split(',')[0]?.trim().toLowerCase());
-              const stateMatch = property.state?.toLowerCase().includes(selectedLocation.split(',')[1]?.trim().toLowerCase());
+              // Always include properties with text-based matches as fallback
+              const searchTerm = selectedLocation.toLowerCase();
+              const searchParts = searchTerm.split(',').map(part => part.trim());
+              
+              const addressMatch = property.address?.toLowerCase().includes(searchTerm);
+              const cityMatch = property.city?.toLowerCase().includes(searchParts[0]);
+              const stateMatch = searchParts[1] ? 
+                property.state?.toLowerCase().includes(searchParts[1]) : 
+                property.state?.toLowerCase().includes(searchParts[0]);
+              
+              // Include if any part matches
               return addressMatch || cityMatch || stateMatch;
             });
           } else {
-            // Fallback to text-based search if geocoding fails
+            // More generous text-based search if geocoding fails
             filteredData = filteredData.filter((property: any) => {
-              const addressMatch = property.address?.toLowerCase().includes(selectedLocation.toLowerCase());
-              const cityMatch = property.city?.toLowerCase().includes(selectedLocation.split(',')[0]?.trim().toLowerCase());
-              const stateMatch = selectedLocation.split(',')[1] ? 
-                property.state?.toLowerCase().includes(selectedLocation.split(',')[1]?.trim().toLowerCase()) : false;
+              const searchTerm = selectedLocation.toLowerCase();
+              const searchParts = searchTerm.split(',').map(part => part.trim());
+              
+              const addressMatch = property.address?.toLowerCase().includes(searchTerm);
+              const cityMatch = property.city?.toLowerCase().includes(searchParts[0]);
+              const stateMatch = searchParts.length > 1 ? 
+                property.state?.toLowerCase().includes(searchParts[1]) : 
+                property.state?.toLowerCase().includes(searchParts[0]);
+              
               return addressMatch || cityMatch || stateMatch;
             });
           }
         }
 
-        // Features/amenities filtering (client-side since it's array-based)
+        // Features/amenities filtering (client-side) - only apply if features are selected
         if (searchFilters.features.length > 0) {
           filteredData = filteredData.filter((property: any) => {
             const propertyFeatures = property.amenities || [];
