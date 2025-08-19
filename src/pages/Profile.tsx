@@ -282,25 +282,25 @@ const Profile = () => {
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="profile">
-              <User className="w-4 h-4 mr-2" />
-              Profile
+            <TabsTrigger value="profile" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+              <User className="w-4 h-4" />
+              <span className="text-xs sm:text-sm truncate">Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="properties">
-              <Home className="w-4 h-4 mr-2" />
-              Properties
+            <TabsTrigger value="properties" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+              <Home className="w-4 h-4" />
+              <span className="text-xs sm:text-sm truncate">Properties</span>
             </TabsTrigger>
-            <TabsTrigger value="subscription">
-              <CreditCard className="w-4 h-4 mr-2" />
-              Subscription
+            <TabsTrigger value="subscription" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+              <CreditCard className="w-4 h-4" />
+              <span className="text-xs sm:text-sm truncate">Subscription</span>
             </TabsTrigger>
-            <TabsTrigger value="settings">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
+            <TabsTrigger value="settings" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+              <Settings className="w-4 h-4" />
+              <span className="text-xs sm:text-sm truncate">Settings</span>
             </TabsTrigger>
-            <TabsTrigger value="security">
-              <Shield className="w-4 h-4 mr-2" />
-              Security
+            <TabsTrigger value="security" className="flex-col sm:flex-row gap-1 sm:gap-2 py-1 px-1 sm:px-3">
+              <Shield className="w-4 h-4" />
+              <span className="text-xs sm:text-sm truncate">Security</span>
             </TabsTrigger>
           </TabsList>
 
