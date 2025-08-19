@@ -286,14 +286,17 @@ const PropertyManager = ({ onPropertyUpdate }: PropertyManagerProps) => {
                     
                     {!property.deleted_at ? (
                       <>
-                        <Button
-                          size="sm"
-                          onClick={() => handleEdit(property)}
-                          className="w-full h-8 text-xs"
-                        >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Edit
-                        </Button>
+                         <Button
+                           size="sm"
+                           onClick={() => {
+                             console.log('🔧 EDIT BUTTON CLICKED!', property.id, property.title);
+                             handleEdit(property);
+                           }}
+                           className="w-full h-8 text-xs"
+                         >
+                           <Edit className="w-3 h-3 mr-1" />
+                           Edit
+                         </Button>
                         
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
