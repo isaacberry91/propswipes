@@ -390,6 +390,41 @@ const Profile = () => {
     input.click();
   };
 
+  const handleRemoveAvatar = async () => {
+    if (!user) return;
+    
+    try {
+      setUploadingAvatar(true);
+      
+      // Update profile to remove avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: null })
+        .eq('user_id', user.id);
+        
+      if (updateError) throw updateError;
+      
+      // Update local state
+      setUserProfile(prev => ({ ...prev, avatar_url: null }));
+      
+      toast({
+        title: "Profile photo removed",
+        description: "Your profile photo has been successfully removed.",
+        duration: 5000
+      });
+    } catch (error) {
+      console.error('Error removing avatar:', error);
+      toast({
+        title: "Error removing photo",
+        description: "Please try again later.",
+        variant: "destructive",
+        duration: 5000
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -452,14 +487,27 @@ const Profile = () => {
                        </AvatarFallback>
                      </Avatar>
                      {isEditing && (
-                       <Button
-                         size="sm"
-                         className="absolute -bottom-1 -right-1 rounded-full w-6 h-6 p-0"
-                         onClick={triggerFileUpload}
-                         disabled={uploadingAvatar}
-                       >
-                         <Camera className="w-3 h-3" />
-                       </Button>
+                       <div className="absolute -bottom-1 -right-1 flex gap-1">
+                         <Button
+                           size="sm"
+                           className="rounded-full w-6 h-6 p-0"
+                           onClick={triggerFileUpload}
+                           disabled={uploadingAvatar}
+                         >
+                           <Camera className="w-3 h-3" />
+                         </Button>
+                         {userProfile?.avatar_url && (
+                           <Button
+                             size="sm"
+                             variant="destructive"
+                             className="rounded-full w-6 h-6 p-0"
+                             onClick={handleRemoveAvatar}
+                             disabled={uploadingAvatar}
+                           >
+                             <Trash2 className="w-3 h-3" />
+                           </Button>
+                         )}
+                       </div>
                      )}
                   </div>
                    <div className="flex-1 min-w-0">
