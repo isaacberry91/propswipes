@@ -192,18 +192,36 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
               <DollarSign className="w-4 h-4" />
               Price Range
             </Label>
-            <div className="px-2">
-              <Slider
-                value={localFilters.priceRange}
-                onValueChange={(value) => setLocalFilters(prev => ({ ...prev, priceRange: value as [number, number] }))}
-                min={50000}
-                max={5000000}
-                step={25000}
-                className="w-full"
-              />
-              <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>{formatPrice(localFilters.priceRange[0])}</span>
-                <span>{formatPrice(localFilters.priceRange[1])}</span>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Minimum</Label>
+                <Input
+                  type="number"
+                  placeholder="Min price"
+                  value={localFilters.priceRange[0]}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    setLocalFilters(prev => ({ 
+                      ...prev, 
+                      priceRange: [value, prev.priceRange[1]] as [number, number] 
+                    }));
+                  }}
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Maximum</Label>
+                <Input
+                  type="number"
+                  placeholder="Max price"
+                  value={localFilters.priceRange[1]}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    setLocalFilters(prev => ({ 
+                      ...prev, 
+                      priceRange: [prev.priceRange[0], value] as [number, number] 
+                    }));
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -275,18 +293,36 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
               <Square className="w-4 h-4" />
               Square Footage
             </Label>
-            <div className="px-2">
-              <Slider
-                value={localFilters.sqftRange}
-                onValueChange={(value) => setLocalFilters(prev => ({ ...prev, sqftRange: value as [number, number] }))}
-                min={200}
-                max={25000}
-                step={100}
-                className="w-full"
-              />
-              <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>{formatSqft(localFilters.sqftRange[0])}</span>
-                <span>{formatSqft(localFilters.sqftRange[1])}</span>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">Minimum (sqft)</Label>
+                <Input
+                  type="number"
+                  placeholder="Min sqft"
+                  value={localFilters.sqftRange[0]}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    setLocalFilters(prev => ({ 
+                      ...prev, 
+                      sqftRange: [value, prev.sqftRange[1]] as [number, number] 
+                    }));
+                  }}
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">Maximum (sqft)</Label>
+                <Input
+                  type="number"
+                  placeholder="Max sqft"
+                  value={localFilters.sqftRange[1]}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    setLocalFilters(prev => ({ 
+                      ...prev, 
+                      sqftRange: [prev.sqftRange[0], value] as [number, number] 
+                    }));
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -297,18 +333,36 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
               <Calendar className="w-4 h-4" />
               Year Built
             </Label>
-            <div className="px-2">
-              <Slider
-                value={localFilters.yearBuilt}
-                onValueChange={(value) => setLocalFilters(prev => ({ ...prev, yearBuilt: value as [number, number] }))}
-                min={1900}
-                max={2024}
-                step={5}
-                className="w-full"
-              />
-              <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <span>{localFilters.yearBuilt[0]}</span>
-                <span>{localFilters.yearBuilt[1]}</span>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">From Year</Label>
+                <Input
+                  type="number"
+                  placeholder="Min year"
+                  value={localFilters.yearBuilt[0]}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    setLocalFilters(prev => ({ 
+                      ...prev, 
+                      yearBuilt: [value, prev.yearBuilt[1]] as [number, number] 
+                    }));
+                  }}
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">To Year</Label>
+                <Input
+                  type="number"
+                  placeholder="Max year"
+                  value={localFilters.yearBuilt[1]}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value) || 0;
+                    setLocalFilters(prev => ({ 
+                      ...prev, 
+                      yearBuilt: [prev.yearBuilt[0], value] as [number, number] 
+                    }));
+                  }}
+                />
               </div>
             </div>
           </div>
