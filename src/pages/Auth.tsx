@@ -83,11 +83,16 @@ const Auth = () => {
         console.error('PropSwipes Auth: Sign up error:', error);
         if (error.message.includes('already registered')) {
           toast({
-            title: "Account exists",
-            description: "This email is already registered. Please sign in instead.",
-            variant: "destructive",
-            duration: 5000
+            title: "Account exists! 👋",
+            description: "This email is already registered. Please use the Sign In tab to log in with your existing account.",
+            variant: "default",
+            duration: 7000
           });
+          // Auto-switch to sign-in tab after a moment
+          setTimeout(() => {
+            const signinTab = document.querySelector('[value="signin"]') as HTMLElement;
+            signinTab?.click();
+          }, 1000);
         } else {
           toast({
             title: "Sign up failed",
@@ -175,12 +180,22 @@ const Auth = () => {
           status: error.status,
           isAuthError: true
         });
-        toast({
-          title: "Sign in failed",
-          description: error.message,
-          variant: "destructive",
-          duration: 5000
-        });
+        
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Incorrect credentials 🔑",
+            description: "Please check your email and password. Click 'Forgot your password?' below if you need to reset it.",
+            variant: "destructive",
+            duration: 7000
+          });
+        } else {
+          toast({
+            title: "Sign in failed",
+            description: error.message,
+            variant: "destructive",
+            duration: 5000
+          });
+        }
       } else {
         console.log('🔐 PropSwipes Auth: Sign in successful, navigating to discover...');
         navigate('/discover');
@@ -478,6 +493,9 @@ const Auth = () => {
                   >
                     Forgot your password?
                   </Button>
+                  <div className="text-center text-xs text-muted-foreground mt-2 p-2 bg-muted/30 rounded">
+                    💡 <strong>Already have an account?</strong> Use the same email and password you created during signup.
+                  </div>
                 </form>
               </TabsContent>
               
