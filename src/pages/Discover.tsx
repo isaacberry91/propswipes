@@ -80,35 +80,66 @@ const Discover = () => {
   const fetchUserProfile = async () => {
     if (!user) return;
     
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    
-    setUserProfile(data);
-    
-    // Check daily likes usage
-    if (data) {
-      const today = new Date().toDateString();
-      const resetDate = data.daily_likes_reset_date ? new Date(data.daily_likes_reset_date).toDateString() : null;
-      
-      if (resetDate !== today) {
-        // Reset daily likes if it's a new day
-        await supabase
-          .from('profiles')
-          .update({ 
-            daily_likes_used: 0, 
-            daily_likes_reset_date: new Date().toISOString().split('T')[0]
-          })
-          .eq('user_id', user.id);
-        setDailyLikesUsed(0);
-      } else {
-        setDailyLikesUsed(data.daily_likes_used || 0);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching profile on Discover:', error);
       }
+
+      if (!data) {
+        const { data: created, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            display_name: (user.user_metadata as any)?.display_name || user.email?.split('@')[0] || null,
+            user_type: (user.user_metadata as any)?.user_type || 'buyer',
+            phone: (user.user_metadata as any)?.phone || null,
+            location: (user.user_metadata as any)?.location || null,
+          })
+          .select('*')
+          .single();
+
+        if (insertError) {
+          console.error('Error creating profile on Discover:', insertError);
+          return;
+        }
+        setUserProfile(created);
+      } else {
+        setUserProfile(data);
+      }
+
+      // Check daily likes usage
+      const profileRow = data as any || (await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle()).data;
+
+      if (profileRow) {
+        const today = new Date().toDateString();
+        const resetDate = profileRow.daily_likes_reset_date ? new Date(profileRow.daily_likes_reset_date).toDateString() : null;
+        if (resetDate !== today) {
+          await supabase
+            .from('profiles')
+            .update({ 
+              daily_likes_used: 0, 
+              daily_likes_reset_date: new Date().toISOString().split('T')[0]
+            })
+            .eq('user_id', user.id);
+          setDailyLikesUsed(0);
+        } else {
+          setDailyLikesUsed(profileRow.daily_likes_used || 0);
+        }
+      }
+    } catch (e) {
+      console.error('Unexpected error in fetchUserProfile:', e);
     }
   };
-
   const fetchProperties = async () => {
     setLoading(true);
     try {
