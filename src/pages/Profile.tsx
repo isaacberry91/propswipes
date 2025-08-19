@@ -450,26 +450,26 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="flex flex-wrap justify-center gap-1 p-1 h-auto">
-            <TabsTrigger value="profile" className="flex items-center gap-1 py-2 px-3 text-xs">
-              <User className="w-4 h-4" />
-              <span>Profile</span>
+          <TabsList className="flex justify-center gap-0.5 sm:gap-1 p-0.5 sm:p-1 h-auto">
+            <TabsTrigger value="profile" className="flex items-center gap-0.5 py-1 px-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-xs">
+              <User className="w-3 h-3" />
+              <span className="hidden xs:inline sm:inline">Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="properties" className="flex items-center gap-1 py-2 px-3 text-xs">
-              <Home className="w-4 h-4" />
-              <span>Properties</span>
+            <TabsTrigger value="properties" className="flex items-center gap-0.5 py-1 px-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-xs">
+              <Home className="w-3 h-3" />
+              <span className="hidden xs:inline sm:inline">Properties</span>
             </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center gap-1 py-2 px-3 text-xs">
-              <CreditCard className="w-4 h-4" />
-              <span>Subscription</span>
+            <TabsTrigger value="subscription" className="flex items-center gap-0.5 py-1 px-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-xs">
+              <CreditCard className="w-3 h-3" />
+              <span className="hidden xs:inline sm:inline">Subscription</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1 py-2 px-3 text-xs">
-              <Settings className="w-4 h-4" />
-              <span>Settings</span>
+            <TabsTrigger value="settings" className="flex items-center gap-0.5 py-1 px-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-xs">
+              <Settings className="w-3 h-3" />
+              <span className="hidden xs:inline sm:inline">Settings</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-1 py-2 px-3 text-xs">
-              <Shield className="w-4 h-4" />
-              <span>Security</span>
+            <TabsTrigger value="security" className="flex items-center gap-0.5 py-1 px-1.5 sm:py-2 sm:px-3 text-[10px] sm:text-xs">
+              <Shield className="w-3 h-3" />
+              <span className="hidden xs:inline sm:inline">Security</span>
             </TabsTrigger>
           </TabsList>
 
