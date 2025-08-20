@@ -140,7 +140,7 @@ const Chat = () => {
             address,
             description
           ),
-          buyer_profile:profiles!buyer_id (
+          buyer_profile:profiles!matches_buyer_id_fkey (
             id,
             user_id,
             display_name,
@@ -150,7 +150,7 @@ const Chat = () => {
             phone,
             location
           ),
-          seller_profile:profiles!seller_id (
+          seller_profile:profiles!matches_seller_id_fkey (
             id,
             user_id,
             display_name,
