@@ -281,9 +281,8 @@ const LocationSearch = ({
   const handleRadiusChange = (newRadius: number) => {
     console.log('🔍 LocationSearch: handleRadiusChange called with:', newRadius);
     setSelectedRadius(newRadius);
-    if (searchValue) {
-      onChange(searchValue, newRadius);
-    }
+    // Always trigger onChange with the new radius, even if no location is set
+    onChange(searchValue || '', newRadius);
   };
 
   const getCurrentLocation = () => {
