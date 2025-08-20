@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import SearchFiltersComponent from "@/components/SearchFilters";
-import LocationSearch from "@/components/LocationSearch";
+import MapLocationSearch from "@/components/MapLocationSearch";
 import SubscriptionPrompt from "@/components/SubscriptionPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
 
@@ -504,7 +504,7 @@ const Discover = () => {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Fixed Header - Always Visible */}
       <div className="flex-shrink-0 bg-background border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-2">
+        <div className="max-w-4xl mx-auto px-4 py-2">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <img 
@@ -534,10 +534,20 @@ const Discover = () => {
             </div>
           </div>
           
-          <LocationSearch
-            value={selectedLocation}
-            onChange={getPropertiesForLocation}
-            placeholder="Search properties anywhere..."
+          <MapLocationSearch
+            defaultLocation={selectedLocation}
+            defaultRadius={selectedRadius}
+            onLocationChange={(location, radius, coordinates) => {
+              console.log('📍 Location changed:', { location, radius, coordinates });
+              getPropertiesForLocation(location, radius);
+            }}
+            onPropertySelect={(property) => {
+              // Find the property in our list and navigate to it
+              const propertyIndex = properties.findIndex(p => p.id === property.id);
+              if (propertyIndex !== -1) {
+                setCurrentIndex(propertyIndex);
+              }
+            }}
           />
         </div>
       </div>
