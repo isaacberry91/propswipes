@@ -24,6 +24,9 @@ interface LocationSuggestion {
   state: string;
   count: number;
   full_location: string;
+  lat?: number;
+  lon?: number;
+  isRealAddress?: boolean;
 }
 
 const LocationSearch = ({ 
@@ -55,7 +58,7 @@ const LocationSearch = ({
     setMapCenter(propMapCenter);
   }, [propMapCenter]);
 
-  // Debounced search function
+  // Enhanced address search with Nominatim + database integration
   const searchLocationsInDatabase = useCallback(async (query: string) => {
     if (!query || query.length < 2) {
       setDatabaseSuggestions([]);
@@ -64,101 +67,104 @@ const LocationSearch = ({
 
     setLoading(true);
     try {
-      console.log('🔍 Searching for:', query);
+      console.log('🔍 Searching for addresses:', query);
       
-       // Search for addresses, cities, and states in the database WITHOUT using PostgREST or() to avoid comma parse issues
-       const rawTerms = query.split(',').map(p => p.trim()).filter(Boolean);
-       const terms = rawTerms.length ? rawTerms : [query];
+      // Use Nominatim for real address suggestions
+      const nominatimResponse = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=us&limit=5&addressdetails=1`
+      );
+      const nominatimData = await nominatimResponse.json();
+      
+      // Also search our database for properties
+      const dbResponse = await supabase
+        .from('properties')
+        .select('address, city, state, latitude, longitude')
+        .eq('status', 'approved')
+        .is('deleted_at', null)
+        .or(`address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`)
+        .limit(10);
 
-       // Build parallel requests for each term/field
-       const requests = terms.flatMap((t) => [
-         supabase
-           .from('properties')
-           .select('address, city, state')
-           .eq('status', 'approved')
-           .is('deleted_at', null)
-           .ilike('address', `%${t}%`)
-           .limit(10),
-         supabase
-           .from('properties')
-           .select('address, city, state')
-           .eq('status', 'approved')
-           .is('deleted_at', null)
-           .ilike('city', `%${t}%`)
-           .limit(10),
-         supabase
-           .from('properties')
-           .select('address, city, state')
-           .eq('status', 'approved')
-           .is('deleted_at', null)
-           .ilike('state', `%${t}%`)
-           .limit(10)
-       ]);
+      console.log('🔍 Nominatim results:', nominatimData);
+      console.log('🔍 Database results:', dbResponse.data);
 
-       const settled = await Promise.allSettled(requests);
-       const rows = settled
-         .filter((r): r is PromiseFulfilledResult<{ data: any[] | null; error: any } & any> => r.status === 'fulfilled')
-         .flatMap((r) => r.value.data || []);
+      // Combine and format suggestions
+      const suggestions: LocationSuggestion[] = [];
 
-       const data = rows;
-       const error = null;
+      // Add real address suggestions from Nominatim
+      nominatimData?.slice(0, 3).forEach((place: any) => {
+        const displayName = place.display_name;
+        const addressParts = displayName.split(',').map((part: string) => part.trim());
+        const address = addressParts[0] || '';
+        const city = place.address?.city || place.address?.town || place.address?.village || '';
+        const state = place.address?.state || '';
+        
+        if (address && city && state) {
+          suggestions.push({
+            address,
+            city,
+            state,
+            count: 0, // Real addresses don't have property counts
+            full_location: `${address}, ${city}, ${state}`,
+            lat: parseFloat(place.lat),
+            lon: parseFloat(place.lon),
+            isRealAddress: true
+          });
+        }
+      });
 
-      console.log('🔍 Search results:', data, error);
-
-      if (error) {
-        console.error('Error searching locations:', error);
-        setDatabaseSuggestions([]);
-        return;
-      }
-
-      // Process and group the results
+      // Add property-based suggestions from our database
       const locationMap = new Map<string, LocationSuggestion>();
-
-      data?.forEach((property) => {
+      dbResponse.data?.forEach((property) => {
         // Add full address
         const fullAddress = `${property.address}, ${property.city}, ${property.state}`;
         if (fullAddress.toLowerCase().includes(query.toLowerCase())) {
+          const existing = locationMap.get(fullAddress);
           locationMap.set(fullAddress, {
             address: property.address,
             city: property.city,
             state: property.state,
-            count: (locationMap.get(fullAddress)?.count || 0) + 1,
-            full_location: fullAddress
+            count: (existing?.count || 0) + 1,
+            full_location: fullAddress,
+            lat: property.latitude,
+            lon: property.longitude,
+            isRealAddress: false
           });
         }
 
         // Add city, state combination
         const cityState = `${property.city}, ${property.state}`;
         if (cityState.toLowerCase().includes(query.toLowerCase())) {
+          const existing = locationMap.get(cityState);
           locationMap.set(cityState, {
             address: '',
             city: property.city,
             state: property.state,
-            count: (locationMap.get(cityState)?.count || 0) + 1,
-            full_location: cityState
-          });
-        }
-
-        // Add state if query matches
-        if (property.state.toLowerCase().includes(query.toLowerCase())) {
-          locationMap.set(property.state, {
-            address: '',
-            city: '',
-            state: property.state,
-            count: (locationMap.get(property.state)?.count || 0) + 1,
-            full_location: property.state
+            count: (existing?.count || 0) + 1,
+            full_location: cityState,
+            lat: property.latitude,
+            lon: property.longitude,
+            isRealAddress: false
           });
         }
       });
 
-      // Convert map to array and sort by count (most properties first)
-      const suggestions = Array.from(locationMap.values())
+      // Add database suggestions
+      const dbSuggestions = Array.from(locationMap.values())
         .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+
+      suggestions.push(...dbSuggestions);
+
+      // Remove duplicates and limit total suggestions
+      const uniqueSuggestions = suggestions
+        .filter((suggestion, index, self) => 
+          index === self.findIndex(s => s.full_location === suggestion.full_location)
+        )
         .slice(0, 5);
 
-      setDatabaseSuggestions(suggestions);
+      setDatabaseSuggestions(uniqueSuggestions);
     } catch (error) {
-      console.error('Database search error:', error);
+      console.error('Address search error:', error);
       setDatabaseSuggestions([]);
     } finally {
       setLoading(false);
@@ -223,17 +229,25 @@ const LocationSearch = ({
     return () => clearTimeout(timeoutId);
   }, [searchValue, showSuggestions, searchLocationsInDatabase]);
 
-  const handleLocationSelect = (location: string) => {
+  const handleLocationSelect = (location: string, suggestion?: LocationSuggestion) => {
     console.log('🔍 LocationSearch: handleLocationSelect called with:', location);
     console.log('🔍 LocationSearch: Current radius:', selectedRadius);
+    console.log('🔍 LocationSearch: Suggestion data:', suggestion);
+    
     setSearchValue(location);
     setShowSuggestions(false);
     
     // Call onChange with the location and current radius
     onChange(location, selectedRadius);
     
-    // Geocode the location for the map
-    geocodeLocationForMap(location);
+    // If we have coordinates from the suggestion, use them directly
+    if (suggestion?.lat && suggestion?.lon) {
+      console.log('🗺️ Using coordinates from suggestion:', [suggestion.lon, suggestion.lat]);
+      setMapCenter([suggestion.lon, suggestion.lat]);
+    } else {
+      // Fallback to geocoding
+      geocodeLocationForMap(location);
+    }
   };
 
   // Geocode location for map display
@@ -364,7 +378,11 @@ const LocationSearch = ({
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              handleLocationSelect(searchValue);
+              // Find matching suggestion if available
+              const matchingSuggestion = databaseSuggestions.find(s => 
+                s.full_location.toLowerCase() === searchValue.toLowerCase()
+              );
+              handleLocationSelect(searchValue, matchingSuggestion);
             }
           }}
           placeholder={placeholder}
@@ -478,7 +496,7 @@ const LocationSearch = ({
                       key={`${suggestion.full_location}-${index}`}
                       className="p-2 hover:bg-accent cursor-pointer rounded-md text-sm flex items-center justify-between group transition-colors"
                       onClick={() => {
-                        handleLocationSelect(suggestion.full_location);
+                        handleLocationSelect(suggestion.full_location, suggestion);
                         setShowSuggestions(false);
                       }}
                     >
