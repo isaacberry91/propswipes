@@ -257,7 +257,7 @@ const PropertyMap = ({
 
   // Add property markers to map
   useEffect(() => {
-    if (!map.current || !properties.length || !mapLoaded) return;
+    if (!map.current || !properties.length || !mapLoaded || !map.current.isStyleLoaded()) return;
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
