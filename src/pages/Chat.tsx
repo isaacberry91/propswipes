@@ -262,7 +262,7 @@ const Chat = () => {
         .from('profiles')
         .select('*')
         .eq('id', otherUserProfileId)
-        .single();
+        .maybeSingle();
         
       console.log('🔥 UNIVERSAL FIX - Complete profile result:', completeProfile);
       console.log('🔥 UNIVERSAL FIX - Profile error:', profileFetchError);
