@@ -258,11 +258,17 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
                 Search Radius
               </h4>
-              <Select value={selectedRadius.toString()} onValueChange={(value) => handleRadiusChange(parseInt(value))}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
+              <Select 
+                value={selectedRadius.toString()} 
+                onValueChange={(value) => handleRadiusChange(parseInt(value))}
+              >
+                <SelectTrigger className="w-full" onClick={(e) => e.stopPropagation()}>
+                  <SelectValue placeholder="Select radius" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent 
+                  className="z-[60]"
+                  onCloseAutoFocus={(e) => e.preventDefault()}
+                >
                   <SelectItem value="5">5 miles</SelectItem>
                   <SelectItem value="10">10 miles</SelectItem>
                   <SelectItem value="25">25 miles</SelectItem>
