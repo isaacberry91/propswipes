@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { notificationService } from "@/services/notificationService";
+import { resolveUserProfile } from "@/utils/profileUtils";
 
 
 const Chat = () => {
@@ -181,149 +182,25 @@ const Chat = () => {
         return;
       }
 
-      // DIRECT SIMPLE APPROACH: Get the other user's profile directly
+      // Get the other user's profile using shared utility
       const isUserBuyer = matchData.buyer_id === userProfile.id;
       const otherUserProfileId = isUserBuyer ? matchData.seller_id : matchData.buyer_id;
+      const joinedProfile = isUserBuyer ? matchData.seller_profile : matchData.buyer_profile;
       
-      console.log('🔥 SIMPLE DEBUG - User profile ID:', userProfile.id);
-      console.log('🔥 SIMPLE DEBUG - User is buyer:', isUserBuyer);
-      console.log('🔥 SIMPLE DEBUG - Match buyer_id:', matchData.buyer_id);
-      console.log('🔥 SIMPLE DEBUG - Match seller_id:', matchData.seller_id);
-      console.log('🔥 SIMPLE DEBUG - Other user profile ID:', otherUserProfileId);
-      
-      // CRITICAL: Verify the profile ID exists in database
-      console.log('🔥 VERIFYING: About to fetch profile with ID:', otherUserProfileId);
-      
-      // Let's also check if this profile ID actually exists
-      const { data: profileCheck } = await supabase
-        .from('profiles')
-        .select('id, display_name, user_type')
-        .eq('id', otherUserProfileId);
-      console.log('🔥 VERIFICATION: Profile check result:', profileCheck);
-      
-      // Get the other user's profile data - Enhanced approach
-      let otherUser = null;
-      
-      // First try to get from joined data
-      if (isUserBuyer && matchData.seller_profile) {
-        otherUser = matchData.seller_profile;
-        console.log('🔥 Using seller profile from match data:', otherUser);
-      } else if (!isUserBuyer && matchData.buyer_profile) {
-        otherUser = matchData.buyer_profile;
-        console.log('🔥 Using buyer profile from match data:', otherUser);
-      } 
-      
-      console.log('🔥 DETAILED DEBUG - Profile from join check:');
-      console.log('🔥 DETAILED DEBUG - isUserBuyer:', isUserBuyer);
-      console.log('🔥 DETAILED DEBUG - matchData.seller_profile exists:', !!matchData.seller_profile);
-      console.log('🔥 DETAILED DEBUG - matchData.buyer_profile exists:', !!matchData.buyer_profile);
-      console.log('🔥 DETAILED DEBUG - Seller profile data:', matchData.seller_profile);
-      console.log('🔥 DETAILED DEBUG - Buyer profile data:', matchData.buyer_profile);
-      
-      // ALWAYS fetch the other user's profile directly to ensure we have current data
-      console.log('🔥 ALWAYS fetching other user profile directly to ensure we have data');
-      console.log('🔥 Other user profile ID to fetch:', otherUserProfileId);
-      
-      const { data: directProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', otherUserProfileId)
-        .maybeSingle();
-        
-      console.log('🔥 Direct profile fetch result:', directProfile);
-      console.log('🔥 Direct profile fetch error:', profileError);
-      
-      if (profileError) {
-        console.error('🔥 Error fetching profile directly:', profileError);
-      }
-      
-      // Always use the direct fetch result if available, otherwise fallback to joined data
-      if (directProfile) {
-        otherUser = directProfile;
-        console.log('🔥 Using direct profile fetch result');
-      } else if (!otherUser) {
-        console.log('🔥 No profile found anywhere - this should not happen');
-      }
+      console.log('🔍 Chat: User is buyer:', isUserBuyer);
+      console.log('🔍 Chat: Other user profile ID:', otherUserProfileId);
+      console.log('🔍 Chat: Joined profile:', joinedProfile);
+
+      // Use shared utility to resolve user profile
+      const resolvedUser = await resolveUserProfile(otherUserProfileId, joinedProfile);
       
       const property = matchData.properties;
-
-      console.log('🔥 SIMPLE DEBUG - Final otherUser object:', otherUser);
-
-      // GUARANTEED USERNAME LOGIC - Never show "User"
-      let userName = 'Unknown';
-      
-      console.log('🔥 CHAT DEBUG - Other user object:', otherUser);
-      
-      // UNIVERSAL FIX: Always fetch the other user's profile data properly
-      console.log('🔥 UNIVERSAL FIX - Fetching profile for ID:', otherUserProfileId);
-      
-      // Always do a fresh, direct profile fetch to ensure we have complete data
-      const { data: completeProfile, error: profileFetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', otherUserProfileId)
-        .maybeSingle();
-        
-      console.log('🔥 UNIVERSAL FIX - Complete profile result:', completeProfile);
-      console.log('🔥 UNIVERSAL FIX - Profile error:', profileFetchError);
-      
-      if (completeProfile) {
-        // Use the complete profile data
-        otherUser = completeProfile;
-        
-        // Try different sources for the name in order of preference
-        if (completeProfile.display_name?.trim()) {
-          userName = completeProfile.display_name.trim();
-          console.log('🔥 UNIVERSAL FIX - Using display_name:', userName);
-        } else {
-          // If no display_name, check the joined data as backup
-          if (isUserBuyer && matchData.seller_profile?.display_name?.trim()) {
-            userName = matchData.seller_profile.display_name.trim();
-            console.log('🔥 UNIVERSAL FIX - Using seller display_name from join:', userName);
-          } else if (!isUserBuyer && matchData.buyer_profile?.display_name?.trim()) {
-            userName = matchData.buyer_profile.display_name.trim();
-            console.log('🔥 UNIVERSAL FIX - Using buyer display_name from join:', userName);
-          } else {
-            // Final fallback - use a descriptive name based on user type
-            userName = completeProfile.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
-            console.log('🔥 UNIVERSAL FIX - Using user type fallback:', userName);
-          }
-        }
-      } else {
-        console.log('🔥 UNIVERSAL FIX - No complete profile, using joined data');
-        
-        // If direct fetch fails, try to use the joined data as fallback
-        if (isUserBuyer && matchData.seller_profile) {
-          otherUser = matchData.seller_profile;
-          userName = matchData.seller_profile.display_name?.trim() || 'Property Seller';
-          console.log('🔥 UNIVERSAL FIX - Using seller profile from join:', userName);
-        } else if (!isUserBuyer && matchData.buyer_profile) {
-          otherUser = matchData.buyer_profile;  
-          userName = matchData.buyer_profile.display_name?.trim() || 'Property Buyer';
-          console.log('🔥 UNIVERSAL FIX - Using buyer profile from join:', userName);
-        } else {
-          // Final fallback
-          userName = 'Property Contact';
-          otherUser = { user_type: 'buyer', display_name: userName };
-          console.log('🔥 UNIVERSAL FIX - Using final fallback:', userName);
-        }
-      }
-
-      console.log('🔥 FINAL USERNAME:', userName);
 
       const transformedMatch = {
         id: matchData.id,
         buyerId: matchData.buyer_id,
         sellerId: matchData.seller_id,
-        user: {
-          name: userName,
-          avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-          type: otherUser?.user_type === 'seller' ? 'Seller' : 'Buyer',
-          bio: otherUser?.bio?.trim() || 'No bio available',
-          phone: otherUser?.phone?.trim() || 'No phone provided',
-          location: otherUser?.location?.trim() || 'Location not provided',
-          profileId: otherUser?.id
-        },
+        user: resolvedUser,
         property: {
           title: property.title,
           location: `${property.city}, ${property.state}`,
