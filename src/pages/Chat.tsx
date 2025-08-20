@@ -165,6 +165,9 @@ const Chat = () => {
         .or(`buyer_id.eq.${userProfile.id},seller_id.eq.${userProfile.id}`)
         .maybeSingle();
 
+      console.log('🔍 Chat: Raw match data from database:', matchData);
+      console.log('🔍 Chat: Database query error:', error);
+
       if (error || !matchData) {
         console.error('Error fetching match:', error);
         toast({
