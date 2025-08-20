@@ -3,10 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +34,9 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [reportType, setReportType] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
 
   useEffect(() => {
     if (user && matchId) {
@@ -410,6 +418,129 @@ const Chat = () => {
     await sendMessageWithAttachment(message.trim());
   };
 
+  const handleDeleteMatch = async () => {
+    if (!match) return;
+
+    try {
+      const { error } = await supabase
+        .from('matches')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', match.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Conversation Deleted",
+        description: "This conversation has been permanently deleted.",
+      });
+
+      navigate('/matches');
+    } catch (error) {
+      console.error('Error deleting match:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the conversation.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleBlockUser = async () => {
+    if (!match || !user) return;
+
+    try {
+      // Get current user's profile
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!userProfile) throw new Error('User profile not found');
+
+      // Determine which user to block
+      const otherUserId = match.buyerId === userProfile.id ? match.sellerId : match.buyerId;
+
+      const { error } = await supabase
+        .from('blocked_users')
+        .insert({
+          blocker_id: userProfile.id,
+          blocked_id: otherUserId,
+          reason: 'Blocked from chat'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "User Blocked",
+        description: `${match.user.name} has been blocked and won't be able to contact you.`,
+      });
+
+      navigate('/matches');
+    } catch (error) {
+      console.error('Error blocking user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to block the user.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReportUser = async () => {
+    if (!match || !user || !reportType) {
+      toast({
+        title: "Error",
+        description: "Please select a report type.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Get current user's profile
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!userProfile) throw new Error('User profile not found');
+
+      // Determine which user to report
+      const reportedUserId = match.buyerId === userProfile.id ? match.sellerId : match.buyerId;
+
+      const { error } = await supabase
+        .from('reports')
+        .insert({
+          reporter_id: userProfile.id,
+          reported_user_id: reportedUserId,
+          match_id: match.id,
+          report_type: reportType,
+          description: reportDescription
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Report Submitted",
+        description: "Thank you for reporting. Our admin team will review this case.",
+      });
+
+      // Reset form and close dialog
+      setReportDialogOpen(false);
+      setReportType("");
+      setReportDescription("");
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit the report.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -461,7 +592,72 @@ const Chat = () => {
             <p className="text-sm text-muted-foreground">{match.user.type}</p>
           </div>
           
-          <Heart className="w-5 h-5 text-love" />
+          <div className="flex items-center gap-2">
+            <Heart className="w-5 h-5 text-love" />
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowUserProfile(true)}>
+                  <User className="w-4 h-4 mr-2" />
+                  View Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowPropertyDetails(true)}>
+                  <Building className="w-4 h-4 mr-2" />
+                  Property Details
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={() => setReportDialogOpen(true)}
+                  className="text-warning"
+                >
+                  <Flag className="w-4 h-4 mr-2" />
+                  Report User
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleBlockUser}
+                  className="text-destructive"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Block User
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem 
+                      className="text-destructive"
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Conversation
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete this conversation with {match.user.name}? 
+                        This action cannot be undone and will permanently remove all messages.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={handleDeleteMatch}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -736,6 +932,59 @@ const Chat = () => {
               </div>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Report User Dialog */}
+      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Report User</DialogTitle>
+            <DialogDescription>
+              Report {match.user.name} for inappropriate behavior. 
+              Our admin team will review this case.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="report-type">Report Type</Label>
+              <Select value={reportType} onValueChange={setReportType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="not_real_estate">Not using for real estate</SelectItem>
+                  <SelectItem value="inappropriate_content">Inappropriate content</SelectItem>
+                  <SelectItem value="harassment">Harassment</SelectItem>
+                  <SelectItem value="fake_profile">Fake profile</SelectItem>
+                  <SelectItem value="spam">Spam</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Textarea
+                id="description"
+                placeholder="Provide additional details about the issue..."
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReportDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleReportUser} className="bg-destructive hover:bg-destructive/90">
+              <Flag className="w-4 h-4 mr-2" />
+              Submit Report
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
