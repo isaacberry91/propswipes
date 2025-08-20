@@ -266,36 +266,36 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
           </p>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {properties.map((property) => (
             <Card key={property.id} className="overflow-hidden">
-              <div className="flex">
+              <div className="flex flex-col sm:flex-row">
                 {/* Left Side - Image and Buttons */}
-                <div className="w-48 flex-shrink-0 flex flex-col">
+                <div className="w-full sm:w-40 md:w-48 flex-shrink-0 flex flex-col">
                   <div className="relative">
                     {property.images && property.images.length > 0 ? (
                       <img 
                         src={property.images[0]} 
                         alt={property.title}
-                        className="w-full h-40 object-cover"
+                        className="w-full h-32 sm:h-36 md:h-40 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-40 bg-muted flex items-center justify-center">
-                        <Home className="w-8 h-8 text-muted-foreground" />
+                      <div className="w-full h-32 sm:h-36 md:h-40 bg-muted flex items-center justify-center">
+                        <Home className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                       </div>
                     )}
-                    <div className="absolute top-3 right-3">
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
                       {getStatusBadge(property.status, property.deleted_at)}
                     </div>
                   </div>
                   
                   {/* Buttons below image */}
-                  <div className="p-3 space-y-2">
+                  <div className="p-2 sm:p-3 space-y-1.5 sm:space-y-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleView(property)}
-                      className="w-full h-8 text-xs"
+                      className="w-full h-7 sm:h-8 text-xs"
                     >
                       <Eye className="w-3 h-3 mr-1" />
                       View
@@ -309,7 +309,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                              console.log('🔧 EDIT BUTTON CLICKED!', property.id, property.title);
                              handleEdit(property);
                            }}
-                           className="w-full h-8 text-xs"
+                           className="w-full h-7 sm:h-8 text-xs"
                          >
                            <Edit className="w-3 h-3 mr-1" />
                            Edit
@@ -320,7 +320,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                             <Button
                               variant="destructive"
                               size="sm"
-                              className="w-full h-8 text-xs"
+                              className="w-full h-7 sm:h-8 text-xs"
                             >
                               <Trash2 className="w-3 h-3 mr-1" />
                               Delete
@@ -346,7 +346,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                         </AlertDialog>
                       </>
                     ) : (
-                      <div className="text-center text-sm text-muted-foreground py-2">
+                      <div className="text-center text-xs sm:text-sm text-muted-foreground py-1.5 sm:py-2">
                         Property Deleted
                       </div>
                     )}
@@ -354,44 +354,44 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                 </div>
                 
                 {/* Right Side - All Content */}
-                <div className={`flex-1 p-6 min-w-0 ${property.deleted_at ? 'opacity-60' : ''}`}>
+                <div className={`flex-1 p-3 sm:p-4 md:p-6 min-w-0 ${property.deleted_at ? 'opacity-60' : ''}`}>
                   <div className="flex flex-col h-full justify-between">
                     {/* Header Section */}
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-xl text-foreground line-clamp-2">
+                    <div className="space-y-2 sm:space-y-3">
+                      <h4 className="font-semibold text-lg sm:text-xl text-foreground line-clamp-2">
                         {property.title}
                       </h4>
                       
-                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <div className="flex items-start gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" />
                         <span className="line-clamp-2">
                           {property.address}, {property.city}, {property.state}
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-2 text-2xl font-bold text-green-600">
-                        <DollarSign className="w-6 h-6" />
+                      <div className="flex items-center gap-1.5 sm:gap-2 text-xl sm:text-2xl font-bold text-green-600">
+                        <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />
                         <span>{property.price.toLocaleString()}</span>
                       </div>
                     </div>
                     
                     {/* Features Section */}
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground mt-4">
+                    <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-1.5 sm:gap-y-2 text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4">
                       {property.bedrooms && (
-                        <div className="flex items-center gap-2">
-                          <Bed className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Bed className="w-3 h-3 sm:w-4 sm:h-4" />
                           <span>{property.bedrooms} bed{property.bedrooms !== 1 ? 's' : ''}</span>
                         </div>
                       )}
                       {property.bathrooms && (
-                        <div className="flex items-center gap-2">
-                          <Bath className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Bath className="w-3 h-3 sm:w-4 sm:h-4" />
                           <span>{property.bathrooms} bath{property.bathrooms !== 1 ? 's' : ''}</span>
                         </div>
                       )}
                       {property.square_feet && (
-                        <div className="flex items-center gap-2">
-                          <Square className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Square className="w-3 h-3 sm:w-4 sm:h-4" />
                           <span>{property.square_feet.toLocaleString()} sq ft</span>
                         </div>
                       )}
