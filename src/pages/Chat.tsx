@@ -191,6 +191,16 @@ const Chat = () => {
       console.log('🔥 SIMPLE DEBUG - Match seller_id:', matchData.seller_id);
       console.log('🔥 SIMPLE DEBUG - Other user profile ID:', otherUserProfileId);
       
+      // CRITICAL: Verify the profile ID exists in database
+      console.log('🔥 VERIFYING: About to fetch profile with ID:', otherUserProfileId);
+      
+      // Let's also check if this profile ID actually exists
+      const { data: profileCheck } = await supabase
+        .from('profiles')
+        .select('id, display_name, user_type')
+        .eq('id', otherUserProfileId);
+      console.log('🔥 VERIFICATION: Profile check result:', profileCheck);
+      
       // Get the other user's profile data - Enhanced approach
       let otherUser = null;
       
