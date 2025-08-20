@@ -35,6 +35,7 @@ import PropertyManager from "@/components/PropertyManager";
 import { TwoFactorSetupDialog } from "@/components/TwoFactorSetupDialog";
 import { ActiveSessionsDialog } from "@/components/ActiveSessionsDialog";
 import { EmailNotificationsDialog } from "@/components/EmailNotificationsDialog";
+import { PushNotificationsDialog } from "@/components/PushNotificationsDialog";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -52,6 +53,7 @@ const Profile = () => {
   const [twoFactorDialogOpen, setTwoFactorDialogOpen] = useState(false);
   const [activeSessionsDialogOpen, setActiveSessionsDialogOpen] = useState(false);
   const [emailNotificationsDialogOpen, setEmailNotificationsDialogOpen] = useState(false);
+  const [pushNotificationsDialogOpen, setPushNotificationsDialogOpen] = useState(false);
   
   useEffect(() => {
     if (user) {
@@ -856,15 +858,20 @@ const Profile = () => {
                    </Button>
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-foreground">Push Notifications</h4>
-                    <p className="text-sm text-muted-foreground">Get notified about app activity</p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Configure
-                  </Button>
-                </div>
+                 <div className="flex items-center justify-between">
+                   <div>
+                     <h4 className="font-medium text-foreground">Push Notifications</h4>
+                     <p className="text-sm text-muted-foreground">Get notified about app activity</p>
+                   </div>
+                   <Button 
+                     variant="outline" 
+                     size="sm"
+                     onClick={() => setPushNotificationsDialogOpen(true)}
+                   >
+                     <Smartphone className="w-4 h-4 mr-2" />
+                     Configure
+                   </Button>
+                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div>
@@ -1079,6 +1086,11 @@ const Profile = () => {
         <EmailNotificationsDialog
           open={emailNotificationsDialogOpen}
           onOpenChange={setEmailNotificationsDialogOpen}
+        />
+        
+        <PushNotificationsDialog
+          open={pushNotificationsDialogOpen}
+          onOpenChange={setPushNotificationsDialogOpen}
         />
       </div>
     </div>
