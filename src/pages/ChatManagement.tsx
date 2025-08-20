@@ -123,7 +123,7 @@ const ChatManagement = () => {
         return;
       }
 
-      // Fetch all matches for this seller (exclude deleted ones)
+      // Fetch ALL matches for this user (both as buyer and seller)
       const { data: matches, error } = await supabase
         .from('matches')
         .select(`
@@ -140,9 +140,13 @@ const ChatManagement = () => {
           buyer_profile:profiles!buyer_id (
             display_name,
             avatar_url
+          ),
+          seller_profile:profiles!seller_id (
+            display_name,
+            avatar_url
           )
         `)
-        .eq('seller_id', userProfile.id)
+        .or(`buyer_id.eq.${userProfile.id},seller_id.eq.${userProfile.id}`)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
@@ -198,11 +202,19 @@ const ChatManagement = () => {
           else if (daysSinceLastMessage <= 7) status = 'warm';
           else if (daysSinceLastMessage > 14) status = 'archived';
 
+          // Determine who is the "other" user in this conversation
+          const isUserBuyer = match.buyer_id === userProfile.id;
+          const isUserSeller = match.seller_id === userProfile.id;
+          
+          // Get the other user's profile (the one we're chatting with)
+          const otherUserProfile = isUserBuyer ? match.seller_profile : match.buyer_profile;
+          const otherUserId = isUserBuyer ? match.seller_id : match.buyer_id;
+
           return {
             matchId: match.id,
-            buyerName: match.buyer_profile?.display_name || 'Unknown Buyer',
-            buyerAvatar: match.buyer_profile?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-            buyerId: match.buyer_id,
+            buyerName: otherUserProfile?.display_name || 'Unknown User',
+            buyerAvatar: otherUserProfile?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+            buyerId: otherUserId,
             propertyTitle: match.properties?.title || 'Unknown Property',
             propertyImage: match.properties?.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
             propertyPrice: match.properties?.price || 0,
@@ -444,7 +456,7 @@ const ChatManagement = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Conversation Dashboard</h1>
-            <p className="text-muted-foreground">Manage leads, track performance, and analyze conversations</p>
+            <p className="text-muted-foreground">Manage all your conversations, track performance, and analyze chat data</p>
           </div>
         </div>
 
@@ -462,7 +474,7 @@ const ChatManagement = () => {
                   <div className="flex items-center gap-3">
                     <MessageSquare className="w-8 h-8 text-primary" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Total Conversations</p>
+                      <p className="text-sm text-muted-foreground">All Conversations</p>
                       <p className="text-2xl font-bold">{analytics.totalConversations}</p>
                     </div>
                   </div>
@@ -507,7 +519,7 @@ const ChatManagement = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <Button variant="outline" onClick={() => setActiveTab("conversations")}>
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  View All Chats
+                  View All Conversations
                 </Button>
                 <Button variant="outline" onClick={() => handleBulkAction("mark_read")}>
                   <CheckCircle className="w-4 h-4 mr-2" />
