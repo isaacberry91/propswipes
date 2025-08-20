@@ -502,7 +502,7 @@ export type Database = {
         | "seller_basic"
         | "seller_professional"
         | "seller_enterprise"
-      user_type: "buyer" | "seller" | "agent"
+      user_type: "buyer" | "seller" | "agent" | "broker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -650,7 +650,7 @@ export const Constants = {
         "seller_professional",
         "seller_enterprise",
       ],
-      user_type: ["buyer", "seller", "agent"],
+      user_type: ["buyer", "seller", "agent", "broker"],
     },
   },
 } as const
