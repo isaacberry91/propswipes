@@ -46,7 +46,7 @@ export const resolveUserProfile = async (
       .from('profiles')
       .select('*')
       .eq('id', profileId)
-      .maybeSingle();
+      .single();
       
     console.log('🔥 RESOLVE PROFILE - Direct fetch result:', directProfile);
     console.log('🔥 RESOLVE PROFILE - Direct fetch error:', error);
