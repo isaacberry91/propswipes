@@ -462,9 +462,46 @@ const LocationSearch = ({
 
       {showSuggestions && (
         <Card 
-          className="absolute top-full left-0 right-0 mt-1 p-4 shadow-lg z-50 max-h-[600px] overflow-y-auto bg-background border"
+          className="absolute top-full left-0 right-0 mt-1 shadow-lg z-50 max-h-[600px] overflow-y-auto bg-background border"
         >
-          <div className="space-y-4">
+          {/* Immediate Search Results - Show at top */}
+          {searchValue && (
+            <div className="p-4 border-b border-border">
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                {loading ? "Searching..." : `Results for "${searchValue}" (${databaseSuggestions.length} found)`}
+              </h4>
+              {databaseSuggestions.length > 0 ? (
+                <div className="space-y-1">
+                  {databaseSuggestions.map((suggestion, index) => (
+                    <div
+                      key={`${suggestion.full_location}-${index}`}
+                      className="p-2 hover:bg-accent cursor-pointer rounded-md text-sm flex items-center justify-between group transition-colors"
+                      onClick={() => {
+                        handleLocationSelect(suggestion.full_location, suggestion);
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <span>{suggestion.full_location}</span>
+                      </div>
+                      {suggestion.count > 0 && (
+                        <Badge variant="secondary" className="text-xs opacity-70 group-hover:opacity-100">
+                          {suggestion.count} {suggestion.count === 1 ? 'property' : 'properties'}
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  {loading ? "Searching..." : `No locations found matching "${searchValue}"`}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="p-4 space-y-4">
             {/* Map Container */}
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
@@ -545,42 +582,6 @@ const LocationSearch = ({
               </Button>
             </div>
 
-            {/* Database Search Results */}
-            {searchValue && (
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  {loading ? "Searching..." : `Results for "${searchValue}" (${databaseSuggestions.length} found)`}
-                </h4>
-                {databaseSuggestions.length > 0 ? (
-                <div className="space-y-1">
-                  {databaseSuggestions.map((suggestion, index) => (
-                    <div
-                      key={`${suggestion.full_location}-${index}`}
-                      className="p-2 hover:bg-accent cursor-pointer rounded-md text-sm flex items-center justify-between group transition-colors"
-                      onClick={() => {
-                        handleLocationSelect(suggestion.full_location, suggestion);
-                        setShowSuggestions(false);
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-muted-foreground" />
-                        <span>{suggestion.full_location}</span>
-                      </div>
-                      {suggestion.count > 0 && (
-                        <Badge variant="secondary" className="text-xs opacity-70 group-hover:opacity-100">
-                          {suggestion.count} {suggestion.count === 1 ? 'property' : 'properties'}
-                        </Badge>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground text-center py-4">
-                    {loading ? "Searching..." : `No locations found matching "${searchValue}"`}
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Popular Locations */}
             {!searchValue && popularLocations.length > 0 && (
