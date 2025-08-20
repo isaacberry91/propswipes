@@ -1,12 +1,47 @@
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MapPin, Layers } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+
+// Google Maps type declarations
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
+declare namespace google.maps {
+  class Map {
+    constructor(element: Element, options: any);
+    panTo(latLng: any): void;
+    setZoom(zoom: number): void;
+  }
+  class Marker {
+    constructor(options: any);
+    setMap(map: Map | null): void;
+    addListener(event: string, handler: () => void): void;
+  }
+  class Circle {
+    constructor(options: any);
+    setMap(map: Map | null): void;
+  }
+  class InfoWindow {
+    constructor();
+    setContent(content: string): void;
+    open(map: Map, marker: Marker): void;
+    close(): void;
+  }
+  class Size {
+    constructor(width: number, height: number);
+  }
+  class Point {
+    constructor(x: number, y: number);
+  }
+  namespace event {
+    function trigger(instance: any, eventName: string): void;
+  }
+}
 
 interface Property {
   id: string;
@@ -44,100 +79,103 @@ const PropertyMap = ({
   visible = true
 }: PropertyMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<any>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
+  const map = useRef<google.maps.Map | null>(null);
+  const [googleMapsApiKey, setGoogleMapsApiKey] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [selectedRadius, setSelectedRadius] = useState(radius);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const markersRef = useRef<any[]>([]);
-  const radiusLayerRef = useRef<string | null>(null);
-  const libRef = useRef<any>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const radiusCircleRef = useRef<google.maps.Circle | null>(null);
+  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
   // Use passed properties or fetch from database
   const [properties, setProperties] = useState<Property[]>(propProperties);
 
-  // Get Mapbox token from Supabase edge function
+  // Get Google Maps API key from Supabase edge function
   useEffect(() => {
-    const getMapboxToken = async () => {
+    const getGoogleMapsApiKey = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('get-mapbox-token')
         
         if (error) {
-          console.error('Error fetching Mapbox token:', error)
+          console.error('Error fetching Google Maps API key:', error)
           return
         }
         
         if (data?.token) {
-          setMapboxToken(data.token)
+          setGoogleMapsApiKey(data.token)
         }
       } catch (error) {
-        console.error('Error calling Mapbox token function:', error)
+        console.error('Error calling Google Maps API key function:', error)
       }
     }
     
-    getMapboxToken()
+    getGoogleMapsApiKey()
   }, [])
 
-  // Initialize map (Mapbox if token exists, else MapLibre)
+  // Load Google Maps script and initialize map
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!googleMapsApiKey || !mapContainer.current) return;
 
-    // Clean previous map
-    if (map.current) {
-      try { map.current.remove(); } catch {}
-      map.current = null;
-      setMapLoaded(false);
-    }
-
-    const init = async () => {
-      let L: any;
-      const hasValidMapboxToken = !!mapboxToken && mapboxToken.startsWith('pk.');
-      if (hasValidMapboxToken) {
-        (mapboxgl as any).accessToken = mapboxToken;
-        L = mapboxgl as any;
-        map.current = new L.Map({
-          container: mapContainer.current as HTMLDivElement,
-          style: 'mapbox://styles/mapbox/light-v11',
-          center,
-          zoom: 12,
-          attributionControl: false,
-        });
-      } else {
-        const maplibregl = (await import('maplibre-gl')).default as any;
-        L = maplibregl;
-        map.current = new L.Map({
-          container: mapContainer.current as HTMLDivElement,
-          style: 'https://demotiles.maplibre.org/style.json',
-          center,
-          zoom: 12,
-          attributionControl: false,
-        });
+    // Load Google Maps script
+    const loadGoogleMaps = () => {
+      if (window.google && window.google.maps) {
+        initializeMap();
+        return;
       }
 
-      libRef.current = L;
-
-      map.current.on('load', () => setMapLoaded(true));
-
-      // Controls
-      try {
-        map.current.addControl(new L.NavigationControl(), 'top-right');
-      } catch {}
-      try {
-        map.current.addControl(new L.AttributionControl({ compact: true }), 'bottom-right');
-      } catch {}
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=geometry`;
+      script.async = true;
+      script.defer = true;
+      script.onload = initializeMap;
+      document.head.appendChild(script);
     };
 
-    init();
+    const initializeMap = () => {
+      if (!mapContainer.current) return;
+
+      map.current = new google.maps.Map(mapContainer.current, {
+        center: { lat: center[1], lng: center[0] },
+        zoom: 12,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      });
+
+      // Create info window
+      infoWindowRef.current = new google.maps.InfoWindow();
+
+      setMapLoaded(true);
+    };
+
+    loadGoogleMaps();
 
     return () => {
-      try { map.current?.remove(); } catch {}
+      // Clean up markers and circles
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
+      if (radiusCircleRef.current) {
+        radiusCircleRef.current.setMap(null);
+        radiusCircleRef.current = null;
+      }
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+      }
     };
-  }, [mapboxToken, center]);
+  }, [googleMapsApiKey, center]);
 
-  // Recalculate layout when visibility changes
+  // Trigger resize when visibility changes
   useEffect(() => {
-    if (visible && mapLoaded) {
-      try { map.current?.resize(); } catch {}
+    if (visible && mapLoaded && map.current) {
+      google.maps.event.trigger(map.current, 'resize');
     }
   }, [visible, mapLoaded]);
   useEffect(() => {
@@ -195,52 +233,55 @@ const PropertyMap = ({
     if (!map.current || !properties.length || !mapLoaded) return;
 
     // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current.forEach(marker => marker.setMap(null));
     markersRef.current = [];
 
     // Add new markers
     properties.forEach((property) => {
       if (property.latitude && property.longitude) {
-        // Create custom marker element
-        const markerElement = document.createElement('div');
-        markerElement.className = 'property-marker';
-        markerElement.innerHTML = `
-          <div class="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-xs font-bold border-2 border-background shadow-lg cursor-pointer hover:scale-110 transition-transform">
-            $${(property.price / 1000).toFixed(0)}k
-          </div>
-        `;
+        // Create custom marker with price
+        const marker = new google.maps.Marker({
+          position: { lat: property.latitude, lng: property.longitude },
+          map: map.current!,
+          title: property.title,
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="14" fill="hsl(var(--primary))" stroke="white" stroke-width="2"/>
+                <text x="16" y="20" text-anchor="middle" fill="white" font-size="8" font-weight="bold">
+                  $${(property.price / 1000).toFixed(0)}k
+                </text>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(32, 32),
+            anchor: new google.maps.Point(16, 16)
+          }
+        });
 
-        const marker = new libRef.current.Marker(markerElement)
-          .setLngLat([property.longitude, property.latitude])
-          .addTo(map.current!);
-
-        // Add popup on click
-        const popup = new libRef.current.Popup({
-          offset: 25,
-          closeButton: true,
-          closeOnClick: false
-        }).setHTML(`
-          <div class="p-2 max-w-xs">
-            <div class="flex gap-2 mb-2">
-              <img src="${property.images[0] || '/placeholder.svg'}" 
-                   alt="${property.title}" 
-                   class="w-16 h-16 object-cover rounded-md">
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-sm truncate">${property.title}</h3>
-                <p class="text-xs text-gray-600 truncate">${property.address}</p>
-                <p class="text-sm font-bold text-primary">$${property.price.toLocaleString()}</p>
+        // Add click listener for info window
+        marker.addListener('click', () => {
+          const content = `
+            <div style="padding: 8px; max-width: 250px;">
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <img src="${property.images[0] || '/placeholder.svg'}" 
+                     alt="${property.title}" 
+                     style="width: 64px; height: 64px; object-fit: cover; border-radius: 4px;">
+                <div style="flex: 1; min-width: 0;">
+                  <h3 style="font-weight: 600; font-size: 14px; margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${property.title}</h3>
+                  <p style="font-size: 12px; color: #666; margin: 0 0 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${property.address}</p>
+                  <p style="font-size: 14px; font-weight: bold; color: hsl(var(--primary)); margin: 0;">$${property.price.toLocaleString()}</p>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                <span>${property.bedrooms || 0} bed</span>
+                <span>${property.bathrooms || 0} bath</span>
+                <span>${property.square_feet || 0} sqft</span>
               </div>
             </div>
-            <div class="flex justify-between text-xs text-gray-500">
-              <span>${property.bedrooms || 0} bed</span>
-              <span>${property.bathrooms || 0} bath</span>
-              <span>${property.square_feet || 0} sqft</span>
-            </div>
-          </div>
-        `);
+          `;
 
-        markerElement.addEventListener('click', () => {
-          marker.setPopup(popup).togglePopup();
+          infoWindowRef.current?.setContent(content);
+          infoWindowRef.current?.open(map.current!, marker);
           onPropertySelect?.(property);
         });
 
@@ -253,63 +294,23 @@ const PropertyMap = ({
   useEffect(() => {
     if (!map.current || !center || !mapLoaded) return;
 
-    // Remove existing radius layer
-    if (radiusLayerRef.current) {
-      if (map.current.getLayer(radiusLayerRef.current)) {
-        map.current.removeLayer(radiusLayerRef.current);
-      }
-      if (map.current.getSource(radiusLayerRef.current)) {
-        map.current.removeSource(radiusLayerRef.current);
-      }
+    // Remove existing radius circle
+    if (radiusCircleRef.current) {
+      radiusCircleRef.current.setMap(null);
     }
 
-    // Create circle geometry (approximate)
-    const radiusInKm = selectedRadius * 1.60934; // Convert miles to km
-    const points = 64;
-    const coordinates = [];
+    // Create new radius circle
+    const radiusInMeters = selectedRadius * 1609.34; // Convert miles to meters
     
-    for (let i = 0; i < points; i++) {
-      const angle = (i / points) * 2 * Math.PI;
-      const latitude = center[1] + (radiusInKm / 111) * Math.cos(angle);
-      const longitude = center[0] + (radiusInKm / (111 * Math.cos(center[1] * Math.PI / 180))) * Math.sin(angle);
-      coordinates.push([longitude, latitude]);
-    }
-    coordinates.push(coordinates[0]); // Close the polygon
-
-    const sourceId = `radius-${Date.now()}`;
-    radiusLayerRef.current = sourceId;
-
-    map.current.addSource(sourceId, {
-      type: 'geojson',
-      data: {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [coordinates]
-        },
-        properties: {}
-      }
-    });
-
-    map.current.addLayer({
-      id: sourceId,
-      type: 'fill',
-      source: sourceId,
-      paint: {
-        'fill-color': '#3b82f6',
-        'fill-opacity': 0.1
-      }
-    });
-
-    map.current.addLayer({
-      id: `${sourceId}-outline`,
-      type: 'line',
-      source: sourceId,
-      paint: {
-        'line-color': '#3b82f6',
-        'line-width': 2,
-        'line-opacity': 0.5
-      }
+    radiusCircleRef.current = new google.maps.Circle({
+      strokeColor: '#3b82f6',
+      strokeOpacity: 0.5,
+      strokeWeight: 2,
+      fillColor: '#3b82f6',
+      fillOpacity: 0.1,
+      map: map.current,
+      center: { lat: center[1], lng: center[0] },
+      radius: radiusInMeters
     });
   }, [center, selectedRadius, mapLoaded]);
 
@@ -317,18 +318,17 @@ const PropertyMap = ({
   useEffect(() => {
     if (!map.current || !center) return;
     
-    map.current.flyTo({
-      center: center,
-      zoom: 12,
-      duration: 1000
-    });
+    map.current.panTo({ lat: center[1], lng: center[0] });
+    map.current.setZoom(12);
   }, [center]);
 
   const handleRadiusChange = (newRadius: number) => {
     setSelectedRadius(newRadius);
     onRadiusChange?.(newRadius);
-    // Ensure proper layout when controls used
-    try { map.current?.resize(); } catch {}
+    // Trigger resize to ensure proper layout
+    if (map.current) {
+      google.maps.event.trigger(map.current, 'resize');
+    }
   };
 
   return (
@@ -371,11 +371,11 @@ const PropertyMap = ({
       {/* Map Container */}
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
 
-      {/* Token Warning */}
-      {(!mapboxToken || !mapboxToken.startsWith('pk.')) && (
+      {/* API Key Warning */}
+      {!googleMapsApiKey && (
         <Card className="absolute bottom-4 left-4 right-4 z-10 p-4 bg-destructive/10 border-destructive/20">
           <div className="text-sm text-destructive">
-            Using fallback map. Add your Mapbox public token in Supabase to enable Mapbox styles.
+            Google Maps API key not configured. Add your Google Maps API key in Supabase to enable map functionality.
           </div>
         </Card>
       )}
