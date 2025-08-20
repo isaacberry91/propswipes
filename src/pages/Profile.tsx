@@ -32,6 +32,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import PropertyManager from "@/components/PropertyManager";
+import { TwoFactorSetupDialog } from "@/components/TwoFactorSetupDialog";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -46,6 +47,7 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [twoFactorDialogOpen, setTwoFactorDialogOpen] = useState(false);
   
   useEffect(() => {
     if (user) {
@@ -258,6 +260,45 @@ const Profile = () => {
       toast({
         title: "Error changing password",
         description: error.message || "Please try again or contact support.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleTwoFactorSuccess = () => {
+    // Refresh user profile to get updated 2FA status
+    fetchUserProfile();
+    toast({
+      title: "2FA Enabled",
+      description: "Two-factor authentication has been successfully enabled for your account."
+    });
+  };
+
+  const handleDisable2FA = async () => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          two_factor_enabled: false,
+          two_factor_method: null,
+          two_factor_contact: null
+        })
+        .eq('user_id', user.id);
+        
+      if (error) throw error;
+      
+      // Refresh profile to show updated status
+      fetchUserProfile();
+      
+      toast({
+        title: "2FA Disabled",
+        description: "Two-factor authentication has been disabled for your account."
+      });
+    } catch (error) {
+      console.error('Error disabling 2FA:', error);
+      toast({
+        title: "Error disabling 2FA",
+        description: "Please try again later.",
         variant: "destructive"
       });
     }
@@ -885,12 +926,50 @@ const Profile = () => {
                 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium text-foreground">Two-Factor Authentication</h4>
-                    <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                    <h4 className="font-medium text-foreground flex items-center gap-2">
+                      Two-Factor Authentication
+                      {userProfile?.two_factor_enabled && (
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                      )}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      {userProfile?.two_factor_enabled 
+                        ? `Enabled via ${userProfile.two_factor_method || 'email'}`
+                        : 'Add an extra layer of security'
+                      }
+                    </p>
                   </div>
-                  <Button variant="outline" size="sm">
-                    Enable
-                  </Button>
+                  {userProfile?.two_factor_enabled ? (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          Disable
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Disable Two-Factor Authentication?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will remove the extra security layer from your account. You can re-enable it anytime.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDisable2FA}>
+                            Disable 2FA
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setTwoFactorDialogOpen(true)}
+                    >
+                      Enable
+                    </Button>
+                  )}
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -973,6 +1052,12 @@ const Profile = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        
+        <TwoFactorSetupDialog
+          open={twoFactorDialogOpen}
+          onOpenChange={setTwoFactorDialogOpen}
+          onSuccess={handleTwoFactorSuccess}
+        />
       </div>
     </div>
   );

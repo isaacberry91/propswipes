@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, Phone, Shield } from 'lucide-react';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface TwoFactorSetupDialogProps {
   open: boolean;
@@ -15,79 +19,71 @@ interface TwoFactorSetupDialogProps {
   onSuccess: () => void;
 }
 
-export const TwoFactorSetupDialog: React.FC<TwoFactorSetupDialogProps> = ({
-  open,
-  onOpenChange,
-  onSuccess
-}) => {
-  const [step, setStep] = useState<'method' | 'contact' | 'verify'>('method');
-  const [method, setMethod] = useState<'email' | 'sms'>('email');
-  const [contact, setContact] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+export function TwoFactorSetupDialog({ open, onOpenChange, onSuccess }: TwoFactorSetupDialogProps) {
   const { toast } = useToast();
+  const [step, setStep] = useState<'contact' | 'verify'>('contact');
+  const [contact, setContact] = useState('');
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const resetDialog = () => {
-    setStep('method');
-    setMethod('email');
+    setStep('contact');
     setContact('');
-    setVerificationCode('');
+    setCode('');
     setLoading(false);
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
+    // Reset after animation completes
+    setTimeout(resetDialog, 300);
   };
 
   const handleSendCode = async () => {
     if (!contact.trim()) {
       toast({
-        title: "Contact required",
-        description: `Please enter your ${method === 'email' ? 'email address' : 'phone number'}`,
+        title: "Email required",
+        description: "Please enter your email address.",
         variant: "destructive"
       });
       return;
     }
 
-    // Basic validation
-    if (method === 'email' && !contact.includes('@')) {
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(contact)) {
       toast({
         title: "Invalid email",
-        description: "Please enter a valid email address",
+        description: "Please enter a valid email address.",
         variant: "destructive"
       });
       return;
     }
 
-    if (method === 'sms' && !/^\+?[\d\s\-\(\)]+$/.test(contact)) {
-      toast({
-        title: "Invalid phone number",
-        description: "Please enter a valid phone number",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(true);
     try {
+      setLoading(true);
+      
       const { data, error } = await supabase.functions.invoke('send-2fa-code', {
-        body: {
-          method: 'setup',
+        body: { 
+          method: 'email', 
           contact: contact.trim(),
-          type: method
+          type: 'email'
         }
       });
 
       if (error) throw error;
 
       toast({
-        title: "Code sent",
-        description: `Verification code sent to your ${method === 'email' ? 'email' : 'phone'}`,
+        title: "Verification code sent",
+        description: `A 6-digit code has been sent to ${contact}`
       });
-
+      
       setStep('verify');
     } catch (error: any) {
-      console.error('Error sending code:', error);
+      console.error('Error sending 2FA code:', error);
       toast({
         title: "Error sending code",
-        description: error.message || "Please try again later",
+        description: error.message || "Please try again later.",
         variant: "destructive"
       });
     } finally {
@@ -96,39 +92,47 @@ export const TwoFactorSetupDialog: React.FC<TwoFactorSetupDialogProps> = ({
   };
 
   const handleVerifyCode = async () => {
-    if (!verificationCode.trim() || verificationCode.length !== 6) {
+    if (!code.trim() || code.length !== 6) {
       toast({
         title: "Invalid code",
-        description: "Please enter the 6-digit verification code",
+        description: "Please enter the 6-digit verification code.",
         variant: "destructive"
       });
       return;
     }
 
-    setLoading(true);
     try {
+      setLoading(true);
+      
       const { data, error } = await supabase.functions.invoke('verify-2fa-code', {
-        body: {
-          code: verificationCode,
+        body: { 
+          code: code.trim(),
           setup: true
         }
       });
 
       if (error) throw error;
 
-      toast({
-        title: "2FA enabled",
-        description: "Two-factor authentication has been successfully enabled",
-      });
-
-      onSuccess();
-      onOpenChange(false);
-      resetDialog();
+      if (data?.verified) {
+        toast({
+          title: "2FA enabled successfully",
+          description: `Two-factor authentication has been enabled using ${data.contact}`
+        });
+        
+        onSuccess();
+        handleClose();
+      } else {
+        toast({
+          title: "Invalid code",
+          description: "The verification code is incorrect or has expired.",
+          variant: "destructive"
+        });
+      }
     } catch (error: any) {
-      console.error('Error verifying code:', error);
+      console.error('Error verifying 2FA code:', error);
       toast({
-        title: "Verification failed",
-        description: error.message || "Invalid or expired code",
+        title: "Error verifying code",
+        description: error.message || "Please try again later.",
         variant: "destructive"
       });
     } finally {
@@ -136,141 +140,97 @@ export const TwoFactorSetupDialog: React.FC<TwoFactorSetupDialogProps> = ({
     }
   };
 
-  const handleClose = () => {
-    onOpenChange(false);
-    resetDialog();
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            Enable Two-Factor Authentication
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6">
-          {step === 'method' && (
-            <>
-              <p className="text-sm text-muted-foreground">
-                Choose how you'd like to receive verification codes for enhanced security.
-              </p>
-              
-              <RadioGroup value={method} onValueChange={(value: 'email' | 'sms') => setMethod(value)}>
-                <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                  <RadioGroupItem value="email" id="email" />
-                  <Label htmlFor="email" className="flex items-center gap-2 cursor-pointer flex-1">
-                    <Mail className="w-4 h-4" />
-                    <div>
-                      <div className="font-medium">Email</div>
-                      <div className="text-sm text-muted-foreground">Receive codes via email</div>
-                    </div>
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2 p-3 border rounded-lg">
-                  <RadioGroupItem value="sms" id="sms" />
-                  <Label htmlFor="sms" className="flex items-center gap-2 cursor-pointer flex-1">
-                    <Phone className="w-4 h-4" />
-                    <div>
-                      <div className="font-medium">SMS</div>
-                      <div className="text-sm text-muted-foreground">Receive codes via text message</div>
-                    </div>
-                  </Label>
-                </div>
-              </RadioGroup>
-
-              <Button onClick={() => setStep('contact')} className="w-full">
-                Continue
-              </Button>
-            </>
-          )}
-
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <div className="space-y-4">
           {step === 'contact' && (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="contact">
-                  {method === 'email' ? 'Email Address' : 'Phone Number'}
-                </Label>
+              <DialogHeader>
+                <DialogTitle>Enable Two-Factor Authentication</DialogTitle>
+                <DialogDescription>
+                  We'll send verification codes to your email address to secure your account.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg mb-4">
+                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                    <span className="text-primary font-semibold">@</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">Email Authentication</p>
+                    <p className="text-sm text-muted-foreground">Receive codes via email</p>
+                  </div>
+                </div>
+                <Label htmlFor="contact">Email Address</Label>
                 <Input
                   id="contact"
-                  type={method === 'email' ? 'email' : 'tel'}
-                  placeholder={method === 'email' ? 'Enter your email address' : 'Enter your phone number (+1234567890)'}
+                  type="email"
+                  placeholder="your@email.com"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
-                  disabled={loading}
+                  className="mt-2"
                 />
-                <p className="text-xs text-muted-foreground">
-                  {method === 'email' 
-                    ? 'We\'ll send a verification code to this email address'
-                    : 'We\'ll send a verification code to this phone number via SMS'
-                  }
-                </p>
               </div>
-
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setStep('method')}
-                  disabled={loading}
-                  className="flex-1"
-                >
-                  Back
+              <DialogFooter>
+                <Button variant="outline" onClick={handleClose}>
+                  Cancel
                 </Button>
                 <Button 
-                  onClick={handleSendCode}
-                  disabled={loading}
-                  className="flex-1"
+                  onClick={handleSendCode} 
+                  disabled={!contact || loading}
                 >
-                  {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Send Code
+                  {loading ? 'Sending...' : 'Send Code'}
                 </Button>
-              </div>
+              </DialogFooter>
             </>
           )}
 
           {step === 'verify' && (
             <>
-              <div className="space-y-2">
+              <DialogHeader>
+                <DialogTitle>Enter Verification Code</DialogTitle>
+                <DialogDescription>
+                  Please enter the 6-digit code sent to {contact}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
                 <Label htmlFor="code">Verification Code</Label>
                 <Input
                   id="code"
                   type="text"
-                  placeholder="Enter 6-digit code"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  disabled={loading}
-                  className="text-center text-lg tracking-widest"
+                  placeholder="123456"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className="mt-2 text-center tracking-widest text-lg font-mono"
+                  maxLength={6}
                 />
-                <p className="text-xs text-muted-foreground">
-                  We sent a 6-digit code to {contact}. The code expires in 10 minutes.
+                <p className="text-sm text-muted-foreground mt-2 text-center">
+                  Didn't receive the code? 
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto ml-1 text-sm"
+                    onClick={() => setStep('contact')}
+                  >
+                    Try again
+                  </Button>
                 </p>
               </div>
-
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setStep('contact')}
-                  disabled={loading}
-                  className="flex-1"
-                >
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setStep('contact')}>
                   Back
                 </Button>
                 <Button 
-                  onClick={handleVerifyCode}
-                  disabled={loading || verificationCode.length !== 6}
-                  className="flex-1"
+                  onClick={handleVerifyCode} 
+                  disabled={code.length !== 6 || loading}
                 >
-                  {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Verify & Enable
+                  {loading ? 'Verifying...' : 'Verify & Enable'}
                 </Button>
-              </div>
+              </DialogFooter>
             </>
           )}
         </div>
       </DialogContent>
     </Dialog>
   );
-};
+}
