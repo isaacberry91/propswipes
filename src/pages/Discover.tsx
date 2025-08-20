@@ -140,13 +140,14 @@ const Discover = () => {
         setSelectedLocation("Seattle, WA");
       }
 
-      // Daily likes reset logic - only for non-subscribers
+      // Daily likes logic - only for non-subscribers
       if (!hasUnlimitedLikes()) {
         const today = new Date().toDateString();
         const resetDate = data.daily_likes_reset_date ? new Date(data.daily_likes_reset_date).toDateString() : null;
         console.log('🔄 PROFILE: Date comparison - today:', today, 'resetDate:', resetDate);
         
         if (resetDate !== today) {
+          // Only reset if it's actually a new day
           console.log('🔄 PROFILE: Resetting daily likes for free user (new day)');
           await supabase
             .from('profiles')
@@ -157,16 +158,9 @@ const Discover = () => {
             .eq('id', data.id);  // Use profile ID consistently
           setDailyLikesUsed(0);
         } else {
-          // Only update state if it's different from database to prevent overriding recent changes
-          const dbLikesUsed = data.daily_likes_used || 0;
-          console.log('🔄 PROFILE: Comparing likes - current state:', dailyLikesUsed, 'db value:', dbLikesUsed);
-          
-          if (dailyLikesUsed !== dbLikesUsed) {
-            console.log('🔄 PROFILE: Updating state from database value:', dbLikesUsed);
-            setDailyLikesUsed(dbLikesUsed);
-          } else {
-            console.log('🔄 PROFILE: Keeping current state value:', dailyLikesUsed);
-          }
+          // Same day - use the database value as-is
+          console.log('🔄 PROFILE: Same day, using database value:', data.daily_likes_used);
+          setDailyLikesUsed(data.daily_likes_used || 0);
         }
       } else {
         // For subscribers, set unlimited likes (no tracking needed)
