@@ -553,32 +553,23 @@ const LocationSearch = ({
                 Search Radius
               </h4>
               <div onClick={(e) => e.stopPropagation()}>
-                 <Select 
-                   value={selectedRadius.toString()} 
-                   onValueChange={(value) => {
-                     const newRadius = parseInt(value);
-                     console.log('🔍 LocationSearch: Radius selector changed to:', newRadius);
-                     console.log('🔍 LocationSearch: Current selectedRadius before change:', selectedRadius);
-                     handleRadiusChange(newRadius);
-                   }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue>
-                      {selectedRadius} miles
-                    </SelectValue>
-                  </SelectTrigger>
-                   <SelectContent className="z-[100] bg-background border shadow-lg">
-                     <SelectItem value="1">1 mile</SelectItem>
-                     <SelectItem value="2">2 miles</SelectItem>
-                     <SelectItem value="5">5 miles</SelectItem>
-                     <SelectItem value="10">10 miles</SelectItem>
-                     <SelectItem value="15">15 miles</SelectItem>
-                     <SelectItem value="25">25 miles</SelectItem>
-                     <SelectItem value="50">50 miles</SelectItem>
-                     <SelectItem value="75">75 miles</SelectItem>
-                     <SelectItem value="100">100 miles</SelectItem>
-                   </SelectContent>
-                </Select>
+                 <div className="flex items-center gap-2">
+                   <Input
+                     type="number"
+                     min="1"
+                     max="200"
+                     value={selectedRadius}
+                     onChange={(e) => {
+                       const newRadius = parseInt(e.target.value) || 10;
+                       console.log('🔍 LocationSearch: Radius input changed to:', newRadius);
+                       console.log('🔍 LocationSearch: Current selectedRadius before change:', selectedRadius);
+                       handleRadiusChange(newRadius);
+                     }}
+                     className="w-20 text-center"
+                     placeholder="10"
+                   />
+                   <span className="text-sm text-muted-foreground">miles</span>
+                 </div>
               </div>
             </div>
 
