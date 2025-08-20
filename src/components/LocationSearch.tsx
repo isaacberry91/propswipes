@@ -70,7 +70,7 @@ const LocationSearch = ({
         .select('address, city, state')
         .eq('status', 'approved')
         .is('deleted_at', null)
-        .or(`address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`)
+        .or(`address.ilike.*${query.replace(/[,()]/g, ' ').trim()}*,city.ilike.*${query.replace(/[,()]/g, ' ').trim()}*,state.ilike.*${query.replace(/[,()]/g, ' ').trim()}*`)
         .limit(15);
 
       if (error) {
