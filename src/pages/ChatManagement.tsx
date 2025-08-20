@@ -138,12 +138,16 @@ const ChatManagement = () => {
             price
           ),
           buyer_profile:profiles!buyer_id (
+            id,
             display_name,
-            avatar_url
+            avatar_url,
+            user_type
           ),
           seller_profile:profiles!seller_id (
+            id,
             display_name,
-            avatar_url
+            avatar_url,
+            user_type
           )
         `)
         .or(`buyer_id.eq.${userProfile.id},seller_id.eq.${userProfile.id}`)
@@ -210,12 +214,21 @@ const ChatManagement = () => {
           const otherUserProfile = isUserBuyer ? match.seller_profile : match.buyer_profile;
           const otherUserId = isUserBuyer ? match.seller_id : match.buyer_id;
 
+          // Enhanced debugging
+          console.log('🔧 Chat Debug - Match:', {
+            matchId: match.id,
+            isUserBuyer,
+            isUserSeller,
+            otherUserProfile: otherUserProfile,
+            property: match.properties
+          });
+
           return {
             matchId: match.id,
-            buyerName: otherUserProfile?.display_name || 'Unknown User',
+            buyerName: otherUserProfile?.display_name || `User ${otherUserId?.slice(0, 8)}`,
             buyerAvatar: otherUserProfile?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
             buyerId: otherUserId,
-            propertyTitle: match.properties?.title || 'Unknown Property',
+            propertyTitle: match.properties?.title || `Property ${match.property_id?.slice(0, 8)}`,
             propertyImage: match.properties?.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
             propertyPrice: match.properties?.price || 0,
             lastMessage: lastMessage?.content || 'No messages yet',

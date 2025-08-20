@@ -499,109 +499,143 @@ const Admin = () => {
                   </div>
                 </div>
 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Reporter</TableHead>
-                      <TableHead>Reported User</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reports.map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={report.reporter?.avatar_url} />
-                              <AvatarFallback>
-                                <Users className="w-4 h-4" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">{report.reporter?.display_name || 'Unknown'}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={report.reported_user?.avatar_url} />
-                              <AvatarFallback>
-                                <Users className="w-4 h-4" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{report.reported_user?.display_name || 'Unknown'}</p>
-                              <p className="text-xs text-muted-foreground">{report.reported_user?.user_type}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {report.report_type.replace('_', ' ')}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <p className="text-sm max-w-xs truncate">
-                            {report.description || 'No description provided'}
-                          </p>
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={
-                              report.status === 'pending' ? 'default' :
-                              report.status === 'resolved' ? 'secondary' : 'destructive'
-                            }
-                          >
-                            {report.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(report.created_at).toLocaleDateString()}
-                          </p>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            {report.match_id && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => window.open(`/chat/${report.match_id}`, '_blank')}
-                              >
-                                <MessageSquare className="w-4 h-4 mr-1" />
-                                View Chat
-                              </Button>
-                            )}
-                            {report.status === 'pending' && (
-                              <>
-                                <Button 
-                                  size="sm" 
-                                  variant="default"
-                                  onClick={() => handleResolveReport(report.id)}
+                {reports.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Flag className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No reports submitted yet</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Reporter</TableHead>
+                          <TableHead>Reported User</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {reports.map((report) => (
+                          <TableRow key={report.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={report.reporter?.avatar_url} />
+                                  <AvatarFallback>
+                                    {report.reporter?.display_name?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium">
+                                  {report.reporter?.display_name || 'Unknown User'}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={report.reported_user?.avatar_url} />
+                                  <AvatarFallback>
+                                    {report.reported_user?.display_name?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium">
+                                    {report.reported_user?.display_name || 'Unknown User'}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {report.reported_user?.user_type || 'Unknown'}
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline">{report.report_type}</Badge>
+                            </TableCell>
+                            <TableCell className="max-w-xs">
+                              <div className="truncate" title={report.description}>
+                                {report.description || 'No description provided'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                report.status === 'pending' ? 'destructive' :
+                                report.status === 'resolved' ? 'default' : 'secondary'
+                              }>
+                                {report.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {new Date(report.created_at).toLocaleDateString()}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleViewProfile(report.reported_user_id)}
                                 >
-                                  <Check className="w-4 h-4 mr-1" />
-                                  Resolve
+                                  <Eye className="w-4 h-4" />
                                 </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="destructive"
-                                  onClick={() => handleDismissReport(report.id)}
-                                >
-                                  <X className="w-4 h-4 mr-1" />
-                                  Dismiss
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                                {report.status === 'pending' && (
+                                  <>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button size="sm" variant="default">
+                                          <Check className="w-4 h-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Resolve Report</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Mark this report as resolved? This action can be undone later.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => handleResolveReport(report.id)}>
+                                            Resolve
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button size="sm" variant="destructive">
+                                          <X className="w-4 h-4" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Dismiss Report</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Dismiss this report? This action can be undone later.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => handleDismissReport(report.id)}>
+                                            Dismiss
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                  </>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </Card>
 
               {/* Blocked Users Section */}
@@ -613,68 +647,105 @@ const Admin = () => {
                   </Badge>
                 </div>
 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Blocker</TableHead>
-                      <TableHead>Blocked User</TableHead>
-                      <TableHead>Reason</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {blockedUsers.map((block) => (
-                      <TableRow key={block.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={block.blocker?.avatar_url} />
-                              <AvatarFallback>
-                                <Users className="w-4 h-4" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="font-medium">{block.blocker?.display_name || 'Unknown'}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={block.blocked?.avatar_url} />
-                              <AvatarFallback>
-                                <Users className="w-4 h-4" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{block.blocked?.display_name || 'Unknown'}</p>
-                              <p className="text-xs text-muted-foreground">{block.blocked?.user_type}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <p className="text-sm max-w-xs truncate">
-                            {block.reason || 'No reason provided'}
-                          </p>
-                        </TableCell>
-                        <TableCell>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(block.created_at).toLocaleDateString()}
-                          </p>
-                        </TableCell>
-                        <TableCell>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleUnblockUser(block.id)}
-                          >
-                            <UserX className="w-4 h-4 mr-1" />
-                            Unblock
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {blockedUsers.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserX className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No blocked users</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Blocker</TableHead>
+                          <TableHead>Blocked User</TableHead>
+                          <TableHead>Reason</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {blockedUsers.map((block) => (
+                          <TableRow key={block.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={block.blocker?.avatar_url} />
+                                  <AvatarFallback>
+                                    {block.blocker?.display_name?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium">
+                                  {block.blocker?.display_name || 'Unknown User'}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="w-8 h-8">
+                                  <AvatarImage src={block.blocked?.avatar_url} />
+                                  <AvatarFallback>
+                                    {block.blocked?.display_name?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium">
+                                    {block.blocked?.display_name || 'Unknown User'}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {block.blocked?.user_type || 'Unknown'}
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="max-w-xs">
+                              <div className="truncate" title={block.reason}>
+                                {block.reason || 'No reason provided'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {new Date(block.created_at).toLocaleDateString()}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleViewProfile(block.blocked_id)}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="destructive">
+                                      <Ban className="w-4 h-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Unblock User</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Remove this block and allow these users to interact again?
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleUnblockUser(block.id)}>
+                                        Unblock
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </Card>
             </div>
           </TabsContent>
