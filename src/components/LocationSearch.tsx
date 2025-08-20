@@ -238,11 +238,13 @@ const LocationSearch = ({
 
   // Geocode location for map display
   const geocodeLocationForMap = async (location: string) => {
+    console.log('🗺️ Starting geocoding for location:', location);
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`
       );
       const data = await response.json();
+      console.log('🗺️ Geocoding response:', data);
       
       if (data && data.length > 0) {
         const result = data[0];
@@ -250,6 +252,8 @@ const LocationSearch = ({
         const lon = parseFloat(result.lon);
         const addrType = (result.addresstype || result.type || '').toLowerCase();
         const cls = (result.class || '').toLowerCase();
+        
+        console.log('🗺️ Parsed coordinates:', { lat, lon, addrType, cls });
         
         // Dynamically adjust radius based on granularity
         let newRadius = selectedRadius;
@@ -270,10 +274,13 @@ const LocationSearch = ({
           onChange(location, newRadius);
         }
         
+        console.log('🗺️ Setting map center to:', [lon, lat]);
         setMapCenter([lon, lat]);
+      } else {
+        console.log('🗺️ No geocoding results found for:', location);
       }
     } catch (error) {
-      console.error('Geocoding error:', error);
+      console.error('🗺️ Geocoding error:', error);
     }
   };
 

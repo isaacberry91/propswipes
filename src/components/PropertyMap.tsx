@@ -397,8 +397,13 @@ const PropertyMap = ({
 
   // Update map center when search location changes
   useEffect(() => {
-    if (!map.current || !center) return;
+    console.log('🗺️ PropertyMap: center prop changed to:', center);
+    if (!map.current || !center) {
+      console.log('🗺️ PropertyMap: No map or center, skipping update');
+      return;
+    }
     
+    console.log('🗺️ PropertyMap: Calling setCenter and setZoom');
     map.current.setCenter(center);
     map.current.setZoom(12);
   }, [center]);
