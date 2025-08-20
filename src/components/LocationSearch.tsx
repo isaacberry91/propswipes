@@ -206,8 +206,24 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
     }
   };
 
+  // Handle clicks outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const searchContainer = target.closest('.location-search-container');
+      if (!searchContainer) {
+        setShowSuggestions(false);
+      }
+    };
+
+    if (showSuggestions) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showSuggestions]);
+
   return (
-    <div className="relative w-full">
+    <div className="relative w-full location-search-container">
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
         <Input
@@ -217,10 +233,6 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
             setShowSuggestions(true);
           }}
           onFocus={() => setShowSuggestions(true)}
-          onBlur={() => {
-            // Delay hiding to allow clicking on suggestions
-            setTimeout(() => setShowSuggestions(false), 200);
-          }}
           placeholder={placeholder}
           className="pl-10 pr-20"
         />
@@ -236,7 +248,10 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
       </div>
 
       {showSuggestions && (
-        <Card className="absolute top-full left-0 right-0 mt-1 p-4 shadow-lg z-50 max-h-96 overflow-y-auto bg-background border">
+        <Card 
+          className="absolute top-full left-0 right-0 mt-1 p-4 shadow-lg z-50 max-h-96 overflow-y-auto bg-background border"
+          onMouseDown={(e) => e.preventDefault()}
+        >
           <div className="space-y-4">
             {/* Radius Selection */}
             <div>
