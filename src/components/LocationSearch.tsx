@@ -70,7 +70,7 @@ const LocationSearch = ({
         .select('address, city, state')
         .eq('status', 'approved')
         .is('deleted_at', null)
-        .or(`address.ilike.*${query.replace(/[,()]/g, ' ').trim()}*,city.ilike.*${query.replace(/[,()]/g, ' ').trim()}*,state.ilike.*${query.replace(/[,()]/g, ' ').trim()}*`)
+        .or(`address.ilike.%${query.replace(/[,()]/g, ' ').trim()}%,city.ilike.%${query.replace(/[,()]/g, ' ').trim()}%,state.ilike.%${query.replace(/[,()]/g, ' ').trim()}%`)
         .limit(15);
 
       if (error) {
@@ -122,7 +122,7 @@ const LocationSearch = ({
       // Convert map to array and sort by count (most properties first)
       const suggestions = Array.from(locationMap.values())
         .sort((a, b) => b.count - a.count)
-        .slice(0, 8);
+        .slice(0, 5);
 
       setDatabaseSuggestions(suggestions);
     } catch (error) {
@@ -322,7 +322,7 @@ const LocationSearch = ({
                     setShowSuggestions(false);
                   }}
                   searchLocation={searchValue}
-                  properties={properties}
+                  properties={[]}
                 />
                 <Button
                   type="button"
