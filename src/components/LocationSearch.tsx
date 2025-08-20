@@ -199,7 +199,8 @@ const LocationSearch = ({
     console.log('🔍 LocationSearch: handleLocationSelect called with:', location);
     console.log('🔍 LocationSearch: Current radius:', selectedRadius);
     setSearchValue(location);
-    setShowSuggestions(false);
+    // Keep suggestions open to visualize results on the map
+    setShowSuggestions(true);
     
     // Call onChange with the location and current radius
     onChange(location, selectedRadius);
@@ -217,8 +218,31 @@ const LocationSearch = ({
       const data = await response.json();
       
       if (data && data.length > 0) {
-        const lat = parseFloat(data[0].lat);
-        const lon = parseFloat(data[0].lon);
+        const result = data[0];
+        const lat = parseFloat(result.lat);
+        const lon = parseFloat(result.lon);
+        const addrType = (result.addresstype || result.type || '').toLowerCase();
+        const cls = (result.class || '').toLowerCase();
+        
+        // Dynamically adjust radius based on granularity
+        let newRadius = selectedRadius;
+        if (addrType === 'state' || result.type === 'state' || (cls === 'boundary' && result.type === 'administrative')) {
+          newRadius = Math.max(selectedRadius, 100);
+        } else if (['county'].includes(addrType)) {
+          newRadius = Math.max(selectedRadius, 50);
+        } else if (['city','town','municipality'].includes(addrType)) {
+          newRadius = Math.max(selectedRadius, 25);
+        } else if (['village','hamlet','suburb','neighbourhood','neighborhood'].includes(addrType)) {
+          newRadius = Math.max(selectedRadius, 10);
+        }
+        
+        if (newRadius !== selectedRadius) {
+          console.log('🔍 Adjusting radius based on location granularity:', addrType, '=>', newRadius);
+          setSelectedRadius(newRadius);
+          // Notify parent with updated radius for consistency
+          onChange(location, newRadius);
+        }
+        
         setMapCenter([lon, lat]);
       }
     } catch (error) {
