@@ -294,7 +294,7 @@ const LocationSearch = ({
       {showSuggestions && (
         <Card 
           className="absolute top-full left-0 right-0 mt-1 p-4 shadow-lg z-50 max-h-[600px] overflow-y-auto bg-background border"
-          onMouseDown={(e) => e.preventDefault()}
+        >
         >
           <div className="space-y-4">
             {/* Map Container */}
@@ -307,9 +307,9 @@ const LocationSearch = ({
                 <PropertyMap
                   center={mapCenter}
                   radius={selectedRadius}
+                  visible={showSuggestions}
                   onRadiusChange={handleRadiusChange}
                   onPropertySelect={(property) => {
-                    // Find the property and navigate to it, then close dropdown
                     onPropertySelect?.(property);
                     setShowSuggestions(false);
                   }}

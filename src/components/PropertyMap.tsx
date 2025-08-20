@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -30,6 +31,7 @@ interface PropertyMapProps {
   onPropertySelect?: (property: Property) => void;
   searchLocation?: string;
   properties?: Property[];
+  visible?: boolean;
 }
 
 const PropertyMap = ({ 
@@ -38,16 +40,18 @@ const PropertyMap = ({
   onRadiusChange,
   onPropertySelect,
   searchLocation,
-  properties: propProperties = []
+  properties: propProperties = [],
+  visible = true
 }: PropertyMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
+  const map = useRef<any>(null);
   const [mapboxToken, setMapboxToken] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [selectedRadius, setSelectedRadius] = useState(radius);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const markersRef = useRef<any[]>([]);
   const radiusLayerRef = useRef<string | null>(null);
+  const libRef = useRef<any>(null);
 
   // Use passed properties or fetch from database
   const [properties, setProperties] = useState<Property[]>(propProperties);
@@ -74,40 +78,67 @@ const PropertyMap = ({
     getMapboxToken()
   }, [])
 
-  // Initialize map
+  // Initialize map (Mapbox if token exists, else MapLibre)
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) return;
+    if (!mapContainer.current) return;
 
-    mapboxgl.accessToken = mapboxToken;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: center,
-      zoom: 12,
-      attributionControl: false
-    });
+    // Clean previous map
+    if (map.current) {
+      try { map.current.remove(); } catch {}
+      map.current = null;
+      setMapLoaded(false);
+    }
 
-    // Wait for map to load before allowing sources/layers to be added
-    map.current.on('load', () => {
-      console.log('Map loaded successfully');
-      setMapLoaded(true);
-    });
+    const init = async () => {
+      let L: any;
+      if (mapboxToken) {
+        (mapboxgl as any).accessToken = mapboxToken;
+        L = mapboxgl as any;
+        map.current = new L.Map({
+          container: mapContainer.current as HTMLDivElement,
+          style: 'mapbox://styles/mapbox/light-v11',
+          center,
+          zoom: 12,
+          attributionControl: false,
+        });
+      } else {
+        const maplibregl = (await import('maplibre-gl')).default as any;
+        L = maplibregl;
+        map.current = new L.Map({
+          container: mapContainer.current as HTMLDivElement,
+          style: 'https://demotiles.maplibre.org/style.json',
+          center,
+          zoom: 12,
+          attributionControl: false,
+        });
+      }
 
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      libRef.current = L;
 
-    // Add attribution
-    map.current.addControl(new mapboxgl.AttributionControl({
-      compact: true
-    }), 'bottom-right');
+      map.current.on('load', () => setMapLoaded(true));
+
+      // Controls
+      try {
+        map.current.addControl(new L.NavigationControl(), 'top-right');
+      } catch {}
+      try {
+        map.current.addControl(new L.AttributionControl({ compact: true }), 'bottom-right');
+      } catch {}
+    };
+
+    init();
 
     return () => {
-      map.current?.remove();
+      try { map.current?.remove(); } catch {}
     };
   }, [mapboxToken, center]);
 
-  // Update properties when prop changes
+  // Recalculate layout when visibility changes
+  useEffect(() => {
+    if (visible && mapLoaded) {
+      try { map.current?.resize(); } catch {}
+    }
+  }, [visible, mapLoaded]);
   useEffect(() => {
     setProperties(propProperties);
   }, [propProperties]);
@@ -178,12 +209,12 @@ const PropertyMap = ({
           </div>
         `;
 
-        const marker = new mapboxgl.Marker(markerElement)
+        const marker = new libRef.current.Marker(markerElement)
           .setLngLat([property.longitude, property.latitude])
           .addTo(map.current!);
 
         // Add popup on click
-        const popup = new mapboxgl.Popup({
+        const popup = new libRef.current.Popup({
           offset: 25,
           closeButton: true,
           closeOnClick: false
@@ -295,6 +326,8 @@ const PropertyMap = ({
   const handleRadiusChange = (newRadius: number) => {
     setSelectedRadius(newRadius);
     onRadiusChange?.(newRadius);
+    // Ensure proper layout when controls used
+    try { map.current?.resize(); } catch {}
   };
 
   return (
