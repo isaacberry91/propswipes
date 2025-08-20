@@ -236,12 +236,14 @@ const Chat = () => {
       if (otherUser?.display_name?.trim()) {
         userName = otherUser.display_name.trim();
         console.log('🔥 CHAT DEBUG - Using display_name:', userName);
-      } else {
-        // Try to get email from the user_id
+      } else if (otherUser?.user_id) {
+        // Try to get email from auth.users by querying profiles with user_id
         try {
-          console.log('🔥 CHAT DEBUG - Trying to get email for user_id:', otherUser?.user_id);
+          console.log('🔥 CHAT DEBUG - Trying to get profile for user_id:', otherUser.user_id);
+          
+          // Try the RPC first
           const { data: profileWithEmail } = await supabase.rpc('get_profile_with_email', { 
-            profile_user_id: otherUser?.user_id 
+            profile_user_id: otherUser.user_id 
           });
           
           console.log('🔥 CHAT DEBUG - Profile with email result:', profileWithEmail);
@@ -253,16 +255,35 @@ const Chat = () => {
             userName = profileWithEmail[0].email.split('@')[0];
             console.log('🔥 CHAT DEBUG - Using email username:', userName);
           } else {
-            // Final fallback - use user type but make it descriptive
-            const userType = otherUser?.user_type || 'user';
-            userName = userType === 'seller' ? 'Real Estate Agent' : 'Property Buyer';
-            console.log('🔥 CHAT DEBUG - Using fallback:', userName);
+            // If RPC fails, try a direct profile fetch to see if there's more data
+            const { data: freshProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('user_id', otherUser.user_id)
+              .single();
+              
+            console.log('🔥 CHAT DEBUG - Fresh profile fetch:', freshProfile);
+            
+            if (freshProfile?.display_name?.trim()) {
+              userName = freshProfile.display_name.trim();
+              console.log('🔥 CHAT DEBUG - Using display_name from fresh fetch:', userName);
+            } else {
+              // Use a more specific fallback based on the user type
+              const userType = otherUser.user_type || 'user';
+              userName = userType === 'seller' ? 'Real Estate Agent' : 'Property Interested Person';
+              console.log('🔥 CHAT DEBUG - Using improved fallback:', userName);
+            }
           }
         } catch (error) {
-          console.error('🔥 CHAT DEBUG - RPC error:', error);
+          console.error('🔥 CHAT DEBUG - Profile lookup error:', error);
           const userType = otherUser?.user_type || 'user';
-          userName = userType === 'seller' ? 'Real Estate Agent' : 'Property Buyer';
+          userName = userType === 'seller' ? 'Real Estate Agent' : 'Property Interested Person';
         }
+      } else {
+        // No user_id available
+        const userType = otherUser?.user_type || 'user';
+        userName = userType === 'seller' ? 'Real Estate Agent' : 'Property Interested Person';
+        console.log('🔥 CHAT DEBUG - No user_id, using fallback:', userName);
       }
 
       console.log('🔥 FINAL USERNAME:', userName);
