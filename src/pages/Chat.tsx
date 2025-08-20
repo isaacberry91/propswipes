@@ -210,25 +210,29 @@ const Chat = () => {
       console.log('🔥 DETAILED DEBUG - Seller profile data:', matchData.seller_profile);
       console.log('🔥 DETAILED DEBUG - Buyer profile data:', matchData.buyer_profile);
       
-      // If joined data is null, fetch directly
-      if (!otherUser) {
-        console.log('🔥 Profile from join was null, fetching directly from profiles table');
-        console.log('🔥 Other user profile ID to fetch:', otherUserProfileId);
+      // ALWAYS fetch the other user's profile directly to ensure we have current data
+      console.log('🔥 ALWAYS fetching other user profile directly to ensure we have data');
+      console.log('🔥 Other user profile ID to fetch:', otherUserProfileId);
+      
+      const { data: directProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', otherUserProfileId)
+        .maybeSingle();
         
-        const { data: directProfile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', otherUserProfileId)
-          .maybeSingle();
-          
-        console.log('🔥 Direct profile fetch result:', directProfile);
-        console.log('🔥 Direct profile fetch error:', profileError);
-        
-        if (profileError) {
-          console.error('🔥 Error fetching profile directly:', profileError);
-        }
-        
+      console.log('🔥 Direct profile fetch result:', directProfile);
+      console.log('🔥 Direct profile fetch error:', profileError);
+      
+      if (profileError) {
+        console.error('🔥 Error fetching profile directly:', profileError);
+      }
+      
+      // Always use the direct fetch result if available, otherwise fallback to joined data
+      if (directProfile) {
         otherUser = directProfile;
+        console.log('🔥 Using direct profile fetch result');
+      } else if (!otherUser) {
+        console.log('🔥 No profile found anywhere - this should not happen');
       }
       
       const property = matchData.properties;
