@@ -36,10 +36,18 @@ async function getAccessToken() {
     const encodedHeader = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
     const encodedPayload = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
     
-    // Import private key
+    // Import private key - convert PEM to binary
+    const privateKeyPem = serviceAccount.private_key.replace(/\\n/g, '\n')
+    const pemHeader = '-----BEGIN PRIVATE KEY-----'
+    const pemFooter = '-----END PRIVATE KEY-----'
+    const pemContents = privateKeyPem.replace(pemHeader, '').replace(pemFooter, '').replace(/\s/g, '')
+    
+    // Decode base64 to binary
+    const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0))
+    
     const privateKey = await crypto.subtle.importKey(
       'pkcs8',
-      new TextEncoder().encode(serviceAccount.private_key.replace(/\\n/g, '\n')),
+      binaryDer,
       {
         name: 'RSASSA-PKCS1-v1_5',
         hash: 'SHA-256'
