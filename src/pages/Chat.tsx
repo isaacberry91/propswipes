@@ -214,36 +214,21 @@ const Chat = () => {
       
       const property = matchData.properties;
 
-      console.log('🔍 Chat: Debug user profiles:', {
-        isUserBuyer,
-        otherUser,
-        otherUserProfileId,
-        matchData: {
-          buyer_id: matchData.buyer_id,
-          seller_id: matchData.seller_id,
-          buyer_profile: matchData.buyer_profile,
-          seller_profile: matchData.seller_profile
-        }
-      });
+      console.log('🔥 SIMPLE DEBUG - Final otherUser object:', otherUser);
 
-      // Enhanced fallback logic for user name
-      let userName = 'Unknown User';
-      if (otherUser?.display_name) {
-        userName = otherUser.display_name;
-      } else if (otherUser?.email) {
-        userName = otherUser.email;
+      // GUARANTEED USERNAME LOGIC - Never show "Unknown User"
+      let userName = 'User';
+      if (otherUser?.display_name?.trim()) {
+        userName = otherUser.display_name.trim();
+      } else if (otherUser?.email?.trim()) {
+        userName = otherUser.email.split('@')[0]; // Use email username part
       } else {
-        // Try to get name from the basic profile data if RPC failed
-        const fallbackProfile = isUserBuyer ? matchData.seller_profile : matchData.buyer_profile;
-        if (fallbackProfile?.display_name) {
-          userName = fallbackProfile.display_name;
-        } else if (fallbackProfile?.user_id) {
-          // Last resort: try to identify by user ID
-          userName = `User ${fallbackProfile.user_id.substring(0, 8)}...`;
-        }
+        // Use a descriptive fallback based on user type
+        const userType = otherUser?.user_type || 'User';
+        userName = `${userType.charAt(0).toUpperCase() + userType.slice(1)}`;
       }
 
-      console.log('🔍 Chat: Final userName determined:', userName);
+      console.log('🔥 FINAL USERNAME:', userName);
 
       const transformedMatch = {
         id: matchData.id,
@@ -253,9 +238,9 @@ const Chat = () => {
           name: userName,
           avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
           type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer',
-          bio: otherUser?.bio || 'No bio available',
-          phone: otherUser?.phone || 'No phone provided',
-          location: otherUser?.location || 'Location not provided',
+          bio: otherUser?.bio?.trim() || 'No bio available',
+          phone: otherUser?.phone?.trim() || 'No phone provided',
+          location: otherUser?.location?.trim() || 'Location not provided',
           profileId: otherUser?.id
         },
         property: {
