@@ -77,10 +77,23 @@ const ListProperty = () => {
       if (!user) return;
       
       try {
+        // First get the user's profile ID
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profileError) {
+          console.error('❌ ListProperty: Error fetching profile:', profileError);
+          return;
+        }
+        
+        // Then count properties using the profile ID (owner_id)
         const { count, error } = await supabase
           .from('properties')
           .select('*', { count: 'exact' })
-          .eq('owner_id', user.id)
+          .eq('owner_id', profile.id)
           .is('deleted_at', null);
           
         if (error) {
