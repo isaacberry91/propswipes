@@ -196,7 +196,18 @@ const Discover = () => {
         .from('properties')
         .select('*')
         .eq('status', 'approved')
-        .is('deleted_at', null); // Exclude soft-deleted properties
+        .is('deleted_at', null);
+
+      // Apply a server-side text filter when a location is specified to avoid missing
+      // relevant results due to pagination/limits. This narrows results by address/city/state
+      // (and also title as a helpful fallback), then client-side radius filtering refines it.
+      if (selectedLocation && selectedLocation !== 'All') {
+        const term = selectedLocation.toLowerCase();
+        const parts = term.split(',').map(p => p.trim()).filter(Boolean);
+        const cityPart = parts[0] || term;
+        const statePart = parts[1] || cityPart;
+        query = query.or(`address.ilike.%${selectedLocation}%,city.ilike.%${cityPart}%,state.ilike.%${statePart}%,title.ilike.%${cityPart}%`);
+      }
 
       // Price range filtering - only apply if user has changed from defaults
       if (searchFilters.priceRange[0] > 200000 || searchFilters.priceRange[1] < 2000000) {
@@ -262,8 +273,12 @@ const Discover = () => {
           query = query.order('created_at', { ascending: false });
       }
 
-      // Limit results
-      query = query.limit(20);
+      // Limit results (fetch more when a location is specified to allow client-side radius filtering)
+      if (selectedLocation && selectedLocation !== 'All') {
+        query = query.limit(500);
+      } else {
+        query = query.limit(20);
+      }
 
       const { data, error } = await query;
 

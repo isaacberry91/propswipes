@@ -315,6 +315,12 @@ const LocationSearch = ({
             setShowSuggestions(true);
           }}
           onFocus={() => setShowSuggestions(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleLocationSelect(searchValue);
+            }
+          }}
           placeholder={placeholder}
           className="pl-10 pr-20"
         />
