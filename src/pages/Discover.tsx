@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import SearchFiltersComponent from "@/components/SearchFilters";
-import MapLocationSearch from "@/components/MapLocationSearch";
+import LocationSearch from "@/components/LocationSearch";
+import PropertyMap from "@/components/PropertyMap";
 import SubscriptionPrompt from "@/components/SubscriptionPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
 
@@ -65,6 +66,7 @@ const Discover = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { subscription, hasUnlimitedLikes } = useSubscription();
+  const [mapCenter, setMapCenter] = useState<[number, number]>([-74.006, 40.7128]); // Default NYC
 
   useEffect(() => {
     if (user) {
@@ -493,11 +495,36 @@ const Discover = () => {
     setDragStart({ x: 0, y: 0 });
   };
 
-  const getPropertiesForLocation = async (location: string, radius: number = 10) => {
+  const getPropertiesForLocation = async (location: string, radius: number) => {
+    console.log('🔍 Getting properties for location:', { location, radius });
     setSelectedLocation(location);
     setSelectedRadius(radius);
-    console.log(`🔍 Searching for properties near "${location}" within ${radius} miles`);
+    setCurrentIndex(0);
+    
+    // Geocode the location to get coordinates for map
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        setMapCenter([lon, lat]);
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+    }
+    
     // The main fetchProperties function will handle the filtering based on the new selectedLocation
+  };
+
+  const handleRadiusChange = (newRadius: number) => {
+    setSelectedRadius(newRadius);
+    if (selectedLocation) {
+      getPropertiesForLocation(selectedLocation, newRadius);
+    }
   };
 
   return (
@@ -534,21 +561,32 @@ const Discover = () => {
             </div>
           </div>
           
-          <MapLocationSearch
-            defaultLocation={selectedLocation}
-            defaultRadius={selectedRadius}
-            onLocationChange={(location, radius, coordinates) => {
-              console.log('📍 Location changed:', { location, radius, coordinates });
-              getPropertiesForLocation(location, radius);
-            }}
-            onPropertySelect={(property) => {
-              // Find the property in our list and navigate to it
-              const propertyIndex = properties.findIndex(p => p.id === property.id);
-              if (propertyIndex !== -1) {
-                setCurrentIndex(propertyIndex);
-              }
-            }}
+          <LocationSearch
+            value={selectedLocation}
+            onChange={getPropertiesForLocation}
+            placeholder="Search properties anywhere..."
           />
+          
+          {/* Map Container - Always Visible */}
+          <div className="mt-4">
+            <Card className="p-0 overflow-hidden">
+              <div className="h-96 md:h-[500px]">
+                <PropertyMap
+                  center={mapCenter}
+                  radius={selectedRadius}
+                  onRadiusChange={handleRadiusChange}
+                  onPropertySelect={(property) => {
+                    // Find the property in our list and navigate to it
+                    const propertyIndex = properties.findIndex(p => p.id === property.id);
+                    if (propertyIndex !== -1) {
+                      setCurrentIndex(propertyIndex);
+                    }
+                  }}
+                  searchLocation={selectedLocation}
+                />
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
 
