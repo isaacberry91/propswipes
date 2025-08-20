@@ -451,8 +451,11 @@ const LocationSearch = ({
                   {databaseSuggestions.map((suggestion, index) => (
                     <div
                       key={`${suggestion.full_location}-${index}`}
-                      className="p-2 hover:bg-accent cursor-pointer rounded-md text-sm flex items-center justify-between group"
-                      onClick={() => handleLocationSelect(suggestion.full_location)}
+                      className="p-2 hover:bg-accent cursor-pointer rounded-md text-sm flex items-center justify-between group transition-colors"
+                      onClick={() => {
+                        handleLocationSelect(suggestion.full_location);
+                        setShowSuggestions(false);
+                      }}
                     >
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-muted-foreground" />
@@ -464,6 +467,13 @@ const LocationSearch = ({
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Show suggestions when typing */}
+            {searchValue && databaseSuggestions.length === 0 && !loading && (
+              <div className="text-sm text-muted-foreground text-center py-4">
+                No properties found matching "{searchValue}"
               </div>
             )}
 
