@@ -240,7 +240,7 @@ const Discover = () => {
       }
 
       // Square footage filtering
-      if (searchFilters.sqftRange[0] > 200 || searchFilters.sqftRange[1] < 25000) {
+      if (searchFilters.sqftRange[0] !== 500 || searchFilters.sqftRange[1] !== 15000) {
         query = query.gte('square_feet', searchFilters.sqftRange[0]).lte('square_feet', searchFilters.sqftRange[1]);
       }
 
@@ -249,8 +249,6 @@ const Discover = () => {
         query = query.not('id', 'in', `(${swipedIds.join(',')})`);
       }
 
-      // Exclude user's own properties
-      query = query.neq('owner_id', userProfile.id);
 
       // Sorting
       switch (searchFilters.sortBy) {
