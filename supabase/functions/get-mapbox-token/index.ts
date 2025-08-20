@@ -12,12 +12,12 @@ serve(async (req) => {
   }
 
   try {
-    // Get the Google Maps API key from Supabase secrets
-    const googleMapsApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY')
+    // Get the Mapbox API token from Supabase secrets
+    const mapboxApiToken = Deno.env.get('MAPBOX_API_TOKEN')
     
-    if (!googleMapsApiKey) {
+    if (!mapboxApiToken) {
       return new Response(
-        JSON.stringify({ error: 'Google Maps API key not configured' }),
+        JSON.stringify({ error: 'Mapbox API token not configured' }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -26,15 +26,15 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ token: googleMapsApiKey }),
+      JSON.stringify({ token: mapboxApiToken }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
   } catch (error) {
-    console.error('Error fetching Google Maps API key:', error)
+    console.error('Error fetching Mapbox API token:', error)
     return new Response(
-      JSON.stringify({ error: 'Failed to fetch Google Maps API key' }),
+      JSON.stringify({ error: 'Failed to fetch Mapbox API token' }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
