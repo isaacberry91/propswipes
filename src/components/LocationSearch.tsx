@@ -60,20 +60,28 @@ const LocationSearch = ({
 
   // Enhanced address search with Nominatim + database integration
   const searchLocationsInDatabase = useCallback(async (query: string) => {
+    console.log('🔍 SEARCH TRIGGERED with query:', query, 'length:', query.length);
+    
     if (!query || query.length < 2) {
+      console.log('🔍 Query too short, clearing suggestions');
       setDatabaseSuggestions([]);
       return;
     }
 
+    console.log('🔍 Starting search for:', query);
     setLoading(true);
+    
     try {
-      console.log('🔍 Searching for addresses:', query);
+      console.log('🔍 Making Nominatim request...');
       
       // Use Nominatim for real address suggestions
       const nominatimResponse = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=us&limit=5&addressdetails=1`
       );
       const nominatimData = await nominatimResponse.json();
+      
+      console.log('🔍 Nominatim response status:', nominatimResponse.status);
+      console.log('🔍 Nominatim data received:', nominatimData);
       
       // Also search our database for properties
       const dbResponse = await supabase
@@ -220,13 +228,22 @@ const LocationSearch = ({
 
   // Debounce the search
   useEffect(() => {
+    console.log('🔍 DEBOUNCE EFFECT - searchValue:', searchValue, 'showSuggestions:', showSuggestions);
+    
     const timeoutId = setTimeout(() => {
+      console.log('🔍 DEBOUNCE TIMEOUT TRIGGERED');
       if (searchValue && showSuggestions) {
+        console.log('🔍 CONDITIONS MET - Starting search...');
         searchLocationsInDatabase(searchValue);
+      } else {
+        console.log('🔍 CONDITIONS NOT MET - searchValue:', searchValue, 'showSuggestions:', showSuggestions);
       }
     }, 300);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      console.log('🔍 CLEANING UP TIMEOUT');
+      clearTimeout(timeoutId);
+    };
   }, [searchValue, showSuggestions, searchLocationsInDatabase]);
 
   const handleLocationSelect = (location: string, suggestion?: LocationSuggestion) => {
