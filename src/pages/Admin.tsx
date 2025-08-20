@@ -20,7 +20,12 @@ import {
   Settings,
   Check,
   X,
-  Eye
+  Eye,
+  Flag,
+  UserX,
+  MessageSquare,
+  Clock,
+  ExternalLink
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,12 +38,17 @@ const Admin = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
   const [deletedProperties, setDeletedProperties] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalProperties: 0,
     pendingProperties: 0,
     totalMatches: 0,
-    deletedProperties: 0
+    deletedProperties: 0,
+    pendingReports: 0,
+    totalReports: 0,
+    totalBlocks: 0
   });
   const [loading, setLoading] = useState(true);
 
@@ -122,15 +132,52 @@ const Admin = () => {
         .from('matches')
         .select('*', { count: 'exact', head: true });
 
+      // Load moderation data
+      const { data: reportsData } = await supabase
+        .from('reports')
+        .select(`
+          *,
+          reporter:profiles!reports_reporter_id_fkey(display_name, avatar_url),
+          reported_user:profiles!reports_reported_user_id_fkey(display_name, avatar_url, user_type)
+        `)
+        .order('created_at', { ascending: false });
+
+      const { data: blockedUsersData } = await supabase
+        .from('blocked_users')
+        .select(`
+          *,
+          blocker:profiles!blocked_users_blocker_id_fkey(display_name, avatar_url),
+          blocked:profiles!blocked_users_blocked_id_fkey(display_name, avatar_url, user_type)
+        `)
+        .order('created_at', { ascending: false });
+
+      const { count: pendingReportsCount } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending');
+
+      const { count: totalReportsCount } = await supabase
+        .from('reports')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: totalBlocksCount } = await supabase
+        .from('blocked_users')
+        .select('*', { count: 'exact', head: true });
+
       setUsers(usersData || []);
       setProperties(propertiesData || []);
       setDeletedProperties(deletedPropertiesData || []);
+      setReports(reportsData || []);
+      setBlockedUsers(blockedUsersData || []);
       setStats({
         totalUsers: userCount || 0,
         totalProperties: propertyCount || 0,
         pendingProperties: pendingCount || 0,
         totalMatches: matchCount || 0,
-        deletedProperties: deletedCount || 0
+        deletedProperties: deletedCount || 0,
+        pendingReports: pendingReportsCount || 0,
+        totalReports: totalReportsCount || 0,
+        totalBlocks: totalBlocksCount || 0
       });
     } catch (error) {
       console.error('Error loading admin data:', error);
@@ -245,6 +292,86 @@ const Admin = () => {
     setIsAuthenticated(false);
   };
 
+  const handleResolveReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'resolved',
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report resolved",
+        description: "The report has been marked as resolved",
+      });
+      loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resolve report",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDismissReport = async (reportId: string) => {
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .update({ 
+          status: 'dismissed',
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', reportId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Report dismissed",
+        description: "The report has been dismissed",
+      });
+      loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to dismiss report",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUnblockUser = async (blockId: string) => {
+    try {
+      const { error } = await supabase
+        .from('blocked_users')
+        .delete()
+        .eq('id', blockId);
+
+      if (error) throw error;
+
+      toast({
+        title: "User unblocked",
+        description: "The user has been unblocked",
+      });
+      loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to unblock user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewProfile = (userId: string) => {
+    // Create a URL to view the user's profile - you can customize this based on your routing
+    window.open(`/profile?userId=${userId}`, '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-7xl mx-auto">
@@ -265,7 +392,7 @@ const Admin = () => {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <Card className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -304,6 +431,18 @@ const Admin = () => {
 
           <Card className="p-6">
             <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
+                <Flag className="w-6 h-6 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{stats.pendingReports}</p>
+                <p className="text-sm text-muted-foreground">Pending Reports</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
                 <BarChart3 className="w-6 h-6 text-purple-600" />
               </div>
@@ -315,8 +454,12 @@ const Admin = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="properties" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+        <Tabs defaultValue="moderation" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="moderation">
+              <Flag className="w-4 h-4 mr-2" />
+              Moderation
+            </TabsTrigger>
             <TabsTrigger value="properties">
               <Home className="w-4 h-4 mr-2" />
               Properties
@@ -338,6 +481,203 @@ const Admin = () => {
               Settings
             </TabsTrigger>
           </TabsList>
+
+          {/* Moderation Tab */}
+          <TabsContent value="moderation">
+            <div className="space-y-6">
+              {/* Reports Section */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold">User Reports</h3>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="destructive">
+                      {stats.pendingReports} pending
+                    </Badge>
+                    <Badge variant="outline">
+                      {stats.totalReports} total
+                    </Badge>
+                  </div>
+                </div>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Reporter</TableHead>
+                      <TableHead>Reported User</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reports.map((report) => (
+                      <TableRow key={report.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={report.reporter?.avatar_url} />
+                              <AvatarFallback>
+                                <Users className="w-4 h-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">{report.reporter?.display_name || 'Unknown'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={report.reported_user?.avatar_url} />
+                              <AvatarFallback>
+                                <Users className="w-4 h-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{report.reported_user?.display_name || 'Unknown'}</p>
+                              <p className="text-xs text-muted-foreground">{report.reported_user?.user_type}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {report.report_type.replace('_', ' ')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <p className="text-sm max-w-xs truncate">
+                            {report.description || 'No description provided'}
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={
+                              report.status === 'pending' ? 'default' :
+                              report.status === 'resolved' ? 'secondary' : 'destructive'
+                            }
+                          >
+                            {report.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(report.created_at).toLocaleDateString()}
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {report.match_id && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => window.open(`/chat/${report.match_id}`, '_blank')}
+                              >
+                                <MessageSquare className="w-4 h-4 mr-1" />
+                                View Chat
+                              </Button>
+                            )}
+                            {report.status === 'pending' && (
+                              <>
+                                <Button 
+                                  size="sm" 
+                                  variant="default"
+                                  onClick={() => handleResolveReport(report.id)}
+                                >
+                                  <Check className="w-4 h-4 mr-1" />
+                                  Resolve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  onClick={() => handleDismissReport(report.id)}
+                                >
+                                  <X className="w-4 h-4 mr-1" />
+                                  Dismiss
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+
+              {/* Blocked Users Section */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold">Blocked Users</h3>
+                  <Badge variant="outline">
+                    {stats.totalBlocks} total blocks
+                  </Badge>
+                </div>
+
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Blocker</TableHead>
+                      <TableHead>Blocked User</TableHead>
+                      <TableHead>Reason</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {blockedUsers.map((block) => (
+                      <TableRow key={block.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={block.blocker?.avatar_url} />
+                              <AvatarFallback>
+                                <Users className="w-4 h-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">{block.blocker?.display_name || 'Unknown'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={block.blocked?.avatar_url} />
+                              <AvatarFallback>
+                                <Users className="w-4 h-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{block.blocked?.display_name || 'Unknown'}</p>
+                              <p className="text-xs text-muted-foreground">{block.blocked?.user_type}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <p className="text-sm max-w-xs truncate">
+                            {block.reason || 'No reason provided'}
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(block.created_at).toLocaleDateString()}
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleUnblockUser(block.id)}
+                          >
+                            <UserX className="w-4 h-4 mr-1" />
+                            Unblock
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Card>
+            </div>
+          </TabsContent>
 
           {/* Properties Tab */}
           <TabsContent value="properties">
@@ -609,7 +949,12 @@ const Admin = () => {
                         </p>
                       </TableCell>
                       <TableCell>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleViewProfile(user.user_id)}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
                           View Profile
                         </Button>
                       </TableCell>
