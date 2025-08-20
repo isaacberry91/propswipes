@@ -145,7 +145,7 @@ const LocationSearch = ({
         .select('address, city, state, latitude, longitude')
         .eq('status', 'approved')
         .is('deleted_at', null)
-        .or(`address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`)
+        .or(`address.ilike.*${query}*,city.ilike.*${query}*,state.ilike.*${query}*`)
         .limit(5);
 
       console.log('🔍 Database results:', dbResponse.data);
@@ -292,7 +292,7 @@ const LocationSearch = ({
         .select('latitude, longitude, city, state, address')
         .eq('status', 'approved')
         .is('deleted_at', null)
-        .or(`address.ilike.%${location}%,city.ilike.%${location}%,state.ilike.%${location}%`)
+        .or(`address.ilike.*${location}*,city.ilike.*${location}*,state.ilike.*${location}*`)
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
         .limit(1);
