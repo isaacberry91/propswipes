@@ -157,10 +157,12 @@ const Profile = () => {
     if (!user || !userProfile) return;
     
     try {
+      console.log('🔄 Profile: Saving profile data:', userProfile);
+      
       const { error } = await supabase
         .from('profiles')
         .update({
-          display_name: `${userProfile.display_name}`,
+          display_name: userProfile.display_name,
           bio: userProfile.bio,
           location: userProfile.location,
           phone: userProfile.phone,
@@ -169,6 +171,11 @@ const Profile = () => {
         
       if (error) throw error;
       
+      console.log('✅ Profile: Profile updated successfully');
+      
+      // Refresh the profile data after successful save
+      await fetchUserProfile();
+      
       setIsEditing(false);
       toast({
         title: "Profile updated",
@@ -176,7 +183,7 @@ const Profile = () => {
         duration: 5000
       });
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('❌ Profile: Error updating profile:', error);
       toast({
         title: "Error updating profile",
         description: "Please try again later.",
