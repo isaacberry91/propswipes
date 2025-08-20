@@ -58,7 +58,7 @@ const LocationSearch = ({
     setMapCenter(propMapCenter);
   }, [propMapCenter]);
 
-  // Enhanced address search with database integration (bypassing CORS issues)
+  // Real address search using Mapbox Geocoding API
   const searchLocationsInDatabase = useCallback(async (query: string) => {
     console.log('🔍 SEARCH TRIGGERED with query:', query, 'length:', query.length);
     
@@ -72,42 +72,93 @@ const LocationSearch = ({
     setLoading(true);
     
     try {
-      // Search our database for properties matching the query
+      // Get Mapbox token from edge function
+      const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+      const mapboxToken = tokenData?.token;
+
+      if (!mapboxToken) {
+        console.error('🔍 No Mapbox token available');
+        setDatabaseSuggestions([]);
+        setLoading(false);
+        return;
+      }
+
+      console.log('🔍 Making Mapbox geocoding request...');
+      
+      // Use Mapbox Geocoding API for real address suggestions
+      const mapboxResponse = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&country=US&types=address,place,locality,neighborhood&limit=8`
+      );
+      
+      if (!mapboxResponse.ok) {
+        throw new Error(`Mapbox API error: ${mapboxResponse.status}`);
+      }
+      
+      const mapboxData = await mapboxResponse.json();
+      console.log('🔍 Mapbox geocoding response:', mapboxData);
+
+      // Process Mapbox results into suggestions
+      const suggestions: LocationSuggestion[] = [];
+
+      mapboxData.features?.forEach((feature: any) => {
+        const coordinates = feature.geometry?.coordinates;
+        const placeName = feature.place_name;
+        const placeType = feature.place_type?.[0] || '';
+        
+        // Extract address components
+        let address = '';
+        let city = '';
+        let state = '';
+        
+        feature.context?.forEach((context: any) => {
+          if (context.id.startsWith('place.')) {
+            city = context.text;
+          } else if (context.id.startsWith('region.')) {
+            state = context.short_code?.replace('us-', '').toUpperCase() || context.text;
+          }
+        });
+
+        // For address types, use the main text as address
+        if (placeType === 'address') {
+          address = feature.text || '';
+          if (!city && feature.properties?.address) {
+            city = feature.properties.address;
+          }
+        } else {
+          // For places/localities, use as city
+          city = city || feature.text || '';
+        }
+
+        if (coordinates && coordinates.length >= 2) {
+          suggestions.push({
+            address: address,
+            city: city,
+            state: state,
+            count: 0,
+            full_location: placeName,
+            lat: coordinates[1], // Mapbox returns [lng, lat]
+            lon: coordinates[0],
+            isRealAddress: true
+          });
+        }
+      });
+
+      // Also search our database for property-based suggestions
       const dbResponse = await supabase
         .from('properties')
         .select('address, city, state, latitude, longitude')
         .eq('status', 'approved')
         .is('deleted_at', null)
         .or(`address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`)
-        .limit(20);
+        .limit(5);
 
       console.log('🔍 Database results:', dbResponse.data);
 
-      // Create a comprehensive list of location suggestions
-      const suggestions: LocationSuggestion[] = [];
+      // Add database suggestions
       const locationMap = new Map<string, LocationSuggestion>();
-
       dbResponse.data?.forEach((property) => {
-        // Add full address if it matches
-        if (property.address && property.address.toLowerCase().includes(query.toLowerCase())) {
-          const fullAddress = `${property.address}, ${property.city}, ${property.state}`;
-          const existing = locationMap.get(fullAddress);
-          locationMap.set(fullAddress, {
-            address: property.address,
-            city: property.city,
-            state: property.state,
-            count: (existing?.count || 0) + 1,
-            full_location: fullAddress,
-            lat: property.latitude,
-            lon: property.longitude,
-            isRealAddress: false
-          });
-        }
-
-        // Add city, state combination
-        if (property.city.toLowerCase().includes(query.toLowerCase()) || 
-            property.state.toLowerCase().includes(query.toLowerCase())) {
-          const cityState = `${property.city}, ${property.state}`;
+        const cityState = `${property.city}, ${property.state}`;
+        if (cityState.toLowerCase().includes(query.toLowerCase())) {
           const existing = locationMap.get(cityState);
           locationMap.set(cityState, {
             address: '',
@@ -120,40 +171,24 @@ const LocationSearch = ({
             isRealAddress: false
           });
         }
-
-        // Add state suggestions for broader searches
-        if (property.state.toLowerCase().includes(query.toLowerCase()) && query.length >= 2) {
-          const stateKey = property.state;
-          const existing = locationMap.get(stateKey);
-          locationMap.set(stateKey, {
-            address: '',
-            city: '',
-            state: property.state,
-            count: (existing?.count || 0) + 1,
-            full_location: property.state,
-            lat: property.latitude,
-            lon: property.longitude,
-            isRealAddress: false
-          });
-        }
       });
 
-      // Convert to array and sort by relevance and count
+      // Add database suggestions to the list
       const dbSuggestions = Array.from(locationMap.values())
-        .sort((a, b) => {
-          // Prioritize exact matches
-          const aExact = a.full_location.toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0;
-          const bExact = b.full_location.toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0;
-          
-          if (aExact !== bExact) return bExact - aExact;
-          
-          // Then by count
-          return b.count - a.count;
-        })
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+
+      suggestions.push(...dbSuggestions);
+
+      // Remove duplicates and limit total suggestions
+      const uniqueSuggestions = suggestions
+        .filter((suggestion, index, self) => 
+          index === self.findIndex(s => s.full_location === suggestion.full_location)
+        )
         .slice(0, 8);
 
-      setDatabaseSuggestions(dbSuggestions);
-      console.log('🔍 Final suggestions:', dbSuggestions);
+      setDatabaseSuggestions(uniqueSuggestions);
+      console.log('🔍 Final suggestions:', uniqueSuggestions);
     } catch (error) {
       console.error('🔍 Address search error:', error);
       setDatabaseSuggestions([]);
