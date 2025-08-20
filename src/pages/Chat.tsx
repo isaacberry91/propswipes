@@ -267,40 +267,45 @@ const Chat = () => {
       console.log('🔥 UNIVERSAL FIX - Complete profile result:', completeProfile);
       console.log('🔥 UNIVERSAL FIX - Profile error:', profileFetchError);
       
-      if (completeProfile && completeProfile.display_name?.trim()) {
+      if (completeProfile) {
         // Use the complete profile data
         otherUser = completeProfile;
-        userName = completeProfile.display_name.trim();
-        console.log('🔥 UNIVERSAL FIX - Success! Using complete profile data:', userName);
+        
+        // Try different sources for the name in order of preference
+        if (completeProfile.display_name?.trim()) {
+          userName = completeProfile.display_name.trim();
+          console.log('🔥 UNIVERSAL FIX - Using display_name:', userName);
+        } else {
+          // If no display_name, check the joined data as backup
+          if (isUserBuyer && matchData.seller_profile?.display_name?.trim()) {
+            userName = matchData.seller_profile.display_name.trim();
+            console.log('🔥 UNIVERSAL FIX - Using seller display_name from join:', userName);
+          } else if (!isUserBuyer && matchData.buyer_profile?.display_name?.trim()) {
+            userName = matchData.buyer_profile.display_name.trim();
+            console.log('🔥 UNIVERSAL FIX - Using buyer display_name from join:', userName);
+          } else {
+            // Final fallback - use a descriptive name based on user type
+            userName = completeProfile.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
+            console.log('🔥 UNIVERSAL FIX - Using user type fallback:', userName);
+          }
+        }
       } else {
-        console.log('🔥 UNIVERSAL FIX - No profile found or no display_name, trying fallbacks');
+        console.log('🔥 UNIVERSAL FIX - No complete profile, using joined data');
         
         // If direct fetch fails, try to use the joined data as fallback
-        if (isUserBuyer && matchData.seller_profile?.display_name) {
+        if (isUserBuyer && matchData.seller_profile) {
           otherUser = matchData.seller_profile;
-          userName = matchData.seller_profile.display_name.trim();
+          userName = matchData.seller_profile.display_name?.trim() || 'Property Seller';
           console.log('🔥 UNIVERSAL FIX - Using seller profile from join:', userName);
-        } else if (!isUserBuyer && matchData.buyer_profile?.display_name) {
+        } else if (!isUserBuyer && matchData.buyer_profile) {
           otherUser = matchData.buyer_profile;  
-          userName = matchData.buyer_profile.display_name.trim();
+          userName = matchData.buyer_profile.display_name?.trim() || 'Property Buyer';
           console.log('🔥 UNIVERSAL FIX - Using buyer profile from join:', userName);
         } else {
-          // Enhanced fallback - try to get email from auth.users as a better display name
-          const { data: authUser } = await supabase
-            .from('profiles')
-            .select('user_id')
-            .eq('id', otherUserProfileId)
-            .single();
-            
-          if (authUser?.user_id) {
-            // Try to get a better name from auth user metadata or email
-            userName = completeProfile?.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
-          } else {
-            userName = completeProfile?.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
-          }
-          
-          otherUser = completeProfile || { user_type: 'buyer', display_name: userName };
-          console.log('🔥 UNIVERSAL FIX - Using enhanced fallback:', userName);
+          // Final fallback
+          userName = 'Property Contact';
+          otherUser = { user_type: 'buyer', display_name: userName };
+          console.log('🔥 UNIVERSAL FIX - Using final fallback:', userName);
         }
       }
 
