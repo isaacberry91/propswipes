@@ -38,28 +38,29 @@ const MapLocationSearch = ({
   const [selectedLocation, setSelectedLocation] = useState(defaultLocation);
   const [selectedRadius, setSelectedRadius] = useState(defaultRadius);
   const [mapCenter, setMapCenter] = useState<[number, number]>([-74.006, 40.7128]); // Default NYC
-  const [showMap, setShowMap] = useState(false);
 
-  // Geocode location to get coordinates
+  // Geocode location to get coordinates using OpenStreetMap Nominatim
   const geocodeLocation = useCallback(async (location: string): Promise<[number, number] | null> => {
     if (!location) return null;
 
     try {
-      // Using Mapbox Geocoding API (you'd need to implement this properly with your token)
-      // For now, return some sample coordinates
-      if (location.toLowerCase().includes('new york')) {
-        return [-74.006, 40.7128];
-      } else if (location.toLowerCase().includes('los angeles')) {
-        return [-118.2437, 34.0522];
-      } else if (location.toLowerCase().includes('chicago')) {
-        return [-87.6298, 41.8781];
+      // Use OpenStreetMap Nominatim API for geocoding
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        return [lon, lat]; // [longitude, latitude]
       }
       
-      // Default fallback
-      return [-74.006, 40.7128];
+      // Fallback to some default coordinates if geocoding fails
+      return [-74.006, 40.7128]; // NYC
     } catch (error) {
       console.error('Geocoding error:', error);
-      return null;
+      return [-74.006, 40.7128]; // NYC fallback
     }
   }, []);
 
@@ -87,19 +88,9 @@ const MapLocationSearch = ({
       {/* Location Search */}
       <Card className="p-4">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Search className="w-5 h-5 text-primary" />
-              <h3 className="text-lg font-semibold">Search Location</h3>
-            </div>
-            <Button
-              variant={showMap ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowMap(!showMap)}
-            >
-              <MapPin className="w-4 h-4 mr-2" />
-              {showMap ? "Hide Map" : "Show Map"}
-            </Button>
+          <div className="flex items-center gap-2">
+            <Search className="w-5 h-5 text-primary" />
+            <h3 className="text-lg font-semibold">Search Location</h3>
           </div>
           
           <LocationSearch
@@ -117,20 +108,18 @@ const MapLocationSearch = ({
         </div>
       </Card>
 
-      {/* Map Container */}
-      {showMap && (
-        <Card className="p-0 overflow-hidden">
-          <div className="h-96 md:h-[500px]">
-            <PropertyMap
-              center={mapCenter}
-              radius={selectedRadius}
-              onRadiusChange={handleRadiusChange}
-              onPropertySelect={onPropertySelect}
-              searchLocation={selectedLocation}
-            />
-          </div>
-        </Card>
-      )}
+      {/* Map Container - Always Visible */}
+      <Card className="p-0 overflow-hidden">
+        <div className="h-96 md:h-[500px]">
+          <PropertyMap
+            center={mapCenter}
+            radius={selectedRadius}
+            onRadiusChange={handleRadiusChange}
+            onPropertySelect={onPropertySelect}
+            searchLocation={selectedLocation}
+          />
+        </div>
+      </Card>
     </div>
   );
 };
