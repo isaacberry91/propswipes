@@ -197,6 +197,7 @@ const LocationSearch = ({
 
   const handleLocationSelect = (location: string) => {
     console.log('🔍 LocationSearch: handleLocationSelect called with:', location);
+    console.log('🔍 LocationSearch: Current radius:', selectedRadius);
     setSearchValue(location);
     setShowSuggestions(false);
     
@@ -416,11 +417,14 @@ const LocationSearch = ({
                 </h4>
                 <div className="grid gap-2">
                   {popularLocations.map((location, index) => (
-                    <div
-                      key={`${location.full_location}-${index}`}
-                      className="p-3 hover:bg-accent cursor-pointer rounded-md border border-border/50 hover:border-primary/50 transition-colors"
-                      onClick={() => handleLocationSelect(location.full_location)}
-                    >
+                     <div
+                       key={`${location.full_location}-${index}`}
+                       className="p-3 hover:bg-accent cursor-pointer rounded-md border border-border/50 hover:border-primary/50 transition-colors"
+                       onClick={() => {
+                         console.log('🔍 Popular area clicked:', location.full_location);
+                         handleLocationSelect(location.full_location);
+                       }}
+                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-primary" />
