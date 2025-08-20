@@ -49,6 +49,7 @@ const PropertyMap = ({
   const [selectedRadius, setSelectedRadius] = useState(radius);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [radiusOpen, setRadiusOpen] = useState(false);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   // Use passed properties or fetch from database
@@ -318,13 +319,17 @@ const PropertyMap = ({
 
   // Update radius circle
   useEffect(() => {
-    if (!map.current || !center || !mapLoaded) return;
+    if (!map.current || !center || !mapLoaded || !map.current.isStyleLoaded()) return;
 
     // Remove existing radius source and layers
-    if (map.current.getSource('radius-circle')) {
-      map.current.removeLayer('radius-circle-fill');
-      map.current.removeLayer('radius-circle-stroke');
-      map.current.removeSource('radius-circle');
+    try {
+      if (map.current.getSource('radius-circle')) {
+        map.current.removeLayer('radius-circle-fill');
+        map.current.removeLayer('radius-circle-stroke');
+        map.current.removeSource('radius-circle');
+      }
+    } catch (_e) {
+      // ignore if style isn't ready yet
     }
 
     // Create circle geometry
@@ -403,7 +408,7 @@ const PropertyMap = ({
   return (
     <div className="relative w-full h-full">
       {/* Map Controls */}
-      <Card className="absolute top-4 left-4 z-10 p-3 bg-background/95 backdrop-blur">
+      <Card className="absolute top-4 left-4 z-10 p-3 bg-background/95 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-primary" />
@@ -411,12 +416,14 @@ const PropertyMap = ({
           </div>
           <Select 
             value={selectedRadius.toString()} 
-            onValueChange={(value) => handleRadiusChange(parseInt(value))}
+            onValueChange={(value) => { handleRadiusChange(parseInt(value)); setRadiusOpen(true); }}
+            open={radiusOpen}
+            onOpenChange={setRadiusOpen}
           >
-            <SelectTrigger className="w-24">
-              <SelectValue />
+            <SelectTrigger className="w-28">
+              <SelectValue placeholder="Radius" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-[60] bg-popover shadow-lg">
               <SelectItem value="5">5 mi</SelectItem>
               <SelectItem value="10">10 mi</SelectItem>
               <SelectItem value="25">25 mi</SelectItem>
@@ -428,7 +435,7 @@ const PropertyMap = ({
       </Card>
 
       {/* Property Count */}
-      <Card className="absolute top-4 right-4 z-10 p-3 bg-background/95 backdrop-blur">
+      <Card className="absolute top-4 right-4 z-10 p-3 bg-background/95 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium">
