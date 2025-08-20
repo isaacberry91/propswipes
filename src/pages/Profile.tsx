@@ -861,10 +861,10 @@ const Profile = () => {
                   </div>
                    <Button 
                      variant="outline" 
-                     size="sm"
+                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
                      onClick={() => setEmailNotificationsDialogOpen(true)}
                    >
-                     <Bell className="w-4 h-4 mr-2" />
+                     <Bell className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                      Configure
                    </Button>
                 </div>
@@ -876,10 +876,10 @@ const Profile = () => {
                    </div>
                    <Button 
                      variant="outline" 
-                     size="sm"
+                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
                      onClick={() => setPushNotificationsDialogOpen(true)}
                    >
-                     <Smartphone className="w-4 h-4 mr-2" />
+                     <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                      Configure
                    </Button>
                  </div>
@@ -891,10 +891,10 @@ const Profile = () => {
                    </div>
                    <Button 
                      variant="outline" 
-                     size="sm"
+                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
                      onClick={() => setPrivacySettingsDialogOpen(true)}
                    >
-                     <Shield className="w-4 h-4 mr-2" />
+                     <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                      Manage
                    </Button>
                  </div>
@@ -915,7 +915,7 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="outline" 
-                      size="sm"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
                       onClick={() => setChangingPassword(!changingPassword)}
                     >
                       {changingPassword ? 'Cancel' : 'Change'}
@@ -973,7 +973,10 @@ const Profile = () => {
                   {userProfile?.two_factor_enabled ? (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
+                        >
                           Disable
                         </Button>
                       </AlertDialogTrigger>
@@ -995,7 +998,7 @@ const Profile = () => {
                   ) : (
                     <Button 
                       variant="outline" 
-                      size="sm"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
                       onClick={() => setTwoFactorDialogOpen(true)}
                     >
                       Enable
@@ -1010,7 +1013,7 @@ const Profile = () => {
                   </div>
                   <Button 
                     variant="outline" 
-                    size="sm"
+                    className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
                     onClick={() => setActiveSessionsDialogOpen(true)}
                   >
                     View
@@ -1025,12 +1028,12 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="destructive" 
-                      size="sm"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex items-center gap-1 sm:gap-2"
                       onClick={handleLogout}
-                      className="flex items-center gap-2"
                     >
-                      <LogOut className="w-4 h-4" />
-                      Sign Out
+                      <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Sign Out</span>
+                      <span className="sm:hidden">Logout</span>
                     </Button>
                   </div>
                 </div>
@@ -1045,11 +1048,11 @@ const Profile = () => {
                       <AlertDialogTrigger asChild>
                         <Button 
                           variant="destructive" 
-                          size="sm"
-                          className="flex items-center gap-2"
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex items-center gap-1 sm:gap-2"
                         >
-                          <Trash2 className="w-4 h-4" />
-                          Delete Account
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden sm:inline">Delete Account</span>
+                          <span className="sm:hidden">Delete</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
