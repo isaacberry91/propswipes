@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { MapPin, Layers } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import mapboxgl from 'mapbox-gl';
@@ -430,23 +430,21 @@ const PropertyMap = ({
             <Layers className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium">Search Radius</span>
           </div>
-          <Select 
-            value={selectedRadius.toString()} 
-            onValueChange={(value) => { handleRadiusChange(parseInt(value)); setRadiusOpen(true); }}
-            open={radiusOpen}
-            onOpenChange={setRadiusOpen}
-          >
-            <SelectTrigger className="w-28">
-              <SelectValue placeholder="Radius" />
-            </SelectTrigger>
-            <SelectContent className="z-[60] bg-popover shadow-lg">
-              <SelectItem value="5">5 mi</SelectItem>
-              <SelectItem value="10">10 mi</SelectItem>
-              <SelectItem value="25">25 mi</SelectItem>
-              <SelectItem value="50">50 mi</SelectItem>
-              <SelectItem value="100">100 mi</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="1"
+              max="200"
+              value={selectedRadius}
+              onChange={(e) => {
+                const newRadius = parseInt(e.target.value) || 10;
+                handleRadiusChange(newRadius);
+              }}
+              className="w-20 text-center"
+              placeholder="10"
+            />
+            <span className="text-sm text-muted-foreground">mi</span>
+          </div>
         </div>
       </Card>
 
