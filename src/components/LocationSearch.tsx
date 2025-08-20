@@ -295,7 +295,6 @@ const LocationSearch = ({
         <Card 
           className="absolute top-full left-0 right-0 mt-1 p-4 shadow-lg z-50 max-h-[600px] overflow-y-auto bg-background border"
         >
-        >
           <div className="space-y-4">
             {/* Map Container */}
             <div>
