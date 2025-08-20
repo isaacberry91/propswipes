@@ -179,73 +179,50 @@ const Chat = () => {
         return;
       }
 
-      // First try to get profiles with email using RPC
-      let buyerProfile = null;
-      let sellerProfile = null;
-
-      if (matchData.buyer_profile?.user_id) {
-        try {
-          const buyerProfileResult = await supabase.rpc('get_profile_with_email', { 
-            profile_user_id: matchData.buyer_profile.user_id 
-          });
-          buyerProfile = buyerProfileResult.data?.[0];
-        } catch (error) {
-          console.error('Error fetching buyer profile with email:', error);
-        }
-      }
-
-      if (matchData.seller_profile?.user_id) {
-        try {
-          const sellerProfileResult = await supabase.rpc('get_profile_with_email', { 
-            profile_user_id: matchData.seller_profile.user_id 
-          });
-          sellerProfile = sellerProfileResult.data?.[0];
-        } catch (error) {
-          console.error('Error fetching seller profile with email:', error);
-        }
-      }
-
-      // If RPC failed or profiles are missing, try direct profile lookup
-      if (!buyerProfile && matchData.buyer_id) {
-        const { data: directBuyerProfile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', matchData.buyer_id)
-          .single();
-        
-        if (directBuyerProfile) {
-          buyerProfile = {
-            ...directBuyerProfile,
-            email: 'Not available'
-          };
-        }
-      }
-
-      if (!sellerProfile && matchData.seller_id) {
-        const { data: directSellerProfile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', matchData.seller_id)
-          .single();
-        
-        if (directSellerProfile) {
-          sellerProfile = {
-            ...directSellerProfile,
-            email: 'Not available'
-          };
-        }
-      }
-
-      // Determine which user is the "other" user
+      // Simplified approach: directly fetch the other user's profile using their profile ID
       const isUserBuyer = matchData.buyer_id === userProfile.id;
-      const otherUser = isUserBuyer ? sellerProfile : buyerProfile;
+      const otherUserProfileId = isUserBuyer ? matchData.seller_id : matchData.buyer_id;
+      
+      console.log('🔍 Chat: Fetching profile for ID:', otherUserProfileId);
+      console.log('🔍 Chat: User is buyer:', isUserBuyer);
+      
+      // Directly fetch the other user's profile
+      const { data: otherUserProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', otherUserProfileId)
+        .single();
+        
+      console.log('🔍 Chat: Other user profile fetch result:', { otherUserProfile, profileError });
+      
+      let otherUser = null;
+      if (otherUserProfile) {
+        // Try to get email using RPC function
+        try {
+          const emailResult = await supabase.rpc('get_profile_with_email', { 
+            profile_user_id: otherUserProfile.user_id 
+          });
+          console.log('🔍 Chat: Email fetch result:', emailResult);
+          
+          otherUser = {
+            ...otherUserProfile,
+            email: emailResult.data?.[0]?.email || 'Email not available'
+          };
+        } catch (emailError) {
+          console.log('🔍 Chat: Email fetch failed, using profile without email:', emailError);
+          otherUser = {
+            ...otherUserProfile,
+            email: 'Email not available'
+          };
+        }
+      }
+      
       const property = matchData.properties;
 
       console.log('🔍 Chat: Debug user profiles:', {
         isUserBuyer,
-        buyerProfile,
-        sellerProfile,
         otherUser,
+        otherUserProfileId,
         matchData: {
           buyer_id: matchData.buyer_id,
           seller_id: matchData.seller_id,
