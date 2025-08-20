@@ -717,18 +717,18 @@ const Profile = () => {
                     <Button 
                       onClick={handleSubscriptionManage} 
                       variant="outline" 
-                      className="flex-1 h-7 sm:h-9 text-xs sm:text-sm px-2 sm:px-4"
+                      className="flex-1 h-7 sm:h-8 text-xs sm:text-sm px-4"
                     >
-                      <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                       <span className="hidden sm:inline">Manage in App</span>
                       <span className="sm:hidden">Manage</span>
                     </Button>
                     {!subscription.isActive && (
                       <Button 
                         onClick={handleUpgradePlan}
-                        className="flex-1 h-7 sm:h-9 text-xs sm:text-sm px-2 sm:px-4"
+                        className="flex-1 h-7 sm:h-8 text-xs sm:text-sm px-4"
                       >
-                        <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                         <span className="hidden sm:inline">Upgrade Plan</span>
                         <span className="sm:hidden">Upgrade</span>
                       </Button>
