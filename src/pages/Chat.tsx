@@ -179,42 +179,37 @@ const Chat = () => {
         return;
       }
 
-      // Simplified approach: directly fetch the other user's profile using their profile ID
+      // DIRECT SIMPLE APPROACH: Get the other user's profile directly
       const isUserBuyer = matchData.buyer_id === userProfile.id;
       const otherUserProfileId = isUserBuyer ? matchData.seller_id : matchData.buyer_id;
       
-      console.log('🔍 Chat: Fetching profile for ID:', otherUserProfileId);
-      console.log('🔍 Chat: User is buyer:', isUserBuyer);
+      console.log('🔥 SIMPLE DEBUG - User is buyer:', isUserBuyer);
+      console.log('🔥 SIMPLE DEBUG - Other user profile ID:', otherUserProfileId);
+      console.log('🔥 SIMPLE DEBUG - Match data:', {
+        buyer_id: matchData.buyer_id,
+        seller_id: matchData.seller_id,
+        buyer_profile: matchData.buyer_profile,
+        seller_profile: matchData.seller_profile
+      });
       
-      // Directly fetch the other user's profile
-      const { data: otherUserProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', otherUserProfileId)
-        .single();
-        
-      console.log('🔍 Chat: Other user profile fetch result:', { otherUserProfile, profileError });
-      
+      // Get the other user's profile data directly from the match join
       let otherUser = null;
-      if (otherUserProfile) {
-        // Try to get email using RPC function
-        try {
-          const emailResult = await supabase.rpc('get_profile_with_email', { 
-            profile_user_id: otherUserProfile.user_id 
-          });
-          console.log('🔍 Chat: Email fetch result:', emailResult);
-          
-          otherUser = {
-            ...otherUserProfile,
-            email: emailResult.data?.[0]?.email || 'Email not available'
-          };
-        } catch (emailError) {
-          console.log('🔍 Chat: Email fetch failed, using profile without email:', emailError);
-          otherUser = {
-            ...otherUserProfile,
-            email: 'Email not available'
-          };
-        }
+      if (isUserBuyer && matchData.seller_profile) {
+        otherUser = matchData.seller_profile;
+        console.log('🔥 Using seller profile from match data:', otherUser);
+      } else if (!isUserBuyer && matchData.buyer_profile) {
+        otherUser = matchData.buyer_profile;
+        console.log('🔥 Using buyer profile from match data:', otherUser);
+      } else {
+        console.log('🔥 No profile found in match data, fetching directly');
+        // Fallback: fetch directly from profiles table
+        const { data: directProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', otherUserProfileId)
+          .single();
+        otherUser = directProfile;
+        console.log('🔥 Direct profile fetch result:', otherUser);
       }
       
       const property = matchData.properties;
