@@ -861,10 +861,10 @@ const Profile = () => {
                   </div>
                    <Button 
                      variant="outline" 
-                     className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex-shrink-0 w-20 sm:w-28"
+                     className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex-shrink-0"
                      onClick={() => setEmailNotificationsDialogOpen(true)}
                    >
-                     <Bell className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                     <Bell className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                      Configure
                    </Button>
                  </div>
@@ -876,10 +876,10 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex-shrink-0 w-20 sm:w-28"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex-shrink-0"
                       onClick={() => setPushNotificationsDialogOpen(true)}
                     >
-                      <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                      <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                       Configure
                     </Button>
                   </div>
@@ -891,10 +891,10 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex-shrink-0 w-20 sm:w-28"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex-shrink-0"
                       onClick={() => setPrivacySettingsDialogOpen(true)}
                     >
-                      <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                      <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                       Manage
                     </Button>
                   </div>
@@ -915,7 +915,7 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex-shrink-0 w-20 sm:w-28"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex-shrink-0"
                       onClick={() => setChangingPassword(!changingPassword)}
                     >
                       {changingPassword ? 'Cancel' : 'Change'}
@@ -975,7 +975,7 @@ const Profile = () => {
                       <AlertDialogTrigger asChild>
                         <Button 
                           variant="outline" 
-                          className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex-shrink-0 w-20 sm:w-28"
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex-shrink-0"
                         >
                           Disable
                         </Button>
@@ -998,7 +998,7 @@ const Profile = () => {
                   ) : (
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex-shrink-0 w-20 sm:w-28"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex-shrink-0"
                       onClick={() => setTwoFactorDialogOpen(true)}
                     >
                       Enable
@@ -1013,7 +1013,7 @@ const Profile = () => {
                   </div>
                   <Button 
                     variant="outline" 
-                    className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex-shrink-0 w-20 sm:w-28"
+                    className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex-shrink-0"
                     onClick={() => setActiveSessionsDialogOpen(true)}
                   >
                     View
@@ -1028,7 +1028,7 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="destructive" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex items-center gap-1 flex-shrink-0 w-20 sm:w-28"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 flex-shrink-0"
                       onClick={handleLogout}
                     >
                       <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1048,7 +1048,7 @@ const Profile = () => {
                       <AlertDialogTrigger asChild>
                         <Button 
                           variant="destructive" 
-                          className="h-7 sm:h-8 text-xs sm:text-sm px-4 flex items-center gap-1 flex-shrink-0 w-20 sm:w-28"
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 flex-shrink-0"
                         >
                           <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                           <span className="hidden sm:inline">Delete</span>
