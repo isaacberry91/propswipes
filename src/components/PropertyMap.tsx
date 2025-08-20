@@ -48,17 +48,27 @@ const PropertyMap = ({
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const radiusLayerRef = useRef<string | null>(null);
 
-  // Get Mapbox token from environment or Supabase secrets
+  // Get Mapbox token from Supabase edge function
   useEffect(() => {
     const getMapboxToken = async () => {
-      // Try to get from Supabase Edge Function (this would need to be implemented)
-      // For now, use a placeholder - user needs to add their token
-      const token = 'pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGV1cW9lY2YwM3djM25xbmJpMzZjMXR5In0.example';
-      setMapboxToken(token);
-    };
+      try {
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token')
+        
+        if (error) {
+          console.error('Error fetching Mapbox token:', error)
+          return
+        }
+        
+        if (data?.token) {
+          setMapboxToken(data.token)
+        }
+      } catch (error) {
+        console.error('Error calling Mapbox token function:', error)
+      }
+    }
     
-    getMapboxToken();
-  }, []);
+    getMapboxToken()
+  }, [])
 
   // Initialize map
   useEffect(() => {
@@ -314,11 +324,10 @@ const PropertyMap = ({
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
 
       {/* Token Warning */}
-      {mapboxToken.includes('example') && (
+      {!mapboxToken && (
         <Card className="absolute bottom-4 left-4 right-4 z-10 p-4 bg-destructive/10 border-destructive/20">
           <div className="text-sm text-destructive">
-            <strong>Setup Required:</strong> Please add your Mapbox public token to Supabase Edge Function Secrets with the name 'MAPBOX_PUBLIC_TOKEN'. 
-            Get your token at <a href="https://mapbox.com/" target="_blank" className="underline">mapbox.com</a>
+            <strong>Map Loading:</strong> Fetching Mapbox configuration...
           </div>
         </Card>
       )}
