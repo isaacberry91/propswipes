@@ -435,7 +435,7 @@ const PropertyMap = ({
       </Card>
 
       {/* Property Count */}
-      <Card className="absolute top-4 right-4 z-10 p-3 bg-background/95 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
+      <Card className="absolute bottom-4 left-4 z-10 p-3 bg-background/95 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium">
