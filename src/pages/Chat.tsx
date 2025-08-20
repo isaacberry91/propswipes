@@ -238,12 +238,44 @@ const Chat = () => {
       const otherUser = isUserBuyer ? sellerProfile : buyerProfile;
       const property = matchData.properties;
 
+      console.log('🔍 Chat: Debug user profiles:', {
+        isUserBuyer,
+        buyerProfile,
+        sellerProfile,
+        otherUser,
+        matchData: {
+          buyer_id: matchData.buyer_id,
+          seller_id: matchData.seller_id,
+          buyer_profile: matchData.buyer_profile,
+          seller_profile: matchData.seller_profile
+        }
+      });
+
+      // Enhanced fallback logic for user name
+      let userName = 'Unknown User';
+      if (otherUser?.display_name) {
+        userName = otherUser.display_name;
+      } else if (otherUser?.email) {
+        userName = otherUser.email;
+      } else {
+        // Try to get name from the basic profile data if RPC failed
+        const fallbackProfile = isUserBuyer ? matchData.seller_profile : matchData.buyer_profile;
+        if (fallbackProfile?.display_name) {
+          userName = fallbackProfile.display_name;
+        } else if (fallbackProfile?.user_id) {
+          // Last resort: try to identify by user ID
+          userName = `User ${fallbackProfile.user_id.substring(0, 8)}...`;
+        }
+      }
+
+      console.log('🔍 Chat: Final userName determined:', userName);
+
       const transformedMatch = {
         id: matchData.id,
         buyerId: matchData.buyer_id,
         sellerId: matchData.seller_id,
         user: {
-          name: otherUser?.display_name || otherUser?.email || 'Unknown User',
+          name: userName,
           avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
           type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer',
           bio: otherUser?.bio || 'No bio available',
