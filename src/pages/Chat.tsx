@@ -267,7 +267,7 @@ const Chat = () => {
       console.log('🔥 UNIVERSAL FIX - Complete profile result:', completeProfile);
       console.log('🔥 UNIVERSAL FIX - Profile error:', profileFetchError);
       
-      if (completeProfile && completeProfile.display_name) {
+      if (completeProfile && completeProfile.display_name?.trim()) {
         // Use the complete profile data
         otherUser = completeProfile;
         userName = completeProfile.display_name.trim();
