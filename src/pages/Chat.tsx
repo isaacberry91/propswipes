@@ -216,16 +216,41 @@ const Chat = () => {
 
       console.log('🔥 SIMPLE DEBUG - Final otherUser object:', otherUser);
 
-      // GUARANTEED USERNAME LOGIC - Never show "Unknown User"
-      let userName = 'User';
+      // GUARANTEED USERNAME LOGIC - Never show "User"
+      let userName = 'Unknown';
+      
+      console.log('🔥 CHAT DEBUG - Other user object:', otherUser);
+      
       if (otherUser?.display_name?.trim()) {
         userName = otherUser.display_name.trim();
-      } else if (otherUser?.email?.trim()) {
-        userName = otherUser.email.split('@')[0]; // Use email username part
+        console.log('🔥 CHAT DEBUG - Using display_name:', userName);
       } else {
-        // Use a descriptive fallback based on user type
-        const userType = otherUser?.user_type || 'User';
-        userName = `${userType.charAt(0).toUpperCase() + userType.slice(1)}`;
+        // Try to get email from the user_id
+        try {
+          console.log('🔥 CHAT DEBUG - Trying to get email for user_id:', otherUser?.user_id);
+          const { data: profileWithEmail } = await supabase.rpc('get_profile_with_email', { 
+            profile_user_id: otherUser?.user_id 
+          });
+          
+          console.log('🔥 CHAT DEBUG - Profile with email result:', profileWithEmail);
+          
+          if (profileWithEmail?.[0]?.display_name?.trim()) {
+            userName = profileWithEmail[0].display_name.trim();
+            console.log('🔥 CHAT DEBUG - Using display_name from RPC:', userName);
+          } else if (profileWithEmail?.[0]?.email?.trim()) {
+            userName = profileWithEmail[0].email.split('@')[0];
+            console.log('🔥 CHAT DEBUG - Using email username:', userName);
+          } else {
+            // Final fallback - use user type but make it descriptive
+            const userType = otherUser?.user_type || 'user';
+            userName = userType === 'seller' ? 'Real Estate Agent' : 'Property Buyer';
+            console.log('🔥 CHAT DEBUG - Using fallback:', userName);
+          }
+        } catch (error) {
+          console.error('🔥 CHAT DEBUG - RPC error:', error);
+          const userType = otherUser?.user_type || 'user';
+          userName = userType === 'seller' ? 'Real Estate Agent' : 'Property Buyer';
+        }
       }
 
       console.log('🔥 FINAL USERNAME:', userName);
