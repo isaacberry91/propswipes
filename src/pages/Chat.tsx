@@ -203,6 +203,13 @@ const Chat = () => {
         console.log('🔥 Using buyer profile from match data:', otherUser);
       } 
       
+      console.log('🔥 DETAILED DEBUG - Profile from join check:');
+      console.log('🔥 DETAILED DEBUG - isUserBuyer:', isUserBuyer);
+      console.log('🔥 DETAILED DEBUG - matchData.seller_profile exists:', !!matchData.seller_profile);
+      console.log('🔥 DETAILED DEBUG - matchData.buyer_profile exists:', !!matchData.buyer_profile);
+      console.log('🔥 DETAILED DEBUG - Seller profile data:', matchData.seller_profile);
+      console.log('🔥 DETAILED DEBUG - Buyer profile data:', matchData.buyer_profile);
+      
       // If joined data is null, fetch directly
       if (!otherUser) {
         console.log('🔥 Profile from join was null, fetching directly from profiles table');
