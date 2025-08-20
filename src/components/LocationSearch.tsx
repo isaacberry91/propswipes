@@ -227,8 +227,7 @@ const LocationSearch = ({
     console.log('🔍 LocationSearch: handleLocationSelect called with:', location);
     console.log('🔍 LocationSearch: Current radius:', selectedRadius);
     setSearchValue(location);
-    // Keep suggestions open to visualize results on the map
-    setShowSuggestions(true);
+    setShowSuggestions(false);
     
     // Call onChange with the location and current radius
     onChange(location, selectedRadius);
@@ -406,10 +405,16 @@ const LocationSearch = ({
               </h4>
               <Select 
                 value={selectedRadius.toString()} 
-                onValueChange={(value) => handleRadiusChange(parseInt(value))}
+                onValueChange={(value) => {
+                  const newRadius = parseInt(value);
+                  console.log('🔍 Select onValueChange:', newRadius);
+                  handleRadiusChange(newRadius);
+                }}
               >
                 <SelectTrigger className="w-full" onClick={(e) => e.stopPropagation()}>
-                  <SelectValue placeholder="Select radius" />
+                  <SelectValue placeholder="Select radius">
+                    {selectedRadius} miles
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent 
                   className="z-[70] bg-background"
