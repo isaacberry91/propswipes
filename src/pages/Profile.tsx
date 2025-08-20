@@ -861,7 +861,7 @@ const Profile = () => {
                   </div>
                    <Button 
                      variant="outline" 
-                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-6"
+                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-20 sm:w-28"
                      onClick={() => setEmailNotificationsDialogOpen(true)}
                    >
                      <Bell className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -876,7 +876,7 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-6"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-20 sm:w-28"
                       onClick={() => setPushNotificationsDialogOpen(true)}
                     >
                       <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -891,7 +891,7 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-6"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-20 sm:w-28"
                       onClick={() => setPrivacySettingsDialogOpen(true)}
                     >
                       <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
@@ -915,7 +915,7 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-6"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-20 sm:w-28"
                       onClick={() => setChangingPassword(!changingPassword)}
                     >
                       {changingPassword ? 'Cancel' : 'Change'}
@@ -975,7 +975,7 @@ const Profile = () => {
                       <AlertDialogTrigger asChild>
                         <Button 
                           variant="outline" 
-                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-6"
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-20 sm:w-28"
                         >
                           Disable
                         </Button>
@@ -998,7 +998,7 @@ const Profile = () => {
                   ) : (
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-6"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-20 sm:w-28"
                       onClick={() => setTwoFactorDialogOpen(true)}
                     >
                       Enable
@@ -1013,7 +1013,7 @@ const Profile = () => {
                   </div>
                   <Button 
                     variant="outline" 
-                    className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-6"
+                    className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex-shrink-0 w-20 sm:w-28"
                     onClick={() => setActiveSessionsDialogOpen(true)}
                   >
                     View
@@ -1028,12 +1028,12 @@ const Profile = () => {
                     </div>
                     <Button 
                       variant="destructive" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex items-center gap-1 sm:gap-2 flex-shrink-0 w-6"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex items-center gap-1 sm:gap-2 flex-shrink-0 w-20 sm:w-28"
                       onClick={handleLogout}
                     >
                       <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Logout</span>
-                      <span className="sm:hidden">Out</span>
+                      <span className="hidden sm:inline">Sign Out</span>
+                      <span className="sm:hidden">Logout</span>
                     </Button>
                   </div>
                 </div>
@@ -1048,11 +1048,11 @@ const Profile = () => {
                       <AlertDialogTrigger asChild>
                         <Button 
                           variant="destructive" 
-                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex items-center gap-1 sm:gap-2 flex-shrink-0 w-6"
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 flex items-center gap-1 sm:gap-2 flex-shrink-0 w-20 sm:w-28"
                         >
                           <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                           <span className="hidden sm:inline">Delete</span>
-                          <span className="sm:hidden">Del</span>
+                          <span className="sm:hidden">Delete</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
