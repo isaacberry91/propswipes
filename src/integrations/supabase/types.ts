@@ -158,6 +158,7 @@ export type Database = {
           bio: string | null
           created_at: string
           daily_likes_reset_date: string | null
+          daily_likes_started_at: string | null
           daily_likes_used: number | null
           deleted_at: string | null
           display_name: string | null
@@ -177,6 +178,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           daily_likes_reset_date?: string | null
+          daily_likes_started_at?: string | null
           daily_likes_used?: number | null
           deleted_at?: string | null
           display_name?: string | null
@@ -196,6 +198,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           daily_likes_reset_date?: string | null
+          daily_likes_started_at?: string | null
           daily_likes_used?: number | null
           deleted_at?: string | null
           display_name?: string | null

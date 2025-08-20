@@ -130,26 +130,27 @@ const Discover = () => {
         setSelectedLocation("Seattle, WA");
       }
 
-      // Daily likes logic - only for non-subscribers
+      // 24-hour likes timer logic - only for non-subscribers
       if (!hasUnlimitedLikes()) {
-        const today = new Date().toDateString();
-        const resetDate = data.daily_likes_reset_date ? new Date(data.daily_likes_reset_date).toDateString() : null;
-        console.log('🔄 PROFILE: Date comparison - today:', today, 'resetDate:', resetDate);
+        const now = new Date();
+        const likesStartedAt = data.daily_likes_started_at ? new Date(data.daily_likes_started_at) : null;
         
-        if (resetDate !== today) {
-          // Only reset if it's actually a new day
-          console.log('🔄 PROFILE: Resetting daily likes for free user (new day)');
+        console.log('🔄 PROFILE: Checking 24hr timer - now:', now.toISOString(), 'started:', likesStartedAt?.toISOString());
+        
+        // Check if 24 hours have passed since likes started
+        if (likesStartedAt && (now.getTime() - likesStartedAt.getTime()) >= 24 * 60 * 60 * 1000) {
+          console.log('🔄 PROFILE: 24 hours passed, resetting likes counter');
           await supabase
             .from('profiles')
             .update({ 
               daily_likes_used: 0, 
-              daily_likes_reset_date: new Date().toISOString().split('T')[0]
+              daily_likes_started_at: null // Reset the timer
             })
-            .eq('id', data.id);  // Use profile ID consistently
+            .eq('id', data.id);
           setDailyLikesUsed(0);
         } else {
-          // Same day - use the database value as-is
-          console.log('🔄 PROFILE: Same day, using database value:', data.daily_likes_used);
+          // Timer still active or not started - use database value
+          console.log('🔄 PROFILE: Using current database value:', data.daily_likes_used);
           setDailyLikesUsed(data.daily_likes_used || 0);
         }
       } else {
@@ -477,10 +478,19 @@ const Discover = () => {
           console.log('💕 LIKE: Updating likes count from', dailyLikesUsed, 'to', newLikesUsed);
           setDailyLikesUsed(newLikesUsed);
           
+          // Prepare update object
+          const updateData: any = { daily_likes_used: newLikesUsed };
+          
+          // Start the 24-hour timer if this is their first like
+          if (dailyLikesUsed === 0) {
+            updateData.daily_likes_started_at = new Date().toISOString();
+            console.log('💕 LIKE: Starting 24-hour timer for first like');
+          }
+          
           // Update using userProfile.id instead of user.id to match the correct profile
           const updateResult = await supabase
             .from('profiles')
-            .update({ daily_likes_used: newLikesUsed })
+            .update(updateData)
             .eq('id', userProfile.id);  // Use profile ID, not auth user ID
           
           console.log('💕 LIKE: Database update result:', updateResult);
