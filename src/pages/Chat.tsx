@@ -163,7 +163,7 @@ const Chat = () => {
         `)
         .eq('id', matchId)
         .or(`buyer_id.eq.${userProfile.id},seller_id.eq.${userProfile.id}`)
-        .single();
+        .maybeSingle();
 
       if (error || !matchData) {
         console.error('Error fetching match:', error);
