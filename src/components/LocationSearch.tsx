@@ -66,14 +66,23 @@ const LocationSearch = ({
     try {
       console.log('🔍 Searching for:', query);
       
-      // Search for addresses, cities, and states in the database
-      const { data, error } = await supabase
-        .from('properties')
-        .select('address, city, state')
-        .eq('status', 'approved')
-        .is('deleted_at', null)
-        .or(`address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`)
-        .limit(20);
+       // Search for addresses, cities, and states in the database (handle commas safely)
+       const terms = query.split(',').map(p => p.trim()).filter(Boolean);
+       const orFilters = (terms.length ? terms : [query])
+         .flatMap((t) => [
+           `address.ilike.%${t}%`,
+           `city.ilike.%${t}%`,
+           `state.ilike.%${t}%`,
+         ])
+         .join(',');
+
+       const { data, error } = await supabase
+         .from('properties')
+         .select('address, city, state')
+         .eq('status', 'approved')
+         .is('deleted_at', null)
+         .or(orFilters)
+         .limit(20);
 
       console.log('🔍 Search results:', data, error);
 
