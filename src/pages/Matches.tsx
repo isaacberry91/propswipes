@@ -71,6 +71,8 @@ const Matches = () => {
       setHasProperties(userProperties && userProperties.length > 0);
 
       // Fetch matches where user is either buyer or seller
+      console.log('🔥 MATCHES DEBUG - User profile ID:', userProfile.id);
+      
       const { data: matchesData, error } = await supabase
         .from('matches')
         .select(`
@@ -102,6 +104,10 @@ const Matches = () => {
         `)
         .or(`buyer_id.eq.${userProfile.id},seller_id.eq.${userProfile.id}`)
         .order('created_at', { ascending: false });
+
+      console.log('🔥 MATCHES DEBUG - Raw matches data:', matchesData);
+      console.log('🔥 MATCHES DEBUG - Matches error:', error);
+      console.log('🔥 MATCHES DEBUG - Number of matches found:', matchesData?.length || 0);
 
       if (error) {
         console.error('Error fetching matches:', error);
