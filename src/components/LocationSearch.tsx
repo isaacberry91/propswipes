@@ -49,11 +49,7 @@ const LocationSearch = ({
     "1234 Main St, Seattle, WA", "456 Oak Ave, Portland, OR", "789 Pine St, San Francisco, CA"
   ]);
 
-  // Update internal state when props change
-  useEffect(() => {
-    setSelectedRadius(propRadius);
-  }, [propRadius]);
-
+  // Update internal state when props change - only on initial mount
   useEffect(() => {
     setMapCenter(propMapCenter);
   }, [propMapCenter]);
