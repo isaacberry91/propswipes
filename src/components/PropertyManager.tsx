@@ -371,7 +371,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                       
                       <div className="flex items-center gap-2 text-2xl font-bold text-green-600">
                         <DollarSign className="w-6 h-6" />
-                        <span>${property.price.toLocaleString()}</span>
+                        <span>{property.price.toLocaleString()}</span>
                       </div>
                     </div>
                     
