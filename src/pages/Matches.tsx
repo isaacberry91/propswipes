@@ -119,18 +119,58 @@ const Matches = () => {
         const otherUserProfile = isUserBuyer ? match.seller_profile : match.buyer_profile;
         const property = match.properties;
 
-        // If the profile is null, try to fetch it with email using RPC
-        let otherUserName = otherUserProfile?.display_name;
-        if (!otherUserName && otherUserProfile?.user_id) {
+        console.log('🔥 MATCHES DEBUG - Match ID:', match.id);
+        console.log('🔥 MATCHES DEBUG - Is user buyer:', isUserBuyer);
+        console.log('🔥 MATCHES DEBUG - Other user profile:', otherUserProfile);
+
+        // GUARANTEED USERNAME LOGIC - Never show "User"
+        let otherUserName = 'Unknown';
+        
+        // First try the profile data from the join
+        if (otherUserProfile?.display_name?.trim()) {
+          otherUserName = otherUserProfile.display_name.trim();
+          console.log('🔥 MATCHES DEBUG - Using display_name from profile:', otherUserName);
+        } else {
+          // Try to fetch full profile with email using RPC
           try {
-            const { data: profileWithEmail } = await supabase.rpc('get_profile_with_email', { 
-              profile_user_id: otherUserProfile.user_id 
-            });
-            otherUserName = profileWithEmail?.[0]?.display_name || profileWithEmail?.[0]?.email;
+            const otherUserId = isUserBuyer ? match.seller_id : match.buyer_id;
+            console.log('🔥 MATCHES DEBUG - Fetching profile for ID:', otherUserId);
+            
+            // Direct profile fetch first
+            const { data: directProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', otherUserId)
+              .single();
+              
+            console.log('🔥 MATCHES DEBUG - Direct profile result:', directProfile);
+            
+            if (directProfile?.display_name?.trim()) {
+              otherUserName = directProfile.display_name.trim();
+              console.log('🔥 MATCHES DEBUG - Using display_name from direct fetch:', otherUserName);
+            } else if (directProfile?.user_id) {
+              // Try RPC for email
+              try {
+                const { data: profileWithEmail } = await supabase.rpc('get_profile_with_email', { 
+                  profile_user_id: directProfile.user_id 
+                });
+                console.log('🔥 MATCHES DEBUG - RPC email result:', profileWithEmail);
+                
+                if (profileWithEmail?.[0]?.display_name?.trim()) {
+                  otherUserName = profileWithEmail[0].display_name.trim();
+                } else if (profileWithEmail?.[0]?.email?.trim()) {
+                  otherUserName = profileWithEmail[0].email.split('@')[0];
+                }
+              } catch (rpcError) {
+                console.error('🔥 MATCHES DEBUG - RPC error:', rpcError);
+              }
+            }
           } catch (error) {
-            console.error('Error fetching profile with email:', error);
+            console.error('🔥 MATCHES DEBUG - Profile fetch error:', error);
           }
         }
+
+        console.log('🔥 MATCHES DEBUG - Final username:', otherUserName);
 
         return {
           id: match.id,
@@ -146,7 +186,7 @@ const Matches = () => {
             image: property.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"
           },
           matchedUser: {
-            name: otherUserName || 'User',
+            name: otherUserName,
             avatar: otherUserProfile?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
             type: otherUserProfile?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer'
           },
