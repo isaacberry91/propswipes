@@ -302,7 +302,7 @@ const LocationSearch = ({
                 <MapPin className="w-4 h-4" />
                 Properties Map
               </h4>
-              <div className="h-64 w-full rounded-lg overflow-hidden border">
+              <div className="h-80 md:h-96 w-full rounded-lg overflow-hidden border relative">
                 <PropertyMap
                   center={mapCenter}
                   radius={selectedRadius}
@@ -315,6 +315,15 @@ const LocationSearch = ({
                   searchLocation={searchValue}
                   properties={properties}
                 />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="absolute bottom-3 right-3 z-20 rounded-full shadow-md pointer-events-auto"
+                  aria-label="Properties"
+                >
+                  <MapPin className="w-4 h-4" />
+                </Button>
               </div>
             </div>
 
@@ -331,7 +340,7 @@ const LocationSearch = ({
                   <SelectValue placeholder="Select radius" />
                 </SelectTrigger>
                 <SelectContent 
-                  className="z-[60]"
+                  className="z-[70] bg-background"
                   onCloseAutoFocus={(e) => e.preventDefault()}
                 >
                   <SelectItem value="5">5 miles</SelectItem>

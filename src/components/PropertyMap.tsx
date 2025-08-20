@@ -91,7 +91,8 @@ const PropertyMap = ({
 
     const init = async () => {
       let L: any;
-      if (mapboxToken) {
+      const hasValidMapboxToken = !!mapboxToken && mapboxToken.startsWith('pk.');
+      if (hasValidMapboxToken) {
         (mapboxgl as any).accessToken = mapboxToken;
         L = mapboxgl as any;
         map.current = new L.Map({
@@ -371,10 +372,10 @@ const PropertyMap = ({
       <div ref={mapContainer} className="w-full h-full rounded-lg" />
 
       {/* Token Warning */}
-      {!mapboxToken && (
+      {(!mapboxToken || !mapboxToken.startsWith('pk.')) && (
         <Card className="absolute bottom-4 left-4 right-4 z-10 p-4 bg-destructive/10 border-destructive/20">
           <div className="text-sm text-destructive">
-            <strong>Map Loading:</strong> Fetching Mapbox configuration...
+            Using fallback map. Add your Mapbox public token in Supabase to enable Mapbox styles.
           </div>
         </Card>
       )}
