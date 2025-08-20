@@ -427,10 +427,15 @@ const LocationSearch = ({
         <Input
           value={searchValue}
           onChange={(e) => {
+            console.log('🔍 INPUT CHANGE - New value:', e.target.value);
             setSearchValue(e.target.value);
+            console.log('🔍 INPUT CHANGE - Setting showSuggestions to true');
             setShowSuggestions(true);
           }}
-          onFocus={() => setShowSuggestions(true)}
+          onFocus={() => {
+            console.log('🔍 INPUT FOCUS - Setting showSuggestions to true');
+            setShowSuggestions(true);
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
@@ -541,11 +546,12 @@ const LocationSearch = ({
             </div>
 
             {/* Database Search Results */}
-            {searchValue && databaseSuggestions.length > 0 && (
+            {searchValue && (
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  {loading ? "Searching..." : "Available Locations"}
+                  {loading ? "Searching..." : `Results for "${searchValue}" (${databaseSuggestions.length} found)`}
                 </h4>
+                {databaseSuggestions.length > 0 ? (
                 <div className="space-y-1">
                   {databaseSuggestions.map((suggestion, index) => (
                     <div
@@ -560,19 +566,19 @@ const LocationSearch = ({
                         <MapPin className="w-4 h-4 text-muted-foreground" />
                         <span>{suggestion.full_location}</span>
                       </div>
-                      <Badge variant="secondary" className="text-xs opacity-70 group-hover:opacity-100">
-                        {suggestion.count} {suggestion.count === 1 ? 'property' : 'properties'}
-                      </Badge>
+                      {suggestion.count > 0 && (
+                        <Badge variant="secondary" className="text-xs opacity-70 group-hover:opacity-100">
+                          {suggestion.count} {suggestion.count === 1 ? 'property' : 'properties'}
+                        </Badge>
+                      )}
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {/* Show suggestions when typing */}
-            {searchValue && databaseSuggestions.length === 0 && !loading && (
-              <div className="text-sm text-muted-foreground text-center py-4">
-                No properties found matching "{searchValue}"
+                ) : (
+                  <div className="text-sm text-muted-foreground text-center py-4">
+                    {loading ? "Searching..." : `No locations found matching "${searchValue}"`}
+                  </div>
+                )}
               </div>
             )}
 
