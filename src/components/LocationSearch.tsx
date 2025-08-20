@@ -66,23 +66,42 @@ const LocationSearch = ({
     try {
       console.log('🔍 Searching for:', query);
       
-       // Search for addresses, cities, and states in the database (handle commas safely)
-       const terms = query.split(',').map(p => p.trim()).filter(Boolean);
-       const orFilters = (terms.length ? terms : [query])
-         .flatMap((t) => [
-           `address.ilike.%${t}%`,
-           `city.ilike.%${t}%`,
-           `state.ilike.%${t}%`,
-         ])
-         .join(',');
+       // Search for addresses, cities, and states in the database WITHOUT using PostgREST or() to avoid comma parse issues
+       const rawTerms = query.split(',').map(p => p.trim()).filter(Boolean);
+       const terms = rawTerms.length ? rawTerms : [query];
 
-       const { data, error } = await supabase
-         .from('properties')
-         .select('address, city, state')
-         .eq('status', 'approved')
-         .is('deleted_at', null)
-         .or(orFilters)
-         .limit(20);
+       // Build parallel requests for each term/field
+       const requests = terms.flatMap((t) => [
+         supabase
+           .from('properties')
+           .select('address, city, state')
+           .eq('status', 'approved')
+           .is('deleted_at', null)
+           .ilike('address', `%${t}%`)
+           .limit(10),
+         supabase
+           .from('properties')
+           .select('address, city, state')
+           .eq('status', 'approved')
+           .is('deleted_at', null)
+           .ilike('city', `%${t}%`)
+           .limit(10),
+         supabase
+           .from('properties')
+           .select('address, city, state')
+           .eq('status', 'approved')
+           .is('deleted_at', null)
+           .ilike('state', `%${t}%`)
+           .limit(10)
+       ]);
+
+       const settled = await Promise.allSettled(requests);
+       const rows = settled
+         .filter((r): r is PromiseFulfilledResult<{ data: any[] | null; error: any } & any> => r.status === 'fulfilled')
+         .flatMap((r) => r.value.data || []);
+
+       const data = rows;
+       const error = null;
 
       console.log('🔍 Search results:', data, error);
 
