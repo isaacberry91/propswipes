@@ -413,7 +413,9 @@ const LocationSearch = ({
                 value={selectedRadius.toString()} 
                 onValueChange={(value) => {
                   const newRadius = parseInt(value);
-                  console.log('🔍 Select onValueChange:', newRadius);
+                  console.log('🔍 LocationSearch: Select onValueChange triggered with value:', value);
+                  console.log('🔍 LocationSearch: Parsed newRadius:', newRadius);
+                  console.log('🔍 LocationSearch: Current selectedRadius before change:', selectedRadius);
                   handleRadiusChange(newRadius);
                 }}
               >

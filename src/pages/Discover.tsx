@@ -74,6 +74,11 @@ const Discover = () => {
     }
   }, [user]);
 
+  // Debug effect to track selectedRadius changes
+  useEffect(() => {
+    console.log('🔍 Discover: selectedRadius state changed to:', selectedRadius);
+  }, [selectedRadius]);
+
   useEffect(() => {
     if (user && userProfile) {
       fetchProperties();
@@ -570,8 +575,10 @@ const Discover = () => {
           <LocationSearch
             value={selectedLocation}
             onChange={(location, radius) => {
-              console.log('🔍 Location search onChange:', { location, radius });
+              console.log('🔍 Discover: LocationSearch onChange called with:', { location, radius });
+              console.log('🔍 Discover: Current selectedRadius before update:', selectedRadius);
               if (radius !== undefined) {
+                console.log('🔍 Discover: Setting selectedRadius to:', radius);
                 setSelectedRadius(radius);
               }
               getPropertiesForLocation(location, radius || selectedRadius);
