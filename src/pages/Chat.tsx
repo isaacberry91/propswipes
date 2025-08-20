@@ -254,73 +254,38 @@ const Chat = () => {
       
       console.log('🔥 CHAT DEBUG - Other user object:', otherUser);
       
-      // HARDCODED FIX: For this specific match, we know the names and profile data
-      if (matchId === 'a70c7503-368e-4d27-973a-0413c37aa668') {
-        if (isUserBuyer) {
-          // Current user is buyer, other user is seller
-          userName = 'isaac berry';
-          // Set the otherUser object with known data
-          otherUser = {
-            id: '25ca4a08-ca28-45fd-a61a-887ab297f402',
-            display_name: 'isaac berry',
-            user_type: 'buyer',
-            phone: '9177974872',
-            location: 'Woodmere',
-            bio: null,
-            avatar_url: null
-          };
-        } else {
-          // Current user is seller, other user is buyer  
-          userName = 'Isaac Berry';
-          otherUser = {
-            id: '7681188e-d4b4-4309-9654-f26f064fb25d',
-            display_name: 'Isaac Berry',
-            user_type: 'buyer', 
-            phone: '9177974872',
-            location: 'Woodmere',
-            bio: null,
-            avatar_url: null
-          };
-        }
-        console.log('🔥 HARDCODED FIX - Using known name and profile data:', userName, otherUser);
-      } else if (otherUser?.display_name?.trim()) {
-        userName = otherUser.display_name.trim();
-        console.log('🔥 CHAT DEBUG - Using display_name:', userName);
-      } else if (otherUserProfileId) {
-        // Try one more direct fetch with better error handling
-        try {
-          console.log('🔥 FINAL ATTEMPT - Fetching profile for ID:', otherUserProfileId);
-          
-          const { data: finalProfile, error: finalError } = await supabase
-            .from('profiles')
-            .select('display_name, user_type')
-            .eq('id', otherUserProfileId)
-            .single();
-            
-          console.log('🔥 FINAL ATTEMPT - Result:', finalProfile);
-          console.log('🔥 FINAL ATTEMPT - Error:', finalError);
-          
-          if (finalProfile?.display_name?.trim()) {
-            userName = finalProfile.display_name.trim();
-            console.log('🔥 FINAL ATTEMPT - Success! Using:', userName);
-          } else {
-            // Manual lookup based on known data
-            if (otherUserProfileId === '25ca4a08-ca28-45fd-a61a-887ab297f402') {
-              userName = 'isaac berry';
-            } else if (otherUserProfileId === '7681188e-d4b4-4309-9654-f26f064fb25d') {
-              userName = 'Isaac Berry';
-            } else {
-              userName = 'Chat Partner';
-            }
-            console.log('🔥 MANUAL LOOKUP - Using:', userName);
-          }
-        } catch (error) {
-          console.error('🔥 FINAL ATTEMPT - Error:', error);
-          userName = 'Chat Partner';
-        }
+      // UNIVERSAL FIX: Always fetch the other user's profile data properly
+      console.log('🔥 UNIVERSAL FIX - Fetching profile for ID:', otherUserProfileId);
+      
+      // Always do a fresh, direct profile fetch to ensure we have complete data
+      const { data: completeProfile, error: profileFetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', otherUserProfileId)
+        .single();
+        
+      console.log('🔥 UNIVERSAL FIX - Complete profile result:', completeProfile);
+      console.log('🔥 UNIVERSAL FIX - Profile error:', profileFetchError);
+      
+      if (completeProfile) {
+        // Use the complete profile data
+        otherUser = completeProfile;
+        userName = completeProfile.display_name?.trim() || 'Chat Partner';
+        console.log('🔥 UNIVERSAL FIX - Success! Using complete profile data');
       } else {
-        userName = 'Chat Partner';
-        console.log('🔥 CHAT DEBUG - No user_id, using fallback:', userName);
+        console.error('🔥 UNIVERSAL FIX - Profile fetch failed:', profileFetchError);
+        // If direct fetch fails, try to use the joined data as fallback
+        if (isUserBuyer && matchData.seller_profile) {
+          otherUser = matchData.seller_profile;
+          userName = matchData.seller_profile.display_name?.trim() || 'Chat Partner';
+        } else if (!isUserBuyer && matchData.buyer_profile) {
+          otherUser = matchData.buyer_profile;  
+          userName = matchData.buyer_profile.display_name?.trim() || 'Chat Partner';
+        } else {
+          // Final fallback
+          userName = 'Chat Partner';
+          otherUser = { user_type: 'buyer' }; // Minimal fallback object
+        }
       }
 
       console.log('🔥 FINAL USERNAME:', userName);
