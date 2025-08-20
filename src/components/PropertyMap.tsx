@@ -80,7 +80,7 @@ const PropertyMap = ({
 
   // Initialize Mapbox
   useEffect(() => {
-    if (!mapboxApiToken || !mapContainer.current || mapLoaded) return;
+    if (!mapboxApiToken || !mapContainer.current || mapLoaded || !visible) return;
 
     try {
       mapboxgl.accessToken = mapboxApiToken;
