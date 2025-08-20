@@ -14,10 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           buyer_id: string
           created_at: string
+          deleted_at: string | null
           id: string
           property_id: string
           seller_id: string
@@ -25,6 +50,7 @@ export type Database = {
         Insert: {
           buyer_id: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           property_id: string
           seller_id: string
@@ -32,6 +58,7 @@ export type Database = {
         Update: {
           buyer_id?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           property_id?: string
           seller_id?: string
@@ -67,6 +94,7 @@ export type Database = {
           attachment_url: string | null
           content: string
           created_at: string
+          deleted_at: string | null
           id: string
           match_id: string
           sender_id: string
@@ -77,6 +105,7 @@ export type Database = {
           attachment_url?: string | null
           content: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           match_id: string
           sender_id: string
@@ -87,6 +116,7 @@ export type Database = {
           attachment_url?: string | null
           content?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           match_id?: string
           sender_id?: string
@@ -334,6 +364,51 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          description: string | null
+          id: string
+          match_id: string | null
+          report_type: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          match_id?: string | null
+          report_type: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          match_id?: string | null
+          report_type?: string
+          reported_user_id?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       subscribers: {
         Row: {
           apple_receipt_data: string | null
@@ -495,6 +570,10 @@ export type Database = {
           tier: Database["public"]["Enums"]["subscription_tier"]
           user_uuid: string
         }
+        Returns: boolean
+      }
+      is_user_blocked: {
+        Args: { profile_a: string; profile_b: string }
         Returns: boolean
       }
     }
