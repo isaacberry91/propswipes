@@ -854,50 +854,50 @@ const Profile = () => {
             <Card className="p-6">
               <h3 className="text-xl font-semibold text-foreground mb-6">Preferences</h3>
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0 pr-4">
                     <h4 className="font-medium text-foreground">Email Notifications</h4>
                     <p className="text-sm text-muted-foreground">Receive email updates about new matches</p>
                   </div>
                    <Button 
                      variant="outline" 
-                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
+                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex-shrink-0"
                      onClick={() => setEmailNotificationsDialogOpen(true)}
                    >
                      <Bell className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                      Configure
                    </Button>
-                </div>
-                
-                 <div className="flex items-center justify-between">
-                   <div>
-                     <h4 className="font-medium text-foreground">Push Notifications</h4>
-                     <p className="text-sm text-muted-foreground">Get notified about app activity</p>
-                   </div>
-                   <Button 
-                     variant="outline" 
-                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
-                     onClick={() => setPushNotificationsDialogOpen(true)}
-                   >
-                     <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                     Configure
-                   </Button>
                  </div>
                 
-                 <div className="flex items-center justify-between">
-                   <div>
-                     <h4 className="font-medium text-foreground">Privacy Settings</h4>
-                     <p className="text-sm text-muted-foreground">Control who can see your profile</p>
-                   </div>
-                   <Button 
-                     variant="outline" 
-                     className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
-                     onClick={() => setPrivacySettingsDialogOpen(true)}
-                   >
-                     <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                     Manage
-                   </Button>
-                 </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <h4 className="font-medium text-foreground">Push Notifications</h4>
+                      <p className="text-sm text-muted-foreground">Get notified about app activity</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex-shrink-0"
+                      onClick={() => setPushNotificationsDialogOpen(true)}
+                    >
+                      <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      Configure
+                    </Button>
+                  </div>
+                
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <h4 className="font-medium text-foreground">Privacy Settings</h4>
+                      <p className="text-sm text-muted-foreground">Control who can see your profile</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex-shrink-0"
+                      onClick={() => setPrivacySettingsDialogOpen(true)}
+                    >
+                      <Shield className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      Manage
+                    </Button>
+                  </div>
               </div>
             </Card>
           </TabsContent>
@@ -908,14 +908,14 @@ const Profile = () => {
               <h3 className="text-xl font-semibold text-foreground mb-6">Security</h3>
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0 pr-4">
                       <h4 className="font-medium text-foreground">Change Password</h4>
                       <p className="text-sm text-muted-foreground">Update your account password</p>
                     </div>
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex-shrink-0"
                       onClick={() => setChangingPassword(!changingPassword)}
                     >
                       {changingPassword ? 'Cancel' : 'Change'}
@@ -955,8 +955,8 @@ const Profile = () => {
                   )}
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0 pr-4">
                     <h4 className="font-medium text-foreground flex items-center gap-2">
                       Two-Factor Authentication
                       {userProfile?.two_factor_enabled && (
@@ -975,7 +975,7 @@ const Profile = () => {
                       <AlertDialogTrigger asChild>
                         <Button 
                           variant="outline" 
-                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex-shrink-0"
                         >
                           Disable
                         </Button>
@@ -998,7 +998,7 @@ const Profile = () => {
                   ) : (
                     <Button 
                       variant="outline" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex-shrink-0"
                       onClick={() => setTwoFactorDialogOpen(true)}
                     >
                       Enable
@@ -1006,14 +1006,14 @@ const Profile = () => {
                   )}
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0 pr-4">
                     <h4 className="font-medium text-foreground">Active Sessions</h4>
                     <p className="text-sm text-muted-foreground">Manage your active login sessions</p>
                   </div>
                   <Button 
                     variant="outline" 
-                    className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3"
+                    className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex-shrink-0"
                     onClick={() => setActiveSessionsDialogOpen(true)}
                   >
                     View
@@ -1021,14 +1021,14 @@ const Profile = () => {
                 </div>
 
                 <div className="border-t border-border pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0 pr-4">
                       <h4 className="font-medium text-destructive">Sign Out</h4>
                       <p className="text-sm text-muted-foreground">Sign out of your PropSwipes account</p>
                     </div>
                     <Button 
                       variant="destructive" 
-                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex items-center gap-1 sm:gap-2"
+                      className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex items-center gap-1 sm:gap-2 flex-shrink-0"
                       onClick={handleLogout}
                     >
                       <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -1039,8 +1039,8 @@ const Profile = () => {
                 </div>
 
                 <div className="border-t border-border pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0 pr-4">
                       <h4 className="font-medium text-destructive">Delete Account</h4>
                       <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
                     </div>
@@ -1048,7 +1048,7 @@ const Profile = () => {
                       <AlertDialogTrigger asChild>
                         <Button 
                           variant="destructive" 
-                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex items-center gap-1 sm:gap-2"
+                          className="h-7 sm:h-8 text-xs sm:text-sm px-2 sm:px-3 flex items-center gap-1 sm:gap-2 flex-shrink-0"
                         >
                           <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                           <span className="hidden sm:inline">Delete Account</span>
