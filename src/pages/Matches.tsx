@@ -114,10 +114,23 @@ const Matches = () => {
       }
 
       // Transform the data to match our interface
-      const transformedMatches = matchesData?.map((match: any) => {
+      const transformedMatches = await Promise.all(matchesData?.map(async (match: any) => {
         const isUserBuyer = match.buyer_id === userProfile.id;
-        const otherUser = isUserBuyer ? match.seller_profile : match.buyer_profile;
+        const otherUserProfile = isUserBuyer ? match.seller_profile : match.buyer_profile;
         const property = match.properties;
+
+        // If the profile is null, try to fetch it with email using RPC
+        let otherUserName = otherUserProfile?.display_name;
+        if (!otherUserName && otherUserProfile?.user_id) {
+          try {
+            const { data: profileWithEmail } = await supabase.rpc('get_profile_with_email', { 
+              profile_user_id: otherUserProfile.user_id 
+            });
+            otherUserName = profileWithEmail?.[0]?.display_name || profileWithEmail?.[0]?.email;
+          } catch (error) {
+            console.error('Error fetching profile with email:', error);
+          }
+        }
 
         return {
           id: match.id,
@@ -133,15 +146,15 @@ const Matches = () => {
             image: property.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"
           },
           matchedUser: {
-            name: otherUser?.display_name || 'Unknown User',
-            avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-            type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer'
+            name: otherUserName || 'User',
+            avatar: otherUserProfile?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+            type: otherUserProfile?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer'
           },
           lastMessage: "Start the conversation!",
           matchedAt: new Date(match.created_at).toLocaleDateString(),
           unreadCount: 0
         };
-      }) || [];
+      }) || []);
 
       setMatches(transformedMatches);
     } catch (error) {
