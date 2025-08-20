@@ -565,28 +565,17 @@ const Discover = () => {
             value={selectedLocation}
             onChange={getPropertiesForLocation}
             placeholder="Search properties anywhere..."
+            properties={properties}
+            selectedRadius={selectedRadius}
+            mapCenter={mapCenter}
+            onPropertySelect={(property) => {
+              // Find the property in our list and navigate to it
+              const propertyIndex = properties.findIndex(p => p.id === property.id);
+              if (propertyIndex !== -1) {
+                setCurrentIndex(propertyIndex);
+              }
+            }}
           />
-          
-          {/* Map Container - Always Visible */}
-          <div className="mt-4">
-            <Card className="p-0 overflow-hidden">
-              <div className="h-96 md:h-[500px]">
-                <PropertyMap
-                  center={mapCenter}
-                  radius={selectedRadius}
-                  onRadiusChange={handleRadiusChange}
-                  onPropertySelect={(property) => {
-                    // Find the property in our list and navigate to it
-                    const propertyIndex = properties.findIndex(p => p.id === property.id);
-                    if (propertyIndex !== -1) {
-                      setCurrentIndex(propertyIndex);
-                    }
-                  }}
-                  searchLocation={selectedLocation}
-                />
-              </div>
-            </Card>
-          </div>
         </div>
       </div>
 

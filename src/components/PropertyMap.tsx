@@ -29,6 +29,7 @@ interface PropertyMapProps {
   onRadiusChange?: (radius: number) => void;
   onPropertySelect?: (property: Property) => void;
   searchLocation?: string;
+  properties?: Property[];
 }
 
 const PropertyMap = ({ 
@@ -36,17 +37,20 @@ const PropertyMap = ({
   radius = 10, 
   onRadiusChange,
   onPropertySelect,
-  searchLocation 
+  searchLocation,
+  properties: propProperties = []
 }: PropertyMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRadius, setSelectedRadius] = useState(radius);
   const [mapLoaded, setMapLoaded] = useState(false);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const radiusLayerRef = useRef<string | null>(null);
+
+  // Use passed properties or fetch from database
+  const [properties, setProperties] = useState<Property[]>(propProperties);
 
   // Get Mapbox token from Supabase edge function
   useEffect(() => {
@@ -103,8 +107,18 @@ const PropertyMap = ({
     };
   }, [mapboxToken, center]);
 
-  // Fetch properties near the location
+  // Update properties when prop changes
   useEffect(() => {
+    setProperties(propProperties);
+  }, [propProperties]);
+
+  // Fetch properties near the location (only if no properties passed)
+  useEffect(() => {
+    if (propProperties.length > 0) {
+      setLoading(false);
+      return;
+    }
+    
     const fetchProperties = async () => {
       if (!center) return;
       
@@ -142,7 +156,7 @@ const PropertyMap = ({
     };
 
     fetchProperties();
-  }, [center, selectedRadius]);
+  }, [center, selectedRadius, propProperties]);
 
   // Add property markers to map
   useEffect(() => {

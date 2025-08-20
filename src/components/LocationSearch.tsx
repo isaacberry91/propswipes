@@ -6,11 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Search, Navigation, Target } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import PropertyMap from "./PropertyMap";
 
 interface LocationSearchProps {
   value: string;
   onChange: (location: string, radius?: number) => void;
   placeholder?: string;
+  onPropertySelect?: (property: any) => void;
+  properties?: any[];
+  selectedRadius?: number;
+  mapCenter?: [number, number];
 }
 
 interface LocationSuggestion {
@@ -21,16 +26,34 @@ interface LocationSuggestion {
   full_location: string;
 }
 
-const LocationSearch = ({ value, onChange, placeholder = "Search any address, city, or area..." }: LocationSearchProps) => {
+const LocationSearch = ({ 
+  value, 
+  onChange, 
+  placeholder = "Search any address, city, or area...", 
+  onPropertySelect,
+  properties = [],
+  selectedRadius: propRadius = 10,
+  mapCenter: propMapCenter = [-74.006, 40.7128]
+}: LocationSearchProps) => {
   const [searchValue, setSearchValue] = useState(value);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedRadius, setSelectedRadius] = useState(10);
+  const [selectedRadius, setSelectedRadius] = useState(propRadius);
+  const [mapCenter, setMapCenter] = useState<[number, number]>(propMapCenter);
   const [databaseSuggestions, setDatabaseSuggestions] = useState<LocationSuggestion[]>([]);
   const [popularLocations, setPopularLocations] = useState<LocationSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [recentSearches] = useState([
     "1234 Main St, Seattle, WA", "456 Oak Ave, Portland, OR", "789 Pine St, San Francisco, CA"
   ]);
+
+  // Update internal state when props change
+  useEffect(() => {
+    setSelectedRadius(propRadius);
+  }, [propRadius]);
+
+  useEffect(() => {
+    setMapCenter(propMapCenter);
+  }, [propMapCenter]);
 
   // Debounced search function
   const searchLocationsInDatabase = useCallback(async (query: string) => {
@@ -171,7 +194,28 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
   const handleLocationSelect = (location: string) => {
     setSearchValue(location);
     onChange(location, selectedRadius);
+    
+    // Geocode the location for the map
+    geocodeLocationForMap(location);
     setShowSuggestions(false);
+  };
+
+  // Geocode location for map display
+  const geocodeLocationForMap = async (location: string) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        setMapCenter([lon, lat]);
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+    }
   };
 
   // Update the selected radius and trigger onChange
@@ -249,10 +293,57 @@ const LocationSearch = ({ value, onChange, placeholder = "Search any address, ci
 
       {showSuggestions && (
         <Card 
-          className="absolute top-full left-0 right-0 mt-1 p-4 shadow-lg z-50 max-h-96 overflow-y-auto bg-background border"
+          className="absolute top-full left-0 right-0 mt-1 p-4 shadow-lg z-50 max-h-[600px] overflow-y-auto bg-background border"
           onMouseDown={(e) => e.preventDefault()}
         >
           <div className="space-y-4">
+            {/* Map Container */}
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Properties Map
+              </h4>
+              <div className="h-64 w-full rounded-lg overflow-hidden border">
+                <PropertyMap
+                  center={mapCenter}
+                  radius={selectedRadius}
+                  onRadiusChange={handleRadiusChange}
+                  onPropertySelect={(property) => {
+                    // Find the property and navigate to it, then close dropdown
+                    onPropertySelect?.(property);
+                    setShowSuggestions(false);
+                  }}
+                  searchLocation={searchValue}
+                  properties={properties}
+                />
+              </div>
+            </div>
+
+            {/* Radius Selection */}
+            <div>
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                Search Radius
+              </h4>
+              <Select 
+                value={selectedRadius.toString()} 
+                onValueChange={(value) => handleRadiusChange(parseInt(value))}
+              >
+                <SelectTrigger className="w-full" onClick={(e) => e.stopPropagation()}>
+                  <SelectValue placeholder="Select radius" />
+                </SelectTrigger>
+                <SelectContent 
+                  className="z-[60]"
+                  onCloseAutoFocus={(e) => e.preventDefault()}
+                >
+                  <SelectItem value="5">5 miles</SelectItem>
+                  <SelectItem value="10">10 miles</SelectItem>
+                  <SelectItem value="25">25 miles</SelectItem>
+                  <SelectItem value="50">50 miles</SelectItem>
+                  <SelectItem value="100">100 miles</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Current Location Option */}
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
