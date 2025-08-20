@@ -309,38 +309,63 @@ const Discover = () => {
         let filteredData = data || [];
         console.log('🔍 Before location filtering:', filteredData.length);
 
-        // Location-based radius filtering (client-side) - more lenient approach
+        // Location-based radius filtering (client-side) - improved for current location
         if (selectedLocation && selectedLocation !== 'All') {
-          const searchCoords = await geocodeAddress(selectedLocation);
-          console.log('🔍 Geocoding result for', selectedLocation, ':', searchCoords);
+          let searchCoords: { lat: number; lng: number } | null = null;
+          
+          // Check if this is a current location with embedded coordinates
+          if (selectedLocation.includes('Current Location')) {
+            const coordMatch = selectedLocation.match(/\(([-\d.]+),\s*([-\d.]+)\)/);
+            if (coordMatch) {
+              searchCoords = {
+                lat: parseFloat(coordMatch[1]),
+                lng: parseFloat(coordMatch[2])
+              };
+              console.log('🔍 Using embedded coordinates from Current Location:', searchCoords);
+            } else if ((window as any).currentLocationCoords) {
+              // Fallback to stored coordinates
+              searchCoords = (window as any).currentLocationCoords;
+              console.log('🔍 Using stored current location coordinates:', searchCoords);
+            }
+          } else {
+            // Use geocoding for regular locations
+            searchCoords = await geocodeAddress(selectedLocation);
+            console.log('🔍 Geocoding result for', selectedLocation, ':', searchCoords);
+          }
+          
           if (searchCoords) {
             // Filter properties within radius, but include fallbacks
             filteredData = filteredData.filter((property: any) => {
               // If property has coordinates, check distance
               if (property.latitude && property.longitude) {
                 const distance = calculateDistance(
-                  searchCoords.lat, 
-                  searchCoords.lng, 
+                  searchCoords!.lat, 
+                  searchCoords!.lng, 
                   property.latitude, 
                   property.longitude
                 );
+                console.log('🔍 Distance to property:', property.title, distance, 'miles (radius:', selectedRadius, ')');
                 if (distance <= selectedRadius) {
                   return true;
                 }
               }
               
-              // Always include properties with text-based matches as fallback
-              const searchTerm = selectedLocation.toLowerCase();
-              const searchParts = searchTerm.split(',').map(part => part.trim());
+              // For non-current location searches, include text-based matches as fallback
+              if (!selectedLocation.includes('Current Location')) {
+                const searchTerm = selectedLocation.toLowerCase();
+                const searchParts = searchTerm.split(',').map(part => part.trim());
+                
+                const addressMatch = property.address?.toLowerCase().includes(searchTerm);
+                const cityMatch = property.city?.toLowerCase().includes(searchParts[0]);
+                const stateMatch = searchParts[1] ? 
+                  property.state?.toLowerCase().includes(searchParts[1]) : 
+                  property.state?.toLowerCase().includes(searchParts[0]);
+                
+                // Include if any part matches
+                return addressMatch || cityMatch || stateMatch;
+              }
               
-              const addressMatch = property.address?.toLowerCase().includes(searchTerm);
-              const cityMatch = property.city?.toLowerCase().includes(searchParts[0]);
-              const stateMatch = searchParts[1] ? 
-                property.state?.toLowerCase().includes(searchParts[1]) : 
-                property.state?.toLowerCase().includes(searchParts[0]);
-              
-              // Include if any part matches
-              return addressMatch || cityMatch || stateMatch;
+              return false;
             });
           } else {
             // More generous text-based search if geocoding fails

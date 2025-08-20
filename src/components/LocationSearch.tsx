@@ -380,12 +380,22 @@ const LocationSearch = ({
           console.log('📍 Got position:', position.coords);
           
           // Set the map center directly from GPS coordinates
-          console.log('📍 Setting map center to GPS coordinates:', [position.coords.longitude, position.coords.latitude]);
-          setMapCenter([position.coords.longitude, position.coords.latitude]);
+          const coords: [number, number] = [position.coords.longitude, position.coords.latitude];
+          console.log('📍 Setting map center to GPS coordinates:', coords);
+          setMapCenter(coords);
           
-          // Use a simple location name without external API
-          const locationName = "Current Location";
-          console.log('📍 Using location name:', locationName);
+          // Create a location string with coordinates that can be parsed
+          const locationName = `Current Location (${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)})`;
+          console.log('📍 Using location name with coordinates:', locationName);
+          
+          // Call onChange with coordinates directly
+          onChange(locationName, selectedRadius);
+          
+          // Store current coordinates for later use
+          (window as any).currentLocationCoords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
           
           handleLocationSelect(locationName);
         },
@@ -550,13 +560,17 @@ const LocationSearch = ({
                       {selectedRadius} miles
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="z-[100] bg-background border shadow-lg">
-                    <SelectItem value="5">5 miles</SelectItem>
-                    <SelectItem value="10">10 miles</SelectItem>
-                    <SelectItem value="25">25 miles</SelectItem>
-                    <SelectItem value="50">50 miles</SelectItem>
-                    <SelectItem value="100">100 miles</SelectItem>
-                  </SelectContent>
+                   <SelectContent className="z-[100] bg-background border shadow-lg">
+                     <SelectItem value="1">1 mile</SelectItem>
+                     <SelectItem value="2">2 miles</SelectItem>
+                     <SelectItem value="5">5 miles</SelectItem>
+                     <SelectItem value="10">10 miles</SelectItem>
+                     <SelectItem value="15">15 miles</SelectItem>
+                     <SelectItem value="25">25 miles</SelectItem>
+                     <SelectItem value="50">50 miles</SelectItem>
+                     <SelectItem value="75">75 miles</SelectItem>
+                     <SelectItem value="100">100 miles</SelectItem>
+                   </SelectContent>
                 </Select>
               </div>
             </div>
@@ -567,15 +581,22 @@ const LocationSearch = ({
                 <Target className="w-4 h-4" />
                 Quick Options
               </h4>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={getCurrentLocation}
-                className="w-full justify-start"
-              >
-                <Navigation className="w-4 h-4 mr-2" />
-                Use Current Location
-              </Button>
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={getCurrentLocation}
+                  className="w-full justify-start"
+                >
+                  <Navigation className="w-4 h-4 mr-2" />
+                  Use Current Location
+                </Button>
+                {searchValue.includes('Current Location') && (
+                  <div className="text-xs text-muted-foreground bg-accent/50 p-2 rounded border">
+                    📍 Showing properties within {selectedRadius} miles of your location
+                  </div>
+                )}
+              </div>
             </div>
 
 
