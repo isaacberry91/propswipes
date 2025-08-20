@@ -84,6 +84,7 @@ const PropertyMap = ({
   const [loading, setLoading] = useState(true);
   const [selectedRadius, setSelectedRadius] = useState(radius);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
   const radiusCircleRef = useRef<google.maps.Circle | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
@@ -103,7 +104,10 @@ const PropertyMap = ({
         }
         
         if (data?.token) {
-          setGoogleMapsApiKey(data.token)
+          setGoogleMapsApiKey(data.token);
+          if (!data.token.startsWith('AIza')) {
+            setMapError('The Google Maps API key appears invalid. Please update it in Supabase.');
+          }
         }
       } catch (error) {
         console.error('Error calling Google Maps API key function:', error)
@@ -129,6 +133,10 @@ const PropertyMap = ({
       script.async = true;
       script.defer = true;
       script.onload = initializeMap;
+      script.onerror = () => {
+        console.error('Failed to load Google Maps script');
+        setMapError('Failed to load Google Maps. Please verify the API key.');
+      };
       document.head.appendChild(script);
     };
 
@@ -369,7 +377,7 @@ const PropertyMap = ({
       </Card>
 
       {/* Map Container */}
-      <div ref={mapContainer} className="w-full h-full rounded-lg" />
+      <div ref={mapContainer} className="w-full h-[480px] sm:h-[560px] md:h-[640px] rounded-lg" />
 
       {/* API Key Warning */}
       {!googleMapsApiKey && (
@@ -377,6 +385,11 @@ const PropertyMap = ({
           <div className="text-sm text-destructive">
             Google Maps API key not configured. Add your Google Maps API key in Supabase to enable map functionality.
           </div>
+        </Card>
+      )}
+      {mapError && (
+        <Card className="absolute bottom-4 left-4 right-4 z-10 p-4 bg-destructive/10 border-destructive/20">
+          <div className="text-sm text-destructive">{mapError}</div>
         </Card>
       )}
     </div>
