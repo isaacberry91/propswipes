@@ -262,29 +262,33 @@ const Chat = () => {
         .from('profiles')
         .select('*')
         .eq('id', otherUserProfileId)
-        .single();
+        .maybeSingle(); // Use maybeSingle to handle zero results gracefully
         
       console.log('🔥 UNIVERSAL FIX - Complete profile result:', completeProfile);
       console.log('🔥 UNIVERSAL FIX - Profile error:', profileFetchError);
       
-      if (completeProfile) {
+      if (completeProfile && completeProfile.display_name) {
         // Use the complete profile data
         otherUser = completeProfile;
-        userName = completeProfile.display_name?.trim() || 'Chat Partner';
-        console.log('🔥 UNIVERSAL FIX - Success! Using complete profile data');
+        userName = completeProfile.display_name.trim();
+        console.log('🔥 UNIVERSAL FIX - Success! Using complete profile data:', userName);
       } else {
-        console.error('🔥 UNIVERSAL FIX - Profile fetch failed:', profileFetchError);
+        console.log('🔥 UNIVERSAL FIX - No profile found or no display_name, trying fallbacks');
+        
         // If direct fetch fails, try to use the joined data as fallback
-        if (isUserBuyer && matchData.seller_profile) {
+        if (isUserBuyer && matchData.seller_profile?.display_name) {
           otherUser = matchData.seller_profile;
-          userName = matchData.seller_profile.display_name?.trim() || 'Chat Partner';
-        } else if (!isUserBuyer && matchData.buyer_profile) {
+          userName = matchData.seller_profile.display_name.trim();
+          console.log('🔥 UNIVERSAL FIX - Using seller profile from join:', userName);
+        } else if (!isUserBuyer && matchData.buyer_profile?.display_name) {
           otherUser = matchData.buyer_profile;  
-          userName = matchData.buyer_profile.display_name?.trim() || 'Chat Partner';
+          userName = matchData.buyer_profile.display_name.trim();
+          console.log('🔥 UNIVERSAL FIX - Using buyer profile from join:', userName);
         } else {
-          // Final fallback
-          userName = 'Chat Partner';
-          otherUser = { user_type: 'buyer' }; // Minimal fallback object
+          // Final fallback - create a reasonable name based on available data
+          userName = `User ${otherUserProfileId.slice(0, 8)}`;
+          otherUser = { user_type: 'buyer', display_name: userName };
+          console.log('🔥 UNIVERSAL FIX - Using ID-based fallback:', userName);
         }
       }
 
