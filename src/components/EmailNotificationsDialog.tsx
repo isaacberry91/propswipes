@@ -48,27 +48,32 @@ export const EmailNotificationsDialog = ({ open, onOpenChange }: EmailNotificati
     try {
       setLoading(true);
       
-      // Check if notification preferences exist in profile
-      const { data: profile, error } = await supabase
+      // Get user profile ID first
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          notification_preferences:notification_preferences(*)
-        `)
+        .select('id')
         .eq('user_id', user.id)
         .single();
+        
+      if (profileError) throw profileError;
+      
+      // Fetch notification preferences
+      const { data: prefs, error } = await supabase
+        .from('notification_preferences' as any)
+        .select('*')
+        .eq('profile_id', profile.id)
+        .maybeSingle();
         
       if (error) throw error;
       
       // If preferences exist, use them; otherwise use defaults
-      if (profile.notification_preferences && profile.notification_preferences.length > 0) {
-        const prefs = profile.notification_preferences[0];
+      if (prefs) {
         setPreferences({
-          match_notifications: prefs.match_notifications ?? true,
-          message_notifications: prefs.message_notifications ?? true,
-          property_updates: prefs.property_updates ?? true,
-          marketing_emails: prefs.marketing_emails ?? false,
-          weekly_digest: prefs.weekly_digest ?? true,
+          match_notifications: (prefs as any).match_notifications ?? true,
+          message_notifications: (prefs as any).message_notifications ?? true,
+          property_updates: (prefs as any).property_updates ?? true,
+          marketing_emails: (prefs as any).marketing_emails ?? false,
+          weekly_digest: (prefs as any).weekly_digest ?? true,
         });
       }
     } catch (error) {
@@ -100,7 +105,7 @@ export const EmailNotificationsDialog = ({ open, onOpenChange }: EmailNotificati
       
       // Upsert notification preferences
       const { error } = await supabase
-        .from('notification_preferences')
+        .from('notification_preferences' as any)
         .upsert({
           profile_id: profile.id,
           match_notifications: preferences.match_notifications,
