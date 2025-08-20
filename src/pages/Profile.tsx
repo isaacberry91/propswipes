@@ -713,18 +713,27 @@ const Profile = () => {
                    )}
                  </div>
                  
-                 <div className="flex gap-4 mt-6">
-                   <Button onClick={handleSubscriptionManage} variant="outline">
-                     <Smartphone className="w-4 h-4 mr-2" />
-                     Manage in App
-                   </Button>
-                   {!subscription.isActive && (
-                     <Button onClick={handleUpgradePlan}>
-                       <Crown className="w-4 h-4 mr-2" />
-                       Upgrade Plan
-                     </Button>
-                   )}
-                 </div>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-6">
+                    <Button 
+                      onClick={handleSubscriptionManage} 
+                      variant="outline" 
+                      size="sm"
+                      className="flex-1 sm:flex-none h-8 sm:h-9 text-xs sm:text-sm"
+                    >
+                      <Smartphone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      Manage in App
+                    </Button>
+                    {!subscription.isActive && (
+                      <Button 
+                        onClick={handleUpgradePlan}
+                        size="sm"
+                        className="flex-1 sm:flex-none h-8 sm:h-9 text-xs sm:text-sm"
+                      >
+                        <Crown className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                        Upgrade Plan
+                      </Button>
+                    )}
+                  </div>
                </Card>
 
                {/* Feature Access */}
