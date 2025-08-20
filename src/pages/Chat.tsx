@@ -140,26 +140,6 @@ const Chat = () => {
             amenities,
             address,
             description
-          ),
-          buyer_profile:profiles!buyer_id (
-            id,
-            user_id,
-            display_name,
-            avatar_url,
-            user_type,
-            bio,
-            phone,
-            location
-          ),
-          seller_profile:profiles!seller_id (
-            id,
-            user_id,
-            display_name,
-            avatar_url,
-            user_type,
-            bio,
-            phone,
-            location
           )
         `)
         .eq('id', matchId)
@@ -168,8 +148,6 @@ const Chat = () => {
 
       console.log('🔍 Chat: Raw match data from database:', matchData);
       console.log('🔍 Chat: Database query error:', error);
-      console.log('🔍 Chat: Buyer profile from join:', matchData?.buyer_profile);
-      console.log('🔍 Chat: Seller profile from join:', matchData?.seller_profile);
 
       if (error || !matchData) {
         console.error('Error fetching match:', error);
@@ -185,14 +163,12 @@ const Chat = () => {
       // Get the other user's profile using shared utility
       const isUserBuyer = matchData.buyer_id === userProfile.id;
       const otherUserProfileId = isUserBuyer ? matchData.seller_id : matchData.buyer_id;
-      const joinedProfile = isUserBuyer ? matchData.seller_profile : matchData.buyer_profile;
       
       console.log('🔍 Chat: User is buyer:', isUserBuyer);
       console.log('🔍 Chat: Other user profile ID:', otherUserProfileId);
-      console.log('🔍 Chat: Joined profile:', joinedProfile);
 
-      // Use shared utility to resolve user profile
-      const resolvedUser = await resolveUserProfile(otherUserProfileId, joinedProfile);
+      // Use shared utility to resolve user profile (no joined profile since we removed joins)
+      const resolvedUser = await resolveUserProfile(otherUserProfileId, null);
       
       const property = matchData.properties;
 
