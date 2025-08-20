@@ -32,6 +32,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { resolveUserProfile } from "@/utils/profileUtils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -223,10 +224,13 @@ const ChatManagement = () => {
             property: match.properties
           });
 
+          // Use shared utility to resolve user profile properly
+          const resolvedUser = await resolveUserProfile(otherUserId, otherUserProfile);
+
           return {
             matchId: match.id,
-            buyerName: otherUserProfile?.display_name || `User ${otherUserId?.slice(0, 8)}`,
-            buyerAvatar: otherUserProfile?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+            buyerName: resolvedUser.name,
+            buyerAvatar: resolvedUser.avatar,
             buyerId: otherUserId,
             propertyTitle: match.properties?.title || `Property ${match.property_id?.slice(0, 8)}`,
             propertyImage: match.properties?.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
