@@ -44,6 +44,7 @@ const PropertyMap = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxApiToken, setMapboxApiToken] = useState<string>('');
+  const [tokenLoading, setTokenLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [selectedRadius, setSelectedRadius] = useState(radius);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -56,22 +57,29 @@ const PropertyMap = ({
   // Get Mapbox API token from Supabase edge function
   useEffect(() => {
     const getMapboxApiToken = async () => {
+      setTokenLoading(true);
       try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token')
-        
-        if (error) {
-          console.error('Error fetching Mapbox API token:', error)
-          return
+        const cached = sessionStorage.getItem('MAPBOX_TOKEN');
+        if (cached) {
+          setMapboxApiToken(cached);
+          return;
         }
-        
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        if (error) {
+          console.error('Error fetching Mapbox API token:', error);
+          return;
+        }
         if (data?.token) {
           setMapboxApiToken(data.token);
+          sessionStorage.setItem('MAPBOX_TOKEN', data.token);
           if (!data.token.startsWith('pk.')) {
             setMapError('The Mapbox API token appears invalid. Please update it in Supabase.');
           }
         }
       } catch (error) {
-        console.error('Error calling Mapbox API token function:', error)
+        console.error('Error calling Mapbox API token function:', error);
+      } finally {
+        setTokenLoading(false);
       }
     }
     
@@ -118,7 +126,7 @@ const PropertyMap = ({
         map.current.remove();
       }
     };
-  }, [mapboxApiToken, center]);
+  }, [mapboxApiToken, center, visible]);
 
   // Trigger resize when visibility changes
   useEffect(() => {
@@ -364,7 +372,7 @@ const PropertyMap = ({
       <div ref={mapContainer} className="w-full h-[480px] sm:h-[560px] md:h-[640px] rounded-lg" />
 
       {/* API Token Warning */}
-      {!mapboxApiToken && (
+      {!tokenLoading && !mapboxApiToken && (
         <Card className="absolute bottom-4 left-4 right-4 z-10 p-4 bg-destructive/10 border-destructive/20">
           <div className="text-sm text-destructive">
             Mapbox API token not configured. Add your Mapbox API token in Supabase to enable map functionality.
