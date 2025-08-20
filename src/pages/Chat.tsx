@@ -301,7 +301,7 @@ const Chat = () => {
         user: {
           name: userName,
           avatar: otherUser?.avatar_url || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-          type: otherUser?.user_type === 'seller' ? 'Real Estate Agent' : 'Buyer',
+          type: otherUser?.user_type === 'seller' ? 'Seller' : 'Buyer',
           bio: otherUser?.bio?.trim() || 'No bio available',
           phone: otherUser?.phone?.trim() || 'No phone provided',
           location: otherUser?.location?.trim() || 'Location not provided',
