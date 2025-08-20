@@ -135,7 +135,10 @@ const Discover = () => {
             .eq('user_id', user.id);
           setDailyLikesUsed(0);
         } else {
-          setDailyLikesUsed(data.daily_likes_used || 0);
+          // Only update state if it's different from database to prevent overriding recent changes
+          if (dailyLikesUsed !== (data.daily_likes_used || 0)) {
+            setDailyLikesUsed(data.daily_likes_used || 0);
+          }
         }
       } else {
         // For subscribers, set unlimited likes (no tracking needed)
