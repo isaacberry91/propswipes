@@ -137,8 +137,8 @@ const Admin = () => {
         .from('reports')
         .select(`
           *,
-          reporter:profiles!reports_reporter_id_fkey(display_name, avatar_url),
-          reported_user:profiles!reports_reported_user_id_fkey(display_name, avatar_url, user_type)
+          reporter:reporter_id(display_name, avatar_url),
+          reported_user:reported_user_id(display_name, avatar_url, user_type)
         `)
         .order('created_at', { ascending: false });
 
@@ -146,8 +146,8 @@ const Admin = () => {
         .from('blocked_users')
         .select(`
           *,
-          blocker:profiles!blocked_users_blocker_id_fkey(display_name, avatar_url),
-          blocked:profiles!blocked_users_blocked_id_fkey(display_name, avatar_url, user_type)
+          blocker:blocker_id(display_name, avatar_url),
+          blocked:blocked_id(display_name, avatar_url, user_type)
         `)
         .order('created_at', { ascending: false });
 
@@ -368,8 +368,8 @@ const Admin = () => {
   };
 
   const handleViewProfile = (userId: string) => {
-    // Create a URL to view the user's profile - you can customize this based on your routing
-    window.open(`/profile?userId=${userId}`, '_blank');
+    // Navigate to the profile page with the user ID
+    window.open(`/profile/${userId}`, '_blank');
   };
 
   return (

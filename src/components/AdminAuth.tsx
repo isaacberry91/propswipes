@@ -39,19 +39,6 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
 
       if (data.valid) {
         console.log('🔧 Admin password verified successfully');
-        
-        // Try to sign in the admin user
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email: 'developer@furrisic.com',
-          password: 'FI@1802'
-        });
-
-        if (authError) {
-          console.error('Admin auth error:', authError);
-          // If the auth user doesn't exist, still allow access with valid password
-          console.log('🔧 Admin user not found in auth, but password is valid - allowing access');
-        }
-
         localStorage.setItem("admin-authenticated", "true");
         
         toast({
