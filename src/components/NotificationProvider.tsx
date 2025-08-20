@@ -1,3 +1,4 @@
+import React from "react";
 import { useNotifications } from "@/hooks/useNotifications";
 
 interface NotificationProviderProps {
