@@ -292,7 +292,10 @@ const ChatManagement = () => {
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', matchId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete match error:', error);
+        throw error;
+      }
 
       toast({
         title: "Match Deleted",
@@ -305,7 +308,7 @@ const ChatManagement = () => {
       console.error('Error deleting match:', error);
       toast({
         title: "Error",
-        description: "Failed to delete the conversation.",
+        description: "Failed to delete the conversation. Please try again.",
         variant: "destructive",
       });
     }
