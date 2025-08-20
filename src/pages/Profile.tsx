@@ -34,6 +34,7 @@ import { useNavigate } from "react-router-dom";
 import PropertyManager from "@/components/PropertyManager";
 import { TwoFactorSetupDialog } from "@/components/TwoFactorSetupDialog";
 import { ActiveSessionsDialog } from "@/components/ActiveSessionsDialog";
+import { EmailNotificationsDialog } from "@/components/EmailNotificationsDialog";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -50,6 +51,7 @@ const Profile = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [twoFactorDialogOpen, setTwoFactorDialogOpen] = useState(false);
   const [activeSessionsDialogOpen, setActiveSessionsDialogOpen] = useState(false);
+  const [emailNotificationsDialogOpen, setEmailNotificationsDialogOpen] = useState(false);
   
   useEffect(() => {
     if (user) {
@@ -844,10 +846,14 @@ const Profile = () => {
                     <h4 className="font-medium text-foreground">Email Notifications</h4>
                     <p className="text-sm text-muted-foreground">Receive email updates about new matches</p>
                   </div>
-                  <Button variant="outline" size="sm">
-                    <Bell className="w-4 h-4 mr-2" />
-                    Configure
-                  </Button>
+                   <Button 
+                     variant="outline" 
+                     size="sm"
+                     onClick={() => setEmailNotificationsDialogOpen(true)}
+                   >
+                     <Bell className="w-4 h-4 mr-2" />
+                     Configure
+                   </Button>
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -1068,6 +1074,11 @@ const Profile = () => {
         <ActiveSessionsDialog
           open={activeSessionsDialogOpen}
           onOpenChange={setActiveSessionsDialogOpen}
+        />
+        
+        <EmailNotificationsDialog
+          open={emailNotificationsDialogOpen}
+          onOpenChange={setEmailNotificationsDialogOpen}
         />
       </div>
     </div>
