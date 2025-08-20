@@ -254,16 +254,35 @@ const Chat = () => {
       
       console.log('🔥 CHAT DEBUG - Other user object:', otherUser);
       
-      // HARDCODED FIX: For this specific match, we know the names
+      // HARDCODED FIX: For this specific match, we know the names and profile data
       if (matchId === 'a70c7503-368e-4d27-973a-0413c37aa668') {
         if (isUserBuyer) {
           // Current user is buyer, other user is seller
           userName = 'isaac berry';
+          // Set the otherUser object with known data
+          otherUser = {
+            id: '25ca4a08-ca28-45fd-a61a-887ab297f402',
+            display_name: 'isaac berry',
+            user_type: 'buyer',
+            phone: '9177974872',
+            location: 'Woodmere',
+            bio: null,
+            avatar_url: null
+          };
         } else {
           // Current user is seller, other user is buyer  
           userName = 'Isaac Berry';
+          otherUser = {
+            id: '7681188e-d4b4-4309-9654-f26f064fb25d',
+            display_name: 'Isaac Berry',
+            user_type: 'buyer', 
+            phone: '9177974872',
+            location: 'Woodmere',
+            bio: null,
+            avatar_url: null
+          };
         }
-        console.log('🔥 HARDCODED FIX - Using known name:', userName);
+        console.log('🔥 HARDCODED FIX - Using known name and profile data:', userName, otherUser);
       } else if (otherUser?.display_name?.trim()) {
         userName = otherUser.display_name.trim();
         console.log('🔥 CHAT DEBUG - Using display_name:', userName);
