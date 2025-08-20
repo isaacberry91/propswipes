@@ -36,6 +36,7 @@ import { TwoFactorSetupDialog } from "@/components/TwoFactorSetupDialog";
 import { ActiveSessionsDialog } from "@/components/ActiveSessionsDialog";
 import { EmailNotificationsDialog } from "@/components/EmailNotificationsDialog";
 import { PushNotificationsDialog } from "@/components/PushNotificationsDialog";
+import { PrivacySettingsDialog } from "@/components/PrivacySettingsDialog";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -54,6 +55,7 @@ const Profile = () => {
   const [activeSessionsDialogOpen, setActiveSessionsDialogOpen] = useState(false);
   const [emailNotificationsDialogOpen, setEmailNotificationsDialogOpen] = useState(false);
   const [pushNotificationsDialogOpen, setPushNotificationsDialogOpen] = useState(false);
+  const [privacySettingsDialogOpen, setPrivacySettingsDialogOpen] = useState(false);
   
   useEffect(() => {
     if (user) {
@@ -873,15 +875,20 @@ const Profile = () => {
                    </Button>
                  </div>
                 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-medium text-foreground">Privacy Settings</h4>
-                    <p className="text-sm text-muted-foreground">Control who can see your profile</p>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Manage
-                  </Button>
-                </div>
+                 <div className="flex items-center justify-between">
+                   <div>
+                     <h4 className="font-medium text-foreground">Privacy Settings</h4>
+                     <p className="text-sm text-muted-foreground">Control who can see your profile</p>
+                   </div>
+                   <Button 
+                     variant="outline" 
+                     size="sm"
+                     onClick={() => setPrivacySettingsDialogOpen(true)}
+                   >
+                     <Shield className="w-4 h-4 mr-2" />
+                     Manage
+                   </Button>
+                 </div>
               </div>
             </Card>
           </TabsContent>
@@ -1091,6 +1098,11 @@ const Profile = () => {
         <PushNotificationsDialog
           open={pushNotificationsDialogOpen}
           onOpenChange={setPushNotificationsDialogOpen}
+        />
+        
+        <PrivacySettingsDialog
+          open={privacySettingsDialogOpen}
+          onOpenChange={setPrivacySettingsDialogOpen}
         />
       </div>
     </div>
