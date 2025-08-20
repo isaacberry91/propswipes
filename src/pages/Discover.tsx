@@ -120,20 +120,26 @@ const Discover = () => {
         setSelectedLocation("Seattle, WA");
       }
 
-      // Daily likes reset logic
-      const today = new Date().toDateString();
-      const resetDate = data.daily_likes_reset_date ? new Date(data.daily_likes_reset_date).toDateString() : null;
-      if (resetDate !== today) {
-        await supabase
-          .from('profiles')
-          .update({ 
-            daily_likes_used: 0, 
-            daily_likes_reset_date: new Date().toISOString().split('T')[0]
-          })
-          .eq('user_id', user.id);
-        setDailyLikesUsed(0);
+      // Daily likes reset logic - only for non-subscribers
+      if (!hasUnlimitedLikes()) {
+        const today = new Date().toDateString();
+        const resetDate = data.daily_likes_reset_date ? new Date(data.daily_likes_reset_date).toDateString() : null;
+        if (resetDate !== today) {
+          console.log('🔄 Discover: Resetting daily likes for free user');
+          await supabase
+            .from('profiles')
+            .update({ 
+              daily_likes_used: 0, 
+              daily_likes_reset_date: new Date().toISOString().split('T')[0]
+            })
+            .eq('user_id', user.id);
+          setDailyLikesUsed(0);
+        } else {
+          setDailyLikesUsed(data.daily_likes_used || 0);
+        }
       } else {
-        setDailyLikesUsed(data.daily_likes_used || 0);
+        // For subscribers, set unlimited likes (no tracking needed)
+        setDailyLikesUsed(0);
       }
     } catch (e) {
       console.error('Unexpected error in fetchUserProfile:', e);

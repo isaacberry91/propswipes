@@ -71,6 +71,32 @@ const ListProperty = () => {
   const { subscription, canListProperties } = useSubscription();
   const [currentPropertyCount, setCurrentPropertyCount] = useState(0);
 
+  // Fetch current property count for subscription limits
+  useEffect(() => {
+    const fetchPropertyCount = async () => {
+      if (!user) return;
+      
+      try {
+        const { count, error } = await supabase
+          .from('properties')
+          .select('*', { count: 'exact' })
+          .eq('owner_id', user.id)
+          .is('deleted_at', null);
+          
+        if (error) {
+          console.error('❌ ListProperty: Error fetching property count:', error);
+        } else {
+          console.log('📊 ListProperty: Current property count:', count);
+          setCurrentPropertyCount(count || 0);
+        }
+      } catch (error) {
+        console.error('❌ ListProperty: Unexpected error fetching property count:', error);
+      }
+    };
+
+    fetchPropertyCount();
+  }, [user]);
+
   // Pre-fill form data when editing
   useEffect(() => {
     console.log('🔧 ListProperty useEffect - isEditing:', isEditing, 'editingProperty:', editingProperty);
