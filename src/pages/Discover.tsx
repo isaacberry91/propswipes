@@ -92,14 +92,7 @@ const Discover = () => {
     console.log('🔄 PROFILE: Current dailyLikesUsed state:', dailyLikesUsed);
     
     try {
-      // First, get existing profile data to preserve daily_likes_used and other values
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      // Use upsert to safely create or reactivate a profile without overriding existing values
+      // Use upsert to safely create or reactivate a profile without overriding likes data
       const payload: any = {
         user_id: user.id,
         display_name: (user.user_metadata as any)?.display_name || user.email?.split('@')[0] || null,
@@ -107,11 +100,8 @@ const Discover = () => {
         phone: (user.user_metadata as any)?.phone || null,
         location: (user.user_metadata as any)?.location || null,
         deleted_at: null,
-        // Preserve existing daily_likes_used and reset_date if they exist
-        ...(existingProfile && {
-          daily_likes_used: existingProfile.daily_likes_used,
-          daily_likes_reset_date: existingProfile.daily_likes_reset_date
-        })
+        // DO NOT include daily_likes_used or daily_likes_reset_date in upsert
+        // These should only be updated by the likes tracking logic
       };
 
       const { data, error } = await supabase
