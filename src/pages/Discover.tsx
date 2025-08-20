@@ -88,6 +88,9 @@ const Discover = () => {
   const fetchUserProfile = async () => {
     if (!user) return;
     
+    console.log('🔄 PROFILE: fetchUserProfile called');
+    console.log('🔄 PROFILE: Current dailyLikesUsed state:', dailyLikesUsed);
+    
     try {
       // Use upsert to safely create or reactivate a profile without 409s
       const payload: any = {
@@ -110,6 +113,11 @@ const Discover = () => {
         return;
       }
 
+      console.log('🔄 PROFILE: Database profile data:', {
+        daily_likes_used: data.daily_likes_used,
+        daily_likes_reset_date: data.daily_likes_reset_date
+      });
+
       setUserProfile(data);
 
       // Set user's location as default search location if available
@@ -124,24 +132,33 @@ const Discover = () => {
       if (!hasUnlimitedLikes()) {
         const today = new Date().toDateString();
         const resetDate = data.daily_likes_reset_date ? new Date(data.daily_likes_reset_date).toDateString() : null;
+        console.log('🔄 PROFILE: Date comparison - today:', today, 'resetDate:', resetDate);
+        
         if (resetDate !== today) {
-          console.log('🔄 Discover: Resetting daily likes for free user');
+          console.log('🔄 PROFILE: Resetting daily likes for free user (new day)');
           await supabase
             .from('profiles')
             .update({ 
               daily_likes_used: 0, 
               daily_likes_reset_date: new Date().toISOString().split('T')[0]
             })
-            .eq('user_id', user.id);
+            .eq('id', data.id);  // Use profile ID consistently
           setDailyLikesUsed(0);
         } else {
           // Only update state if it's different from database to prevent overriding recent changes
-          if (dailyLikesUsed !== (data.daily_likes_used || 0)) {
-            setDailyLikesUsed(data.daily_likes_used || 0);
+          const dbLikesUsed = data.daily_likes_used || 0;
+          console.log('🔄 PROFILE: Comparing likes - current state:', dailyLikesUsed, 'db value:', dbLikesUsed);
+          
+          if (dailyLikesUsed !== dbLikesUsed) {
+            console.log('🔄 PROFILE: Updating state from database value:', dbLikesUsed);
+            setDailyLikesUsed(dbLikesUsed);
+          } else {
+            console.log('🔄 PROFILE: Keeping current state value:', dailyLikesUsed);
           }
         }
       } else {
         // For subscribers, set unlimited likes (no tracking needed)
+        console.log('🔄 PROFILE: User has unlimited likes (subscriber)');
         setDailyLikesUsed(0);
       }
     } catch (e) {
@@ -461,13 +478,19 @@ const Discover = () => {
         // Update daily likes counter for non-subscribers
         if (!hasUnlimitedLikes()) {
           const newLikesUsed = dailyLikesUsed + 1;
+          console.log('💕 LIKE: Updating likes count from', dailyLikesUsed, 'to', newLikesUsed);
           setDailyLikesUsed(newLikesUsed);
           
-          await supabase
+          // Update using userProfile.id instead of user.id to match the correct profile
+          const updateResult = await supabase
             .from('profiles')
             .update({ daily_likes_used: newLikesUsed })
-            .eq('user_id', user.id);
+            .eq('id', userProfile.id);  // Use profile ID, not auth user ID
+          
+          console.log('💕 LIKE: Database update result:', updateResult);
         }
+        
+        
         
         toast({
           title: "Property Liked! 💕",
