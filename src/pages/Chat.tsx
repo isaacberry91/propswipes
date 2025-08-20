@@ -167,6 +167,8 @@ const Chat = () => {
 
       console.log('🔍 Chat: Raw match data from database:', matchData);
       console.log('🔍 Chat: Database query error:', error);
+      console.log('🔍 Chat: Buyer profile from join:', matchData?.buyer_profile);
+      console.log('🔍 Chat: Seller profile from join:', matchData?.seller_profile);
 
       if (error || !matchData) {
         console.error('Error fetching match:', error);
@@ -183,14 +185,11 @@ const Chat = () => {
       const isUserBuyer = matchData.buyer_id === userProfile.id;
       const otherUserProfileId = isUserBuyer ? matchData.seller_id : matchData.buyer_id;
       
+      console.log('🔥 SIMPLE DEBUG - User profile ID:', userProfile.id);
       console.log('🔥 SIMPLE DEBUG - User is buyer:', isUserBuyer);
+      console.log('🔥 SIMPLE DEBUG - Match buyer_id:', matchData.buyer_id);
+      console.log('🔥 SIMPLE DEBUG - Match seller_id:', matchData.seller_id);
       console.log('🔥 SIMPLE DEBUG - Other user profile ID:', otherUserProfileId);
-      console.log('🔥 SIMPLE DEBUG - Match data:', {
-        buyer_id: matchData.buyer_id,
-        seller_id: matchData.seller_id,
-        buyer_profile: matchData.buyer_profile,
-        seller_profile: matchData.seller_profile
-      });
       
       // Get the other user's profile data - Enhanced approach
       let otherUser = null;
