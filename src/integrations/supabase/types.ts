@@ -453,6 +453,18 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      get_matched_user_profile: {
+        Args: { requesting_user_id: string; target_profile_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          id: string
+          location: string
+          phone: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }[]
+      }
       get_profile_with_email: {
         Args: { profile_user_id: string }
         Returns: {

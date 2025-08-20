@@ -41,48 +41,39 @@ export const resolveUserProfile = async (
     userName = joinedProfile.display_name.trim();
     console.log('🔥 RESOLVE PROFILE - Using joined profile display_name:', userName);
   } else {
-    // Fetch profile directly from database
-    const { data: directProfile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', profileId)
-      .maybeSingle();
-      
-    console.log('🔥 RESOLVE PROFILE - Direct fetch result:', directProfile);
-    console.log('🔥 RESOLVE PROFILE - Direct fetch error:', error);
+    // Fetch profile using security definer function that bypasses RLS
+    const { data: supabaseAuth } = await supabase.auth.getUser();
     
-    if (directProfile) {
-      userProfile = directProfile;
+    if (supabaseAuth.user) {
+      const { data: directProfile, error } = await supabase.rpc('get_matched_user_profile', { 
+        target_profile_id: profileId,
+        requesting_user_id: supabaseAuth.user.id
+      });
+        
+      console.log('🔥 RESOLVE PROFILE - RPC fetch result:', directProfile);
+      console.log('🔥 RESOLVE PROFILE - RPC fetch error:', error);
       
-      if (directProfile.display_name?.trim()) {
-        userName = directProfile.display_name.trim();
-        console.log('🔥 RESOLVE PROFILE - Using direct fetch display_name:', userName);
-      } else {
-        // Try to get email from auth users as last resort
-        try {
-          const { data: profileWithEmail } = await supabase.rpc('get_profile_with_email', { 
-            profile_user_id: directProfile.user_id 
-          });
-          
-          console.log('🔥 RESOLVE PROFILE - RPC email result:', profileWithEmail);
-          
-          if (profileWithEmail?.[0]?.display_name?.trim()) {
-            userName = profileWithEmail[0].display_name.trim();
-            console.log('🔥 RESOLVE PROFILE - Using RPC display_name:', userName);
-          } else if (profileWithEmail?.[0]?.email?.trim()) {
-            // Use part of email as name if no display name exists
-            userName = profileWithEmail[0].email.split('@')[0];
-            console.log('🔥 RESOLVE PROFILE - Using email prefix as name:', userName);
-          } else {
-            // Final fallback based on user type
-            userName = directProfile.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
-            console.log('🔥 RESOLVE PROFILE - Using user type fallback:', userName);
-          }
-        } catch (rpcError) {
-          console.error('🔥 RESOLVE PROFILE - RPC error:', rpcError);
-          userName = directProfile.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
+      // The RPC returns an array, take the first result
+      const profileData = directProfile?.[0];
+      
+      if (profileData) {
+        userProfile = profileData;
+        
+        if (profileData.display_name?.trim()) {
+          userName = profileData.display_name.trim();
+          console.log('🔥 RESOLVE PROFILE - Using RPC display_name:', userName);
+        } else {
+          // Final fallback based on user type
+          userName = profileData.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
+          console.log('🔥 RESOLVE PROFILE - Using user type fallback:', userName);
         }
+      } else {
+        console.log('🔥 RESOLVE PROFILE - No data from RPC, using fallback');
+        userName = 'Property Contact';
       }
+    } else {
+      console.log('🔥 RESOLVE PROFILE - No authenticated user');
+      userName = 'Property Contact';
     }
   }
 
