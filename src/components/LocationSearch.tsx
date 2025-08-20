@@ -192,12 +192,15 @@ const LocationSearch = ({
   }, [searchValue, showSuggestions, searchLocationsInDatabase]);
 
   const handleLocationSelect = (location: string) => {
+    console.log('🔍 LocationSearch: handleLocationSelect called with:', location);
     setSearchValue(location);
+    setShowSuggestions(false);
+    
+    // Call onChange with the location and current radius
     onChange(location, selectedRadius);
     
     // Geocode the location for the map
     geocodeLocationForMap(location);
-    setShowSuggestions(false);
   };
 
   // Geocode location for map display
@@ -220,6 +223,7 @@ const LocationSearch = ({
 
   // Update the selected radius and trigger onChange
   const handleRadiusChange = (newRadius: number) => {
+    console.log('🔍 LocationSearch: handleRadiusChange called with:', newRadius);
     setSelectedRadius(newRadius);
     if (searchValue) {
       onChange(searchValue, newRadius);
@@ -231,12 +235,17 @@ const LocationSearch = ({
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           try {
-            // Reverse geocode coordinates to get actual address
+            // Use a simple reverse geocoding service for current location
             const response = await fetch(
-              `https://api.mapbox.com/geocoding/v5/mapbox.places/${position.coords.longitude},${position.coords.latitude}.json?access_token=pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjbGV1cW9lY2YwM3djM25xbmJpMzZjMXR5In0.example`
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}&zoom=18&addressdetails=1`
             );
             const data = await response.json();
-            const address = data.features?.[0]?.place_name || "Current Location";
+            
+            // Extract city and state from the response
+            const city = data.address?.city || data.address?.town || data.address?.village || '';
+            const state = data.address?.state || '';
+            
+            const address = city && state ? `${city}, ${state}` : data.display_name || "Current Location";
             handleLocationSelect(address);
           } catch (error) {
             console.error("Error reverse geocoding:", error);

@@ -563,7 +563,13 @@ const Discover = () => {
           
           <LocationSearch
             value={selectedLocation}
-            onChange={getPropertiesForLocation}
+            onChange={(location, radius) => {
+              console.log('🔍 Location search onChange:', { location, radius });
+              if (radius !== undefined) {
+                setSelectedRadius(radius);
+              }
+              getPropertiesForLocation(location, radius || selectedRadius);
+            }}
             placeholder="Search properties anywhere..."
             properties={properties}
             selectedRadius={selectedRadius}
