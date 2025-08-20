@@ -293,31 +293,44 @@ const LocationSearch = ({
   };
 
   const getCurrentLocation = () => {
+    console.log('📍 Getting current location...');
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
+          console.log('📍 Got position:', position.coords);
           try {
             // Use a simple reverse geocoding service for current location
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}&zoom=18&addressdetails=1`
             );
             const data = await response.json();
+            console.log('📍 Reverse geocoding response:', data);
             
             // Extract city and state from the response
             const city = data.address?.city || data.address?.town || data.address?.village || '';
             const state = data.address?.state || '';
             
             const address = city && state ? `${city}, ${state}` : data.display_name || "Current Location";
+            console.log('📍 Using address:', address);
+            
+            // Also set the map center directly from GPS coordinates
+            console.log('📍 Setting map center to GPS coordinates:', [position.coords.longitude, position.coords.latitude]);
+            setMapCenter([position.coords.longitude, position.coords.latitude]);
+            
             handleLocationSelect(address);
           } catch (error) {
-            console.error("Error reverse geocoding:", error);
+            console.error("📍 Error reverse geocoding:", error);
+            // Still set map center to current location even if reverse geocoding fails
+            setMapCenter([position.coords.longitude, position.coords.latitude]);
             handleLocationSelect("Current Location");
           }
         },
         (error) => {
-          console.error("Error getting location:", error);
+          console.error("📍 Error getting location:", error);
         }
       );
+    } else {
+      console.error("📍 Geolocation is not supported by this browser.");
     }
   };
 
@@ -390,7 +403,7 @@ const LocationSearch = ({
                     setShowSuggestions(false);
                   }}
                   searchLocation={searchValue}
-                  properties={[]}
+                  properties={properties}
                 />
                 <Button
                   type="button"

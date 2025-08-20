@@ -164,10 +164,14 @@ const PropertyMap = ({
 
   // Fetch properties near the location (only if no properties passed)
   useEffect(() => {
+    console.log('🗺️ PropertyMap: Properties effect - propProperties.length:', propProperties.length);
     if (propProperties.length > 0) {
+      console.log('🗺️ PropertyMap: Using passed properties:', propProperties);
       setLoading(false);
       return;
     }
+    
+    console.log('🗺️ PropertyMap: No properties passed, fetching from database');
     
     const fetchProperties = async () => {
       if (!center) return;
