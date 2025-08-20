@@ -626,11 +626,16 @@ const Discover = () => {
             onChange={(location, radius) => {
               console.log('🔍 Discover: LocationSearch onChange called with:', { location, radius });
               console.log('🔍 Discover: Current selectedRadius before update:', selectedRadius);
-              if (radius !== undefined) {
+              
+              // Always update the radius if it's provided
+              if (radius !== undefined && radius !== selectedRadius) {
                 console.log('🔍 Discover: Setting selectedRadius to:', radius);
                 setSelectedRadius(radius);
               }
-              getPropertiesForLocation(location, radius || selectedRadius);
+              
+              // Use the new radius immediately, don't wait for state update
+              const radiusToUse = radius !== undefined ? radius : selectedRadius;
+              getPropertiesForLocation(location, radiusToUse);
             }}
             placeholder="Search properties anywhere..."
             properties={properties}

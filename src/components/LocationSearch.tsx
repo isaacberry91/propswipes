@@ -45,9 +45,17 @@ const LocationSearch = ({
   const [databaseSuggestions, setDatabaseSuggestions] = useState<LocationSuggestion[]>([]);
   const [popularLocations, setPopularLocations] = useState<LocationSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
-  const [recentSearches] = useState([
-    "1234 Main St, Seattle, WA", "456 Oak Ave, Portland, OR", "789 Pine St, San Francisco, CA"
-  ]);
+   const [recentSearches] = useState([
+     "1234 Main St, Seattle, WA", "456 Oak Ave, Portland, OR", "789 Pine St, San Francisco, CA"
+   ]);
+
+   // Sync internal radius state with prop changes
+   useEffect(() => {
+     if (propRadius !== selectedRadius) {
+       console.log('🔍 LocationSearch: Syncing propRadius to internal state:', propRadius);
+       setSelectedRadius(propRadius);
+     }
+   }, [propRadius, selectedRadius]);
 
   // Update internal state when props change - only on initial mount
   useEffect(() => {
@@ -545,15 +553,14 @@ const LocationSearch = ({
                 Search Radius
               </h4>
               <div onClick={(e) => e.stopPropagation()}>
-                <Select 
-                  value={selectedRadius.toString()} 
-                  onValueChange={(value) => {
-                    const newRadius = parseInt(value);
-                    console.log('🔍 LocationSearch: Select onValueChange triggered with value:', value);
-                    console.log('🔍 LocationSearch: Parsed newRadius:', newRadius);
-                    console.log('🔍 LocationSearch: Current selectedRadius before change:', selectedRadius);
-                    handleRadiusChange(newRadius);
-                  }}
+                 <Select 
+                   value={selectedRadius.toString()} 
+                   onValueChange={(value) => {
+                     const newRadius = parseInt(value);
+                     console.log('🔍 LocationSearch: Radius selector changed to:', newRadius);
+                     console.log('🔍 LocationSearch: Current selectedRadius before change:', selectedRadius);
+                     handleRadiusChange(newRadius);
+                   }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue>
