@@ -44,6 +44,7 @@ const PropertyMap = ({
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRadius, setSelectedRadius] = useState(radius);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const radiusLayerRef = useRef<string | null>(null);
 
@@ -71,6 +72,12 @@ const PropertyMap = ({
       center: center,
       zoom: 12,
       attributionControl: false
+    });
+
+    // Wait for map to load before allowing sources/layers to be added
+    map.current.on('load', () => {
+      console.log('Map loaded successfully');
+      setMapLoaded(true);
     });
 
     // Add navigation controls
@@ -129,7 +136,7 @@ const PropertyMap = ({
 
   // Add property markers to map
   useEffect(() => {
-    if (!map.current || !properties.length) return;
+    if (!map.current || !properties.length || !mapLoaded) return;
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
@@ -184,11 +191,11 @@ const PropertyMap = ({
         markersRef.current.push(marker);
       }
     });
-  }, [properties, onPropertySelect]);
+  }, [properties, onPropertySelect, mapLoaded]);
 
   // Update radius circle
   useEffect(() => {
-    if (!map.current || !center) return;
+    if (!map.current || !center || !mapLoaded) return;
 
     // Remove existing radius layer
     if (radiusLayerRef.current) {
@@ -248,7 +255,7 @@ const PropertyMap = ({
         'line-opacity': 0.5
       }
     });
-  }, [center, selectedRadius]);
+  }, [center, selectedRadius, mapLoaded]);
 
   // Update map center when search location changes
   useEffect(() => {
