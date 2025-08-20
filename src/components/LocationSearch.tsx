@@ -64,14 +64,18 @@ const LocationSearch = ({
 
     setLoading(true);
     try {
+      console.log('🔍 Searching for:', query);
+      
       // Search for addresses, cities, and states in the database
       const { data, error } = await supabase
         .from('properties')
         .select('address, city, state')
         .eq('status', 'approved')
         .is('deleted_at', null)
-        .or(`address.ilike.%${query.replace(/[,()]/g, ' ').trim()}%,city.ilike.%${query.replace(/[,()]/g, ' ').trim()}%,state.ilike.%${query.replace(/[,()]/g, ' ').trim()}%`)
-        .limit(15);
+        .or(`address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`)
+        .limit(20);
+
+      console.log('🔍 Search results:', data, error);
 
       if (error) {
         console.error('Error searching locations:', error);

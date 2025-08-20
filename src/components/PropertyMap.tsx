@@ -230,6 +230,8 @@ const PropertyMap = ({
 
         // Filter properties within radius
         const radiusInDegrees = selectedRadius / 69; // Rough conversion: 1 degree ≈ 69 miles
+        console.log(`🗺️ Filtering with radius: ${selectedRadius} miles (${radiusInDegrees} degrees) from center:`, center);
+        
         const filteredProperties = processedProperties.filter((property) => {
           // Only include properties with valid coordinates
           if (!property.latitude || !property.longitude) {
@@ -240,7 +242,12 @@ const PropertyMap = ({
             Math.pow(property.latitude - center[1], 2) + 
             Math.pow(property.longitude - center[0], 2)
           );
-          return distance <= radiusInDegrees;
+          
+          const included = distance <= radiusInDegrees;
+          if (included) {
+            console.log(`🗺️ Including property: ${property.title} at distance ${distance.toFixed(4)} degrees`);
+          }
+          return included;
         });
 
         setProperties(filteredProperties);
