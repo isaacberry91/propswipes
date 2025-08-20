@@ -121,6 +121,9 @@ export type Database = {
           location: string | null
           phone: string | null
           properties_listed: number | null
+          two_factor_contact: string | null
+          two_factor_enabled: boolean | null
+          two_factor_method: string | null
           updated_at: string
           user_id: string
           user_type: Database["public"]["Enums"]["user_type"] | null
@@ -137,6 +140,9 @@ export type Database = {
           location?: string | null
           phone?: string | null
           properties_listed?: number | null
+          two_factor_contact?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_method?: string | null
           updated_at?: string
           user_id: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
@@ -153,6 +159,9 @@ export type Database = {
           location?: string | null
           phone?: string | null
           properties_listed?: number | null
+          two_factor_contact?: string | null
+          two_factor_enabled?: boolean | null
+          two_factor_method?: string | null
           updated_at?: string
           user_id?: string
           user_type?: Database["public"]["Enums"]["user_type"] | null
@@ -331,6 +340,39 @@ export type Database = {
           },
         ]
       }
+      two_factor_codes: {
+        Row: {
+          code: string
+          contact: string
+          created_at: string
+          expires_at: string
+          id: string
+          type: string
+          used: boolean
+          user_id: string
+        }
+        Insert: {
+          code: string
+          contact: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          type: string
+          used?: boolean
+          user_id: string
+        }
+        Update: {
+          code?: string
+          contact?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          type?: string
+          used?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_push_tokens: {
         Row: {
           created_at: string
@@ -363,6 +405,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_2fa_codes: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_profile_with_email: {
         Args: { profile_user_id: string }
         Returns: {
