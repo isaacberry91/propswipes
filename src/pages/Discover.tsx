@@ -279,7 +279,22 @@ const Discover = () => {
         query = query.limit(20);
       }
 
+      console.log('🔍 About to execute property query with filters:', {
+        selectedLocation,
+        selectedRadius,
+        priceRange: searchFilters.priceRange,
+        propertyType: searchFilters.propertyType,
+        bedrooms: searchFilters.bedrooms,
+        bathrooms: searchFilters.bathrooms
+      });
+
       const { data, error } = await query;
+
+      console.log('🔍 Database query result:', {
+        error,
+        dataLength: data?.length || 0,
+        sampleData: data?.slice(0, 2) || []
+      });
 
       if (error) {
         console.error('Error fetching properties:', error);
@@ -292,10 +307,12 @@ const Discover = () => {
         setProperties([]);
       } else {
         let filteredData = data || [];
+        console.log('🔍 Before location filtering:', filteredData.length);
 
         // Location-based radius filtering (client-side) - more lenient approach
         if (selectedLocation && selectedLocation !== 'All') {
           const searchCoords = await geocodeAddress(selectedLocation);
+          console.log('🔍 Geocoding result for', selectedLocation, ':', searchCoords);
           if (searchCoords) {
             // Filter properties within radius, but include fallbacks
             filteredData = filteredData.filter((property: any) => {
@@ -340,10 +357,12 @@ const Discover = () => {
               return addressMatch || cityMatch || stateMatch;
             });
           }
+          console.log('🔍 After location filtering:', filteredData.length);
         }
 
         // Features/amenities filtering (client-side) - only apply if features are selected
         if (searchFilters.features.length > 0) {
+          console.log('🔍 Before features filtering:', filteredData.length);
           filteredData = filteredData.filter((property: any) => {
             const propertyFeatures = property.amenities || [];
             return searchFilters.features.some(feature => 
@@ -352,8 +371,10 @@ const Discover = () => {
               )
             );
           });
+          console.log('🔍 After features filtering:', filteredData.length);
         }
 
+        console.log('🔍 Final filtered data count:', filteredData.length);
         setProperties(filteredData);
         console.log(`🔍 Loaded ${filteredData.length} properties for location: ${selectedLocation}`);
       }
