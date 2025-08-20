@@ -33,6 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import PropertyManager from "@/components/PropertyManager";
 import { TwoFactorSetupDialog } from "@/components/TwoFactorSetupDialog";
+import { ActiveSessionsDialog } from "@/components/ActiveSessionsDialog";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -48,6 +49,7 @@ const Profile = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [twoFactorDialogOpen, setTwoFactorDialogOpen] = useState(false);
+  const [activeSessionsDialogOpen, setActiveSessionsDialogOpen] = useState(false);
   
   useEffect(() => {
     if (user) {
@@ -977,7 +979,11 @@ const Profile = () => {
                     <h4 className="font-medium text-foreground">Active Sessions</h4>
                     <p className="text-sm text-muted-foreground">Manage your active login sessions</p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveSessionsDialogOpen(true)}
+                  >
                     View
                   </Button>
                 </div>
@@ -1057,6 +1063,11 @@ const Profile = () => {
           open={twoFactorDialogOpen}
           onOpenChange={setTwoFactorDialogOpen}
           onSuccess={handleTwoFactorSuccess}
+        />
+        
+        <ActiveSessionsDialog
+          open={activeSessionsDialogOpen}
+          onOpenChange={setActiveSessionsDialogOpen}
         />
       </div>
     </div>
