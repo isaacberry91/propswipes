@@ -58,7 +58,7 @@ const LocationSearch = ({
     setMapCenter(propMapCenter);
   }, [propMapCenter]);
 
-  // Enhanced address search with Nominatim + database integration
+  // Enhanced address search with database integration (bypassing CORS issues)
   const searchLocationsInDatabase = useCallback(async (query: string) => {
     console.log('🔍 SEARCH TRIGGERED with query:', query, 'length:', query.length);
     
@@ -72,60 +72,25 @@ const LocationSearch = ({
     setLoading(true);
     
     try {
-      console.log('🔍 Making Nominatim request...');
-      
-      // Use Nominatim for real address suggestions
-      const nominatimResponse = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=us&limit=5&addressdetails=1`
-      );
-      const nominatimData = await nominatimResponse.json();
-      
-      console.log('🔍 Nominatim response status:', nominatimResponse.status);
-      console.log('🔍 Nominatim data received:', nominatimData);
-      
-      // Also search our database for properties
+      // Search our database for properties matching the query
       const dbResponse = await supabase
         .from('properties')
         .select('address, city, state, latitude, longitude')
         .eq('status', 'approved')
         .is('deleted_at', null)
         .or(`address.ilike.%${query}%,city.ilike.%${query}%,state.ilike.%${query}%`)
-        .limit(10);
+        .limit(20);
 
-      console.log('🔍 Nominatim results:', nominatimData);
       console.log('🔍 Database results:', dbResponse.data);
 
-      // Combine and format suggestions
+      // Create a comprehensive list of location suggestions
       const suggestions: LocationSuggestion[] = [];
-
-      // Add real address suggestions from Nominatim
-      nominatimData?.slice(0, 3).forEach((place: any) => {
-        const displayName = place.display_name;
-        const addressParts = displayName.split(',').map((part: string) => part.trim());
-        const address = addressParts[0] || '';
-        const city = place.address?.city || place.address?.town || place.address?.village || '';
-        const state = place.address?.state || '';
-        
-        if (address && city && state) {
-          suggestions.push({
-            address,
-            city,
-            state,
-            count: 0, // Real addresses don't have property counts
-            full_location: `${address}, ${city}, ${state}`,
-            lat: parseFloat(place.lat),
-            lon: parseFloat(place.lon),
-            isRealAddress: true
-          });
-        }
-      });
-
-      // Add property-based suggestions from our database
       const locationMap = new Map<string, LocationSuggestion>();
+
       dbResponse.data?.forEach((property) => {
-        // Add full address
-        const fullAddress = `${property.address}, ${property.city}, ${property.state}`;
-        if (fullAddress.toLowerCase().includes(query.toLowerCase())) {
+        // Add full address if it matches
+        if (property.address && property.address.toLowerCase().includes(query.toLowerCase())) {
+          const fullAddress = `${property.address}, ${property.city}, ${property.state}`;
           const existing = locationMap.get(fullAddress);
           locationMap.set(fullAddress, {
             address: property.address,
@@ -140,8 +105,9 @@ const LocationSearch = ({
         }
 
         // Add city, state combination
-        const cityState = `${property.city}, ${property.state}`;
-        if (cityState.toLowerCase().includes(query.toLowerCase())) {
+        if (property.city.toLowerCase().includes(query.toLowerCase()) || 
+            property.state.toLowerCase().includes(query.toLowerCase())) {
+          const cityState = `${property.city}, ${property.state}`;
           const existing = locationMap.get(cityState);
           locationMap.set(cityState, {
             address: '',
@@ -154,25 +120,42 @@ const LocationSearch = ({
             isRealAddress: false
           });
         }
+
+        // Add state suggestions for broader searches
+        if (property.state.toLowerCase().includes(query.toLowerCase()) && query.length >= 2) {
+          const stateKey = property.state;
+          const existing = locationMap.get(stateKey);
+          locationMap.set(stateKey, {
+            address: '',
+            city: '',
+            state: property.state,
+            count: (existing?.count || 0) + 1,
+            full_location: property.state,
+            lat: property.latitude,
+            lon: property.longitude,
+            isRealAddress: false
+          });
+        }
       });
 
-      // Add database suggestions
+      // Convert to array and sort by relevance and count
       const dbSuggestions = Array.from(locationMap.values())
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 3);
+        .sort((a, b) => {
+          // Prioritize exact matches
+          const aExact = a.full_location.toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0;
+          const bExact = b.full_location.toLowerCase().startsWith(query.toLowerCase()) ? 1 : 0;
+          
+          if (aExact !== bExact) return bExact - aExact;
+          
+          // Then by count
+          return b.count - a.count;
+        })
+        .slice(0, 8);
 
-      suggestions.push(...dbSuggestions);
-
-      // Remove duplicates and limit total suggestions
-      const uniqueSuggestions = suggestions
-        .filter((suggestion, index, self) => 
-          index === self.findIndex(s => s.full_location === suggestion.full_location)
-        )
-        .slice(0, 5);
-
-      setDatabaseSuggestions(uniqueSuggestions);
+      setDatabaseSuggestions(dbSuggestions);
+      console.log('🔍 Final suggestions:', dbSuggestions);
     } catch (error) {
-      console.error('Address search error:', error);
+      console.error('🔍 Address search error:', error);
       setDatabaseSuggestions([]);
     } finally {
       setLoading(false);
@@ -267,49 +250,84 @@ const LocationSearch = ({
     }
   };
 
-  // Geocode location for map display
+  // Use database properties for map centering when external geocoding fails
   const geocodeLocationForMap = async (location: string) => {
     console.log('🗺️ Starting geocoding for location:', location);
+    
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}&limit=1`
-      );
-      const data = await response.json();
-      console.log('🗺️ Geocoding response:', data);
-      
-      if (data && data.length > 0) {
-        const result = data[0];
-        const lat = parseFloat(result.lat);
-        const lon = parseFloat(result.lon);
-        const addrType = (result.addresstype || result.type || '').toLowerCase();
-        const cls = (result.class || '').toLowerCase();
+      // First try to find coordinates from our database
+      const { data: dbProperties } = await supabase
+        .from('properties')
+        .select('latitude, longitude, city, state, address')
+        .eq('status', 'approved')
+        .is('deleted_at', null)
+        .or(`address.ilike.%${location}%,city.ilike.%${location}%,state.ilike.%${location}%`)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .limit(1);
+
+      console.log('🗺️ Database geocoding results:', dbProperties);
+
+      if (dbProperties && dbProperties.length > 0) {
+        const property = dbProperties[0];
+        const lat = property.latitude;
+        const lon = property.longitude;
         
-        console.log('🗺️ Parsed coordinates:', { lat, lon, addrType, cls });
+        console.log('🗺️ Using database coordinates:', { lat, lon });
         
-        // Dynamically adjust radius based on granularity
+        // Adjust radius based on location specificity
         let newRadius = selectedRadius;
-        if (addrType === 'state' || result.type === 'state' || (cls === 'boundary' && result.type === 'administrative')) {
-          newRadius = Math.max(selectedRadius, 100);
-        } else if (['county'].includes(addrType)) {
-          newRadius = Math.max(selectedRadius, 50);
-        } else if (['city','town','municipality'].includes(addrType)) {
-          newRadius = Math.max(selectedRadius, 25);
-        } else if (['village','hamlet','suburb','neighbourhood','neighborhood'].includes(addrType)) {
-          newRadius = Math.max(selectedRadius, 10);
+        const locationLower = location.toLowerCase();
+        
+        if (locationLower.includes(property.address?.toLowerCase() || '')) {
+          newRadius = Math.max(selectedRadius, 5); // Specific address
+        } else if (locationLower.includes(property.city?.toLowerCase() || '')) {
+          newRadius = Math.max(selectedRadius, 15); // City level
+        } else if (locationLower.includes(property.state?.toLowerCase() || '')) {
+          newRadius = Math.max(selectedRadius, 50); // State level
         }
         
         if (newRadius !== selectedRadius) {
-          console.log('🔍 Adjusting radius based on location granularity:', addrType, '=>', newRadius);
+          console.log('🔍 Adjusting radius based on location specificity:', newRadius);
           setSelectedRadius(newRadius);
-          // Notify parent with updated radius for consistency
           onChange(location, newRadius);
         }
         
-        console.log('🗺️ Setting map center to:', [lon, lat]);
+        console.log('🗺️ Setting map center to database coordinates:', [lon, lat]);
         setMapCenter([lon, lat]);
-      } else {
-        console.log('🗺️ No geocoding results found for:', location);
+        return;
       }
+
+      // Fallback to default coordinates for major cities if no database match
+      const cityDefaults: { [key: string]: [number, number] } = {
+        'new york': [-74.006, 40.7128],
+        'nyc': [-74.006, 40.7128],
+        'manhattan': [-73.9857, 40.7484],
+        'brooklyn': [-73.9442, 40.6782],
+        'los angeles': [-118.2437, 34.0522],
+        'chicago': [-87.6298, 41.8781],
+        'houston': [-95.3698, 29.7604],
+        'philadelphia': [-75.1652, 39.9526],
+        'phoenix': [-112.0740, 33.4484],
+        'san antonio': [-98.4936, 29.4241],
+        'san diego': [-117.1611, 32.7157],
+        'dallas': [-96.7970, 32.7767],
+        'san jose': [-121.8863, 37.3382],
+        'austin': [-97.7431, 30.2672],
+        'woodmere': [-73.7118, 40.6323],
+      };
+
+      const locationKey = location.toLowerCase().trim();
+      for (const [city, coords] of Object.entries(cityDefaults)) {
+        if (locationKey.includes(city)) {
+          console.log('🗺️ Using default coordinates for city:', city, coords);
+          setMapCenter(coords);
+          return;
+        }
+      }
+
+      console.log('🗺️ No specific coordinates found, keeping current map center');
+      
     } catch (error) {
       console.error('🗺️ Geocoding error:', error);
     }
@@ -329,39 +347,25 @@ const LocationSearch = ({
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           console.log('📍 Got position:', position.coords);
-          try {
-            // Use a simple reverse geocoding service for current location
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}&zoom=18&addressdetails=1`
-            );
-            const data = await response.json();
-            console.log('📍 Reverse geocoding response:', data);
-            
-            // Extract city and state from the response
-            const city = data.address?.city || data.address?.town || data.address?.village || '';
-            const state = data.address?.state || '';
-            
-            const address = city && state ? `${city}, ${state}` : data.display_name || "Current Location";
-            console.log('📍 Using address:', address);
-            
-            // Also set the map center directly from GPS coordinates
-            console.log('📍 Setting map center to GPS coordinates:', [position.coords.longitude, position.coords.latitude]);
-            setMapCenter([position.coords.longitude, position.coords.latitude]);
-            
-            handleLocationSelect(address);
-          } catch (error) {
-            console.error("📍 Error reverse geocoding:", error);
-            // Still set map center to current location even if reverse geocoding fails
-            setMapCenter([position.coords.longitude, position.coords.latitude]);
-            handleLocationSelect("Current Location");
-          }
+          
+          // Set the map center directly from GPS coordinates
+          console.log('📍 Setting map center to GPS coordinates:', [position.coords.longitude, position.coords.latitude]);
+          setMapCenter([position.coords.longitude, position.coords.latitude]);
+          
+          // Use a simple location name without external API
+          const locationName = "Current Location";
+          console.log('📍 Using location name:', locationName);
+          
+          handleLocationSelect(locationName);
         },
         (error) => {
           console.error("📍 Error getting location:", error);
+          alert("Unable to access your location. Please search manually.");
         }
       );
     } else {
       console.error("📍 Geolocation is not supported by this browser.");
+      alert("Geolocation is not supported by this browser.");
     }
   };
 
