@@ -422,32 +422,31 @@ const LocationSearch = ({
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
                 Search Radius
               </h4>
-              <Select 
-                value={selectedRadius.toString()} 
-                onValueChange={(value) => {
-                  const newRadius = parseInt(value);
-                  console.log('🔍 LocationSearch: Select onValueChange triggered with value:', value);
-                  console.log('🔍 LocationSearch: Parsed newRadius:', newRadius);
-                  console.log('🔍 LocationSearch: Current selectedRadius before change:', selectedRadius);
-                  handleRadiusChange(newRadius);
-                }}
-              >
-                <SelectTrigger className="w-full" onClick={(e) => e.stopPropagation()}>
-                  <SelectValue placeholder="Select radius">
-                    {selectedRadius} miles
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent 
-                  className="z-[70] bg-background"
-                  onCloseAutoFocus={(e) => e.preventDefault()}
+              <div onClick={(e) => e.stopPropagation()}>
+                <Select 
+                  value={selectedRadius.toString()} 
+                  onValueChange={(value) => {
+                    const newRadius = parseInt(value);
+                    console.log('🔍 LocationSearch: Select onValueChange triggered with value:', value);
+                    console.log('🔍 LocationSearch: Parsed newRadius:', newRadius);
+                    console.log('🔍 LocationSearch: Current selectedRadius before change:', selectedRadius);
+                    handleRadiusChange(newRadius);
+                  }}
                 >
-                  <SelectItem value="5">5 miles</SelectItem>
-                  <SelectItem value="10">10 miles</SelectItem>
-                  <SelectItem value="25">25 miles</SelectItem>
-                  <SelectItem value="50">50 miles</SelectItem>
-                  <SelectItem value="100">100 miles</SelectItem>
-                </SelectContent>
-              </Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue>
+                      {selectedRadius} miles
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="z-[100] bg-background border shadow-lg">
+                    <SelectItem value="5">5 miles</SelectItem>
+                    <SelectItem value="10">10 miles</SelectItem>
+                    <SelectItem value="25">25 miles</SelectItem>
+                    <SelectItem value="50">50 miles</SelectItem>
+                    <SelectItem value="100">100 miles</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Current Location Option */}
