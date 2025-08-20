@@ -176,14 +176,23 @@ const Chat = () => {
         return;
       }
 
-      // Fetch profile data with emails using RPC
-      const [buyerProfileResult, sellerProfileResult] = await Promise.all([
-        supabase.rpc('get_profile_with_email', { profile_user_id: matchData.buyer_profile.user_id }),
-        supabase.rpc('get_profile_with_email', { profile_user_id: matchData.seller_profile.user_id })
-      ]);
+      // Fetch profile data with emails using RPC, but only if profiles exist
+      let buyerProfile = null;
+      let sellerProfile = null;
 
-      const buyerProfile = buyerProfileResult.data?.[0];
-      const sellerProfile = sellerProfileResult.data?.[0];
+      if (matchData.buyer_profile?.user_id) {
+        const buyerProfileResult = await supabase.rpc('get_profile_with_email', { 
+          profile_user_id: matchData.buyer_profile.user_id 
+        });
+        buyerProfile = buyerProfileResult.data?.[0];
+      }
+
+      if (matchData.seller_profile?.user_id) {
+        const sellerProfileResult = await supabase.rpc('get_profile_with_email', { 
+          profile_user_id: matchData.seller_profile.user_id 
+        });
+        sellerProfile = sellerProfileResult.data?.[0];
+      }
 
       // Transform the data
       const isUserBuyer = matchData.buyer_id === userProfile.id;
