@@ -139,6 +139,28 @@ const PropertyMap = ({
     setProperties(propProperties);
   }, [propProperties]);
 
+  // Helper function to geocode an address
+  const geocodeAddress = async (address: string): Promise<{ lat: number; lng: number } | null> => {
+    try {
+      // Simple geocoding using a free service
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
+      );
+      const data = await response.json();
+      
+      if (data && data[0]) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return null;
+    }
+  };
+
   // Fetch properties near the location (only if no properties passed)
   useEffect(() => {
     if (propProperties.length > 0) {
@@ -151,30 +173,77 @@ const PropertyMap = ({
       
       setLoading(true);
       try {
+        // First get all approved properties
         const { data, error } = await supabase
           .from('properties')
           .select('*')
           .eq('status', 'approved')
-          .is('deleted_at', null)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null);
+          .is('deleted_at', null);
 
         if (error) {
           console.error('Error fetching properties:', error);
           return;
         }
 
-        // Filter properties within radius (rough calculation)
+        if (!data || data.length === 0) {
+          setProperties([]);
+          return;
+        }
+
+        // Process properties and add coordinates if missing
+        const processedProperties = await Promise.all(
+          data.map(async (property) => {
+            // If property already has coordinates, use them
+            if (property.latitude && property.longitude) {
+              return property;
+            }
+
+            // Otherwise, try to geocode the address
+            try {
+              const fullAddress = `${property.address}, ${property.city}, ${property.state}`;
+              const coords = await geocodeAddress(fullAddress);
+              
+              if (coords) {
+                // Update the property in the database with the coordinates
+                await supabase
+                  .from('properties')
+                  .update({
+                    latitude: coords.lat,
+                    longitude: coords.lng
+                  })
+                  .eq('id', property.id);
+
+                return {
+                  ...property,
+                  latitude: coords.lat,
+                  longitude: coords.lng
+                };
+              }
+            } catch (geocodeError) {
+              console.error('Geocoding error for property:', property.id, geocodeError);
+            }
+
+            return property;
+          })
+        );
+
+        // Filter properties within radius
         const radiusInDegrees = selectedRadius / 69; // Rough conversion: 1 degree ≈ 69 miles
-        const filteredProperties = data?.filter((property) => {
+        const filteredProperties = processedProperties.filter((property) => {
+          // Only include properties with valid coordinates
+          if (!property.latitude || !property.longitude) {
+            return false;
+          }
+
           const distance = Math.sqrt(
             Math.pow(property.latitude - center[1], 2) + 
             Math.pow(property.longitude - center[0], 2)
           );
           return distance <= radiusInDegrees;
-        }) || [];
+        });
 
         setProperties(filteredProperties);
+        console.log(`🗺️ Loaded ${filteredProperties.length} properties with coordinates for search area`);
       } catch (error) {
         console.error('Error fetching properties:', error);
       } finally {
