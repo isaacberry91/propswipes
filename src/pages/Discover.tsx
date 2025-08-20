@@ -504,7 +504,7 @@ const Discover = () => {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Fixed Header - Always Visible */}
       <div className="flex-shrink-0 bg-background border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-2">
+        <div className="max-w-md mx-auto px-4 py-2">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <img 
