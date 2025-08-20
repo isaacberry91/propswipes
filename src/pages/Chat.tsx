@@ -285,10 +285,22 @@ const Chat = () => {
           userName = matchData.buyer_profile.display_name.trim();
           console.log('🔥 UNIVERSAL FIX - Using buyer profile from join:', userName);
         } else {
-          // Final fallback - create a reasonable name based on available data
-          userName = `User ${otherUserProfileId.slice(0, 8)}`;
-          otherUser = { user_type: 'buyer', display_name: userName };
-          console.log('🔥 UNIVERSAL FIX - Using ID-based fallback:', userName);
+          // Enhanced fallback - try to get email from auth.users as a better display name
+          const { data: authUser } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('id', otherUserProfileId)
+            .single();
+            
+          if (authUser?.user_id) {
+            // Try to get a better name from auth user metadata or email
+            userName = completeProfile?.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
+          } else {
+            userName = completeProfile?.user_type === 'seller' ? 'Property Seller' : 'Property Buyer';
+          }
+          
+          otherUser = completeProfile || { user_type: 'buyer', display_name: userName };
+          console.log('🔥 UNIVERSAL FIX - Using enhanced fallback:', userName);
         }
       }
 
