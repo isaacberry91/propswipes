@@ -290,66 +290,129 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                   </div>
                   
                   {/* Buttons below image */}
-                  <div className="p-2 sm:p-3 space-y-1.5 sm:space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleView(property)}
-                      className="w-full h-7 sm:h-8 text-xs"
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      View
-                    </Button>
-                    
-                    {!property.deleted_at ? (
-                      <>
-                         <Button
-                           size="sm"
-                           onClick={() => {
-                             console.log('🔧 EDIT BUTTON CLICKED!', property.id, property.title);
-                             handleEdit(property);
-                           }}
-                           className="w-full h-7 sm:h-8 text-xs"
-                         >
-                           <Edit className="w-3 h-3 mr-1" />
-                           Edit
-                         </Button>
-                        
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="w-full h-7 sm:h-8 text-xs"
-                            >
-                              <Trash2 className="w-3 h-3 mr-1" />
-                              Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Property</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{property.title}"? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(property)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  <div className="p-2 sm:p-3 flex flex-col sm:space-y-2 space-y-1.5 md:flex-col">
+                    {/* Mobile: Single row layout, Desktop: Column layout */}
+                    <div className="flex flex-row gap-1 sm:hidden">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(property)}
+                        className="flex-1 h-7 text-xs px-2"
+                      >
+                        <Eye className="w-3 h-3" />
+                      </Button>
+                      
+                      {!property.deleted_at ? (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              console.log('🔧 EDIT BUTTON CLICKED!', property.id, property.title);
+                              handleEdit(property);
+                            }}
+                            className="flex-1 h-7 text-xs px-2"
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                         
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="flex-1 h-7 text-xs px-2"
                               >
-                                Delete Property
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </>
-                    ) : (
-                      <div className="text-center text-xs sm:text-sm text-muted-foreground py-1.5 sm:py-2">
-                        Property Deleted
-                      </div>
-                    )}
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{property.title}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(property)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete Property
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      ) : (
+                        <div className="flex-1 text-center text-xs text-muted-foreground py-1.5 bg-muted rounded">
+                          Deleted
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Desktop: Column layout */}
+                    <div className="hidden sm:flex sm:flex-col sm:space-y-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(property)}
+                        className="w-full h-7 sm:h-8 text-xs"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        View
+                      </Button>
+                      
+                      {!property.deleted_at ? (
+                        <>
+                           <Button
+                             size="sm"
+                             onClick={() => {
+                               console.log('🔧 EDIT BUTTON CLICKED!', property.id, property.title);
+                               handleEdit(property);
+                             }}
+                             className="w-full h-7 sm:h-8 text-xs"
+                           >
+                             <Edit className="w-3 h-3 mr-1" />
+                             Edit
+                           </Button>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="w-full h-7 sm:h-8 text-xs"
+                              >
+                                <Trash2 className="w-3 h-3 mr-1" />
+                                Delete
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{property.title}"? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(property)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete Property
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </>
+                      ) : (
+                        <div className="text-center text-xs sm:text-sm text-muted-foreground py-1.5 sm:py-2">
+                          Property Deleted
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
