@@ -364,6 +364,7 @@ const Profile = () => {
     
     try {
       setUploadingAvatar(true);
+      console.log('📷 Profile: Starting avatar upload for file:', file.name);
       
       // Validate file type
       if (!file.type.startsWith('image/')) {
@@ -388,6 +389,7 @@ const Profile = () => {
       // Create unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      console.log('📷 Profile: Uploading file as:', fileName);
       
       // Upload to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -397,12 +399,19 @@ const Profile = () => {
           upsert: true
         });
         
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('❌ Profile: Upload error:', uploadError);
+        throw uploadError;
+      }
+      
+      console.log('📷 Profile: File uploaded successfully:', uploadData);
       
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
+      
+      console.log('📷 Profile: Public URL generated:', publicUrl);
       
       // Update profile with new avatar URL
       const { error: updateError } = await supabase
@@ -410,10 +419,15 @@ const Profile = () => {
         .update({ avatar_url: publicUrl })
         .eq('user_id', user.id);
         
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('❌ Profile: Database update error:', updateError);
+        throw updateError;
+      }
       
-      // Update local state
-      setUserProfile(prev => ({ ...prev, avatar_url: publicUrl }));
+      console.log('✅ Profile: Database updated with new avatar URL');
+      
+      // Refresh profile data to ensure it persists
+      await fetchUserProfile();
       
       toast({
         title: "Profile photo updated",
@@ -421,7 +435,7 @@ const Profile = () => {
         duration: 5000
       });
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      console.error('❌ Profile: Error uploading avatar:', error);
       toast({
         title: "Error uploading photo",
         description: "Please try again later.",
