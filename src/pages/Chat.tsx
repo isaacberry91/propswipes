@@ -192,24 +192,37 @@ const Chat = () => {
         seller_profile: matchData.seller_profile
       });
       
-      // Get the other user's profile data directly from the match join
+      // Get the other user's profile data - Enhanced approach
       let otherUser = null;
+      
+      // First try to get from joined data
       if (isUserBuyer && matchData.seller_profile) {
         otherUser = matchData.seller_profile;
         console.log('🔥 Using seller profile from match data:', otherUser);
       } else if (!isUserBuyer && matchData.buyer_profile) {
         otherUser = matchData.buyer_profile;
         console.log('🔥 Using buyer profile from match data:', otherUser);
-      } else {
-        console.log('🔥 No profile found in match data, fetching directly');
-        // Fallback: fetch directly from profiles table
-        const { data: directProfile } = await supabase
+      } 
+      
+      // If joined data is null, fetch directly
+      if (!otherUser) {
+        console.log('🔥 Profile from join was null, fetching directly from profiles table');
+        console.log('🔥 Other user profile ID to fetch:', otherUserProfileId);
+        
+        const { data: directProfile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', otherUserProfileId)
-          .single();
+          .maybeSingle();
+          
+        console.log('🔥 Direct profile fetch result:', directProfile);
+        console.log('🔥 Direct profile fetch error:', profileError);
+        
+        if (profileError) {
+          console.error('🔥 Error fetching profile directly:', profileError);
+        }
+        
         otherUser = directProfile;
-        console.log('🔥 Direct profile fetch result:', otherUser);
       }
       
       const property = matchData.properties;
