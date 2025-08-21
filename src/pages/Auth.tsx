@@ -668,7 +668,7 @@ const Auth = () => {
 
                   <p className="text-xs text-muted-foreground text-center mt-4">
                     By signing up, you agree to our{" "}
-                    <a href="/terms" className="underline hover:text-foreground transition-colors">
+                    <a href="/terms-of-use" className="underline hover:text-foreground transition-colors">
                       Terms of Use
                     </a>{" "}
                     and{" "}

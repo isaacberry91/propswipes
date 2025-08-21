@@ -356,7 +356,7 @@ const Subscription = () => {
           {/* Legal Links */}
           <div className="flex items-center justify-center gap-6 text-sm">
             <a 
-              href="/terms"
+              href="/terms-of-use" 
               className="text-muted-foreground hover:text-foreground transition-colors underline"
             >
               Terms of Use

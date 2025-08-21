@@ -136,7 +136,7 @@ const App = () => {
                  </ProtectedRoute>
                  } />
                   <Route path="/privacy" element={<Privacy />} />
-                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/terms-of-use" element={<Terms />} />
                  <Route path="/property/:propertyId" element={<PropertyDetails />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
