@@ -37,7 +37,7 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
         return;
       }
 
-      if (data.valid) {
+      if (data.isValid) {
         console.log('🔧 Admin password verified successfully');
         localStorage.setItem("admin-authenticated", "true");
         
