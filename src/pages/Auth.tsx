@@ -667,7 +667,14 @@ const Auth = () => {
                   </Button>
 
                   <p className="text-xs text-muted-foreground text-center mt-4">
-                    By signing up, you agree to our Terms of Service and Privacy Policy
+                    By signing up, you agree to our{" "}
+                    <a href="/terms" className="underline hover:text-foreground transition-colors">
+                      Terms of Use
+                    </a>{" "}
+                    and{" "}
+                    <a href="/privacy" className="underline hover:text-foreground transition-colors">
+                      Privacy Policy
+                    </a>
                   </p>
                 </form>
               </TabsContent>
