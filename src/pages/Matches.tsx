@@ -104,6 +104,7 @@ const Matches = () => {
           )
         `)
         .or(`buyer_id.eq.${userProfile.id},seller_id.eq.${userProfile.id}`)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       console.log('🔥 MATCHES DEBUG - Raw matches data:', matchesData);
