@@ -567,139 +567,137 @@ const Profile = () => {
                    </div>
                  </div>
 
-                 {/* Main Profile Section - Better responsive layout */}
-                 <div className="w-full">
-                   <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-4 gap-6 lg:gap-8 xl:gap-10">
-                     {/* Avatar and Status Column - Fixed width on large screens */}
-                     <div className="lg:col-span-2 xl:col-span-1">
-                       <div className="flex flex-col items-center lg:items-start space-y-4 lg:space-y-6">
-                        <div className="relative group">
-                          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-secondary blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
-                          <div className="relative">
-                            <Avatar className="h-24 w-24 sm:h-32 sm:w-32 lg:h-36 lg:w-36 xl:h-40 xl:w-40 border-4 border-background shadow-2xl ring-4 ring-primary/10">
-                              <AvatarImage src={userProfile?.avatar_url} />
-                              <AvatarFallback className="text-2xl lg:text-3xl xl:text-4xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
-                                {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            {isEditing && (
-                              <div className="absolute -bottom-2 -right-2 flex gap-2">
-                                <Button
-                                  size="sm"
-                                  className="rounded-full h-10 w-10 lg:h-12 lg:w-12 p-0 shadow-lg bg-primary hover:bg-primary/90 border-2 border-background"
-                                  onClick={triggerFileUpload}
-                                  disabled={uploadingAvatar}
-                                >
-                                  <Camera className="w-4 h-4 lg:w-5 lg:h-5" />
-                                </Button>
-                                {userProfile?.avatar_url && (
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    className="rounded-full h-10 w-10 lg:h-12 lg:w-12 p-0 shadow-lg border-2 border-background"
-                                    onClick={handleRemoveAvatar}
-                                    disabled={uploadingAvatar}
-                                  >
-                                    <Trash2 className="w-4 h-4 lg:w-5 lg:h-5" />
-                                  </Button>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="text-center lg:text-left space-y-3 lg:space-y-4 w-full">
-                          <div>
-                            <h3 className="text-xl lg:text-2xl xl:text-3xl font-bold text-foreground mb-2">
-                              {userProfile?.display_name || user?.email?.split('@')[0]}
-                            </h3>
-                            <p className="text-muted-foreground font-medium text-sm lg:text-base break-all">{user?.email}</p>
-                          </div>
-                          
-                          <div className="flex flex-wrap justify-center lg:justify-start gap-2 lg:gap-3">
-                            <Badge variant={subscription.isActive ? "default" : "secondary"} className="px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-medium shadow-lg">
-                              {subscription.isActive ? <Crown className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" /> : <Star className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" />}
-                              {getTierDisplayName()}
-                            </Badge>
-                            <Badge variant="outline" className="capitalize px-3 lg:px-4 py-1.5 lg:py-2 rounded-full border-primary/30 text-primary bg-primary/5 shadow-sm text-xs lg:text-sm">
-                              {userProfile?.user_type || 'buyer'}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  {/* Main Profile Section - Mobile-first layout */}
+                  <div className="w-full">
+                    <div className="space-y-6">
+                      {/* Avatar and Status Section */}
+                      <div className="flex flex-col items-center space-y-4">
+                       <div className="relative group">
+                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-secondary blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
+                         <div className="relative">
+                           <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-background shadow-2xl ring-4 ring-primary/10">
+                             <AvatarImage src={userProfile?.avatar_url} />
+                             <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
+                               {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
+                             </AvatarFallback>
+                           </Avatar>
+                           {isEditing && (
+                             <div className="absolute -bottom-2 -right-2 flex gap-2">
+                               <Button
+                                 size="sm"
+                                 className="rounded-full h-10 w-10 p-0 shadow-lg bg-primary hover:bg-primary/90 border-2 border-background"
+                                 onClick={triggerFileUpload}
+                                 disabled={uploadingAvatar}
+                               >
+                                 <Camera className="w-4 h-4" />
+                               </Button>
+                               {userProfile?.avatar_url && (
+                                 <Button
+                                   size="sm"
+                                   variant="destructive"
+                                   className="rounded-full h-10 w-10 p-0 shadow-lg border-2 border-background"
+                                   onClick={handleRemoveAvatar}
+                                   disabled={uploadingAvatar}
+                                 >
+                                   <Trash2 className="w-4 h-4" />
+                                 </Button>
+                               )}
+                             </div>
+                           )}
+                         </div>
+                       </div>
+                       
+                       <div className="text-center space-y-3 w-full">
+                         <div>
+                           <h3 className="text-xl font-bold text-foreground mb-2">
+                             {userProfile?.display_name || user?.email?.split('@')[0]}
+                           </h3>
+                           <p className="text-muted-foreground font-medium text-sm break-all">{user?.email}</p>
+                         </div>
+                         
+                         <div className="flex flex-wrap justify-center gap-2">
+                           <Badge variant={subscription.isActive ? "default" : "secondary"} className="px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
+                             {subscription.isActive ? <Crown className="w-3 h-3 mr-1.5" /> : <Star className="w-3 h-3 mr-1.5" />}
+                             {getTierDisplayName()}
+                           </Badge>
+                           <Badge variant="outline" className="capitalize px-3 py-1.5 rounded-full border-primary/30 text-primary bg-primary/5 shadow-sm text-xs">
+                             {userProfile?.user_type || 'buyer'}
+                           </Badge>
+                         </div>
+                       </div>
+                     </div>
 
-                     {/* Form Fields Column - Responsive width */}
-                     <div className="lg:col-span-3 xl:col-span-3">
-                       <div className="space-y-6 lg:space-y-8">
-                        {/* Form Grid - Responsive columns */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-                          <div className="space-y-2 lg:space-y-3">
-                            <Label htmlFor="displayName" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
-                              <User className="w-4 h-4 text-primary" />
-                              Display Name
-                            </Label>
-                            <div className="relative group">
-                              <Input
-                                id="displayName"
-                                value={userProfile?.display_name || ''}
-                                onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
-                                disabled={!isEditing}
-                                className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11 lg:h-12"
-                                maxLength={50}
-                              />
-                              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-2 lg:space-y-3">
-                            <Label htmlFor="email" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
-                              <AlertCircle className="w-4 h-4 text-muted-foreground" />
-                              Email
-                            </Label>
-                            <Input
-                              id="email"
-                              type="email"
-                              value={user?.email || ''}
-                              disabled={true}
-                              className="rounded-xl bg-muted/60 border-muted-foreground/20 shadow-sm h-11 lg:h-12"
-                              title={user?.email || ''}
-                            />
-                          </div>
-                          
-                          <div className="space-y-2 lg:space-y-3 md:col-span-2 xl:col-span-1">
-                            <Label htmlFor="phone" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
-                              <Smartphone className="w-4 h-4 text-primary" />
-                              Phone
-                            </Label>
-                            <div className="relative group">
-                              <Input
-                                id="phone"
-                                value={userProfile?.phone || ''}
-                                onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
-                                disabled={!isEditing}
-                                placeholder="Phone number"
-                                className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11 lg:h-12"
-                              />
-                              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                            </div>
-                          </div>
+                      {/* Form Fields Section */}
+                      <div className="space-y-6">
+                        <div className="space-y-6">
+                         {/* Form Grid - Single column for mobile */}
+                         <div className="space-y-4">
+                           <div className="space-y-2">
+                             <Label htmlFor="displayName" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                               <User className="w-4 h-4 text-primary" />
+                               Display Name
+                             </Label>
+                             <div className="relative group">
+                               <Input
+                                 id="displayName"
+                                 value={userProfile?.display_name || ''}
+                                 onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
+                                 disabled={!isEditing}
+                                 className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
+                                 maxLength={50}
+                               />
+                               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                             </div>
+                           </div>
+                           
+                           <div className="space-y-2">
+                             <Label htmlFor="email" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                               <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                               Email
+                             </Label>
+                             <Input
+                               id="email"
+                               type="email"
+                               value={user?.email || ''}
+                               disabled={true}
+                               className="rounded-xl bg-muted/60 border-muted-foreground/20 shadow-sm h-11"
+                               title={user?.email || ''}
+                             />
+                           </div>
+                           
+                           <div className="space-y-2">
+                             <Label htmlFor="phone" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                               <Smartphone className="w-4 h-4 text-primary" />
+                               Phone
+                             </Label>
+                             <div className="relative group">
+                               <Input
+                                 id="phone"
+                                 value={userProfile?.phone || ''}
+                                 onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
+                                 disabled={!isEditing}
+                                 placeholder="Phone number"
+                                 className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
+                               />
+                               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                             </div>
+                           </div>
                         </div>
                         
-                        {/* Location - Full width */}
-                        <div className="space-y-2 lg:space-y-3">
-                          <Label htmlFor="location" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
-                            <Home className="w-4 h-4 text-primary" />
-                            Location
-                          </Label>
-                          <div className="relative group">
-                            <Input
-                              id="location"
-                              value={userProfile?.location || ''}
-                              onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
-                              disabled={!isEditing}
-                              placeholder="Your location"
-                              className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11 lg:h-12"
+                         {/* Location - Full width */}
+                         <div className="space-y-2">
+                           <Label htmlFor="location" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                             <Home className="w-4 h-4 text-primary" />
+                             Location
+                           </Label>
+                           <div className="relative group">
+                             <Input
+                               id="location"
+                               value={userProfile?.location || ''}
+                               onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
+                               disabled={!isEditing}
+                               placeholder="Your location"
+                               className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
                               maxLength={100}
                             />
                             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
