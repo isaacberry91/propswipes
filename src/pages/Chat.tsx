@@ -700,7 +700,7 @@ const Chat = () => {
               className={`flex flex-col ${msg.senderId === 'me' ? 'items-end' : 'items-start'}`}
             >
               <div
-                className={`max-w-[70%] rounded-2xl p-3 shadow-sm ${
+                className={`max-w-[70%] rounded-2xl px-3 py-2 shadow-sm ${
                   msg.senderId === 'me'
                     ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-md'
                     : 'bg-card text-card-foreground border border-border/50 rounded-bl-md backdrop-blur-sm'
