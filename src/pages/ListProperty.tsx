@@ -1343,7 +1343,7 @@ const ListProperty = () => {
             </div>
 
             {/* Sidebar */}
-            <div>
+            <div className="space-y-6">
               {/* Tips Card */}
               <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/5 to-accent/10 backdrop-blur-sm">
                 <CardHeader>
