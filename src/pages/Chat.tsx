@@ -697,7 +697,7 @@ const Chat = () => {
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex ${msg.senderId === 'me' ? 'justify-end' : 'justify-start'}`}
+              className={`flex flex-col ${msg.senderId === 'me' ? 'items-end' : 'items-start'}`}
             >
               <div
                 className={`max-w-[70%] rounded-2xl p-3 shadow-sm ${
@@ -733,15 +733,11 @@ const Chat = () => {
                     )}
                   </div>
                 )}
-                
-                <p className={`text-xs mt-1 ${
-                  msg.senderId === 'me' 
-                    ? 'text-primary-foreground/70' 
-                    : 'text-muted-foreground'
-                }`}>
-                  {msg.timestamp}
-                </p>
               </div>
+              
+              <p className="text-xs text-muted-foreground mt-1 px-2">
+                {msg.timestamp}
+              </p>
             </div>
           ))}
           <div ref={messagesEndRef} />
