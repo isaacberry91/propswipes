@@ -637,7 +637,9 @@ const Discover = () => {
                 alt="PropSwipes" 
                 className="w-6 h-6"
               />
-              <span className="text-sm sm:text-base font-bold text-primary">PropertyMatch</span>
+              <span className="text-sm sm:text-base font-bold">
+                <span className="text-foreground">Prop</span><span className="text-blue-500">Swipes</span>
+              </span>
               {subscription.isActive && (
                 <Crown className="w-3 h-3 sm:w-4 sm:h-4 text-amber-500" />
               )}
