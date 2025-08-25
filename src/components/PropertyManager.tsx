@@ -249,7 +249,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-semibold">My Properties</h3>
         <Badge variant="outline">
@@ -258,29 +258,31 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
       </div>
 
       {properties.length === 0 ? (
-        <Card className="p-8 text-center">
-          <Home className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h4 className="text-lg font-medium mb-2">No Properties Listed</h4>
-          <p className="text-muted-foreground mb-4">
-            You haven't listed any properties yet. Start by adding your first property!
-          </p>
-        </Card>
+        <div className="mx-4">
+          <Card className="p-8 text-center border border-border shadow-sm">
+            <Home className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <h4 className="text-lg font-medium mb-2">No Properties Listed</h4>
+            <p className="text-muted-foreground mb-4">
+              You haven't listed any properties yet. Start by adding your first property!
+            </p>
+          </Card>
+        </div>
       ) : (
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-4 mx-4">{/* Added mx-4 for side spacing */}
           {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden">
+            <Card key={property.id} className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow duration-200">{/* Added proper border and shadow */}
               <div className="flex flex-col sm:flex-row">
-                {/* Left Side - Image and Buttons */}
-                <div className="w-full sm:w-40 md:w-48 flex-shrink-0 flex flex-col">
+                {/* Left Side - Image and Buttons - Made smaller */}
+                <div className="w-full sm:w-32 md:w-36 flex-shrink-0 flex flex-col">{/* Reduced width from w-40/w-48 to w-32/w-36 */}
                   <div className="relative">
                     {property.images && property.images.length > 0 ? (
                       <img 
                         src={property.images[0]} 
                         alt={property.title}
-                        className="w-full h-32 sm:h-36 md:h-40 object-cover"
+                        className="w-full h-28 sm:h-32 md:h-36 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-32 sm:h-36 md:h-40 bg-muted flex items-center justify-center">
+                      <div className="w-full h-28 sm:h-32 md:h-36 bg-muted flex items-center justify-center">{/* Reduced height */}
                         <Home className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                       </div>
                     )}
@@ -417,11 +419,11 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                 </div>
                 
                 {/* Right Side - All Content */}
-                <div className={`flex-1 p-3 sm:p-4 md:p-6 min-w-0 ${property.deleted_at ? 'opacity-60' : ''}`}>
+                <div className={`flex-1 p-3 sm:p-4 min-w-0 ${property.deleted_at ? 'opacity-60' : ''}`}>{/* Reduced padding from md:p-6 */}
                   <div className="flex flex-col h-full justify-between">
                     {/* Header Section */}
-                    <div className="space-y-2 sm:space-y-3">
-                      <h4 className="font-semibold text-lg sm:text-xl text-foreground line-clamp-2">
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-base sm:text-lg text-foreground line-clamp-2">{/* Reduced text size from lg/xl to base/lg */}
                         {property.title}
                       </h4>
                       
@@ -432,14 +434,14 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-1.5 sm:gap-2 text-xl sm:text-2xl font-bold text-green-600">
-                        <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />
+                      <div className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-xl font-bold text-green-600">{/* Reduced text size from xl/2xl to lg/xl */}
+                        <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />{/* Reduced icon size */}
                         <span>{property.price.toLocaleString()}</span>
                       </div>
                     </div>
                     
                     {/* Features Section */}
-                    <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-1.5 sm:gap-y-2 text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4">
+                    <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 sm:gap-y-1.5 text-xs sm:text-sm text-muted-foreground mt-2 sm:mt-3">{/* Reduced spacing */}
                       {property.bedrooms && (
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           <Bed className="w-3 h-3 sm:w-4 sm:h-4" />
