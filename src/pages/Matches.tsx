@@ -181,8 +181,8 @@ const Matches = () => {
       <div className="max-w-md mx-auto">
         <div className="text-center mb-8">
           <Heart className="w-12 h-12 text-love mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-foreground mb-2">Your Matches</h1>
-          <p className="text-muted-foreground">Connect with people interested in the same properties</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Property Connections</h1>
+          <p className="text-muted-foreground">Connect with interested parties for property opportunities</p>
           
           {(userType === 'seller' || hasProperties) && (
             <div className="mt-6">
@@ -206,12 +206,12 @@ const Matches = () => {
         ) : matches.length === 0 ? (
           <Card className="p-8 text-center shadow-card border-0">
             <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">No matches yet</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-2">No connections yet</h3>
             <p className="text-muted-foreground mb-4">
-              Start swiping to find people interested in the same properties!
+              Start browsing to find people interested in property opportunities!
             </p>
             <Button variant="gradient" onClick={() => navigate('/discover')}>
-              Start Discovering
+              Browse Properties
             </Button>
           </Card>
         ) : (

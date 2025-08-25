@@ -616,14 +616,14 @@ const Chat = () => {
                   className="text-warning"
                 >
                   <Flag className="w-4 h-4 mr-2" />
-                  Report User
+                  Report Contact
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleBlockUser}
                   className="text-destructive"
                 >
                   <Shield className="w-4 h-4 mr-2" />
-                  Block User
+                  Block Contact
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialog>
@@ -939,10 +939,10 @@ const Chat = () => {
       <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Report User</DialogTitle>
+            <DialogTitle>Report Contact</DialogTitle>
             <DialogDescription>
               Report {match.user.name} for inappropriate behavior. 
-              Our admin team will review this case.
+              Our support team will review this case.
             </DialogDescription>
           </DialogHeader>
           
@@ -954,7 +954,7 @@ const Chat = () => {
                   <SelectValue placeholder="Select a reason" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="not_real_estate">Not using for real estate</SelectItem>
+                  <SelectItem value="not_real_estate">Not using for property business</SelectItem>
                   <SelectItem value="inappropriate_content">Inappropriate content</SelectItem>
                   <SelectItem value="harassment">Harassment</SelectItem>
                   <SelectItem value="fake_profile">Fake profile</SelectItem>

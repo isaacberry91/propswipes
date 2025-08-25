@@ -637,7 +637,7 @@ const Discover = () => {
                 alt="PropSwipes" 
                 className="w-6 h-6"
               />
-              <span className="text-base font-bold text-primary">PropSwipes</span>
+              <span className="text-base font-bold text-primary">PropertyMatch</span>
               {subscription.isActive && (
                 <Crown className="w-4 h-4 text-amber-500" />
               )}
@@ -645,7 +645,7 @@ const Discover = () => {
             <div className="flex items-center gap-2">
               {!hasUnlimitedLikes() && (
                 <div className="bg-accent px-2 py-1 rounded-full text-xs">
-                  {10 - dailyLikesUsed} likes left
+                  {10 - dailyLikesUsed} views left
                 </div>
               )}
               <SearchFiltersComponent 
