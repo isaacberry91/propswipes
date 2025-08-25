@@ -158,13 +158,13 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="relative">
-          <SlidersHorizontal className="w-4 h-4 mr-2" />
+        <Button variant="outline" className="relative h-8 px-2.5 text-xs">
+          <SlidersHorizontal className="w-3 h-3 mr-1.5" />
           Filters
           {activeFiltersCount() > 0 && (
             <Badge 
               variant="default" 
-              className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs"
+              className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full p-0 text-xs"
             >
               {activeFiltersCount()}
             </Badge>
