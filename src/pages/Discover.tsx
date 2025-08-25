@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock } from "lucide-react";
+import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock } from "lucide-react"; // Force rebuild to clear cache
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
