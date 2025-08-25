@@ -268,7 +268,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
           </Card>
         </div>
       ) : (
-        <div className="space-y-4 mx-4">{/* Added mx-4 for side spacing */}
+        <div className="space-y-6 mx-6">{/* Matched spacing between cards (space-y-6) with side margins (mx-6) */}
           {properties.map((property) => (
             <Card key={property.id} className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow duration-200">{/* Added proper border and shadow */}
               <div className="flex flex-col sm:flex-row">
