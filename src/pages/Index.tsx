@@ -53,7 +53,7 @@ const Index = () => {
           </div>
           
           <h1 className="text-6xl font-bold text-foreground mb-6">
-            Professional Real Estate Discovery
+            <span className="text-foreground">Prop</span><span className="text-blue-500">Swipes</span>
           </h1>
           <p className="text-2xl text-muted-foreground mb-4 max-w-4xl mx-auto">
             Connect with verified property owners and licensed real estate professionals
