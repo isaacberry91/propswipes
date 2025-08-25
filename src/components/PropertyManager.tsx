@@ -249,7 +249,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="max-w-md mx-auto p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-semibold">My Properties</h3>
         <Badge variant="outline">
