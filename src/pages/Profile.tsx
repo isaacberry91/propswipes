@@ -552,12 +552,12 @@ const Profile = () => {
                  <div className="relative z-10 p-4">
                   {/* Elegant Header */}
                   <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-col items-center text-center space-y-2">
                       <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
                         <Shield className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold bg-gradient-to-r from-primary via-primary/60 to-primary/20 bg-clip-text text-transparent">
+                        <h2 className="text-lg font-bold text-primary">
                           Professional Profile
                         </h2>
                         <p className="text-muted-foreground text-xs">
