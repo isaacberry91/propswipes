@@ -550,34 +550,34 @@ const Profile = () => {
           <TabsContent value="profile">
             <Card className="border border-border bg-card">
               <CardHeader className="border-b border-border">
-                <CardTitle className="text-2xl font-bold flex items-center gap-3">
-                  <Shield className="w-6 h-6 text-primary" />
+                <CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2 sm:gap-3">
+                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   Professional Profile
                 </CardTitle>
-                <CardDescription className="text-base">
+                <CardDescription className="text-sm sm:text-base">
                   Manage your professional real estate information and credentials
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-8">
-                <div className="space-y-8">
+              <CardContent className="p-4 sm:p-8">
+                <div className="space-y-4 sm:space-y-8">
                   {/* Professional Avatar Section */}
-                  <div className="flex items-start gap-6">
+                  <div className="flex items-start gap-3 sm:gap-6">
                      <div className="relative">
-                       <Avatar className="w-24 h-24">
+                       <Avatar className="w-16 h-16 sm:w-24 sm:h-24">
                          <AvatarImage src={userProfile?.avatar_url} />
-                         <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                         <AvatarFallback className="text-lg sm:text-xl bg-primary/10 text-primary">
                            {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
                          </AvatarFallback>
                        </Avatar>
                        {isEditing && (
-                         <div className="absolute -bottom-2 -right-2 flex gap-2">
+                         <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 flex gap-1 sm:gap-2">
                            <Button
                              size="sm"
                              className="rounded-full w-8 h-8 p-0"
                              onClick={triggerFileUpload}
                              disabled={uploadingAvatar}
                            >
-                             <Camera className="w-4 h-4" />
+                             <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
                            </Button>
                            {userProfile?.avatar_url && (
                              <Button
@@ -587,22 +587,22 @@ const Profile = () => {
                                onClick={handleRemoveAvatar}
                                disabled={uploadingAvatar}
                              >
-                               <Trash2 className="w-4 h-4" />
+                               <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                              </Button>
                            )}
                          </div>
                        )}
                     </div>
                      <div className="flex-1">
-                       <h2 className="text-3xl font-bold text-foreground mb-2">{userProfile?.display_name || user?.email}</h2>
-                       <p className="text-lg text-muted-foreground mb-1">{user?.email}</p>
-                       <p className="text-base text-muted-foreground capitalize mb-4">{userProfile?.user_type || 'buyer'}</p>
-                       <div className="flex items-center gap-3">
-                         <Badge variant={subscription.isActive ? "default" : "secondary"} className="flex items-center gap-2 px-3 py-1">
-                           {subscription.isActive ? <Crown className="w-4 h-4" /> : <Star className="w-4 h-4" />}
+                       <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">{userProfile?.display_name || user?.email}</h2>
+                       <p className="text-base sm:text-lg text-muted-foreground mb-1">{user?.email}</p>
+                       <p className="text-sm sm:text-base text-muted-foreground capitalize mb-2 sm:mb-4">{userProfile?.user_type || 'buyer'}</p>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                         <Badge variant={subscription.isActive ? "default" : "secondary"} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 text-xs sm:text-sm">
+                           {subscription.isActive ? <Crown className="w-3 h-3 sm:w-4 sm:h-4" /> : <Star className="w-3 h-3 sm:w-4 sm:h-4" />}
                            <span>{getTierDisplayName()}</span>
                          </Badge>
-                         <Badge variant="outline" className="capitalize px-3 py-1">
+                         <Badge variant="outline" className="capitalize px-2 sm:px-3 py-1 text-xs sm:text-sm">
                            <span>{userProfile?.user_type || 'buyer'}</span>
                          </Badge>
                        </div>
@@ -610,10 +610,10 @@ const Profile = () => {
                   </div>
 
                 {/* Profile Information */}
-                <div className="grid grid-cols-1 gap-4">
-                   <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-2 min-w-0">
-                       <Label htmlFor="displayName" className="text-sm">Display Name</Label>
+                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                     <div className="space-y-1.5 sm:space-y-2 min-w-0">
+                       <Label htmlFor="displayName" className="text-xs sm:text-sm">Display Name</Label>
                        <Input
                          id="displayName"
                          value={userProfile?.display_name || ''}
@@ -624,8 +624,8 @@ const Profile = () => {
                        />
                      </div>
                      
-                     <div className="space-y-2 min-w-0">
-                       <Label htmlFor="email" className="text-sm">Email</Label>
+                     <div className="space-y-1.5 sm:space-y-2 min-w-0">
+                       <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
                        <Input
                          id="email"
                          type="email"
@@ -637,9 +637,9 @@ const Profile = () => {
                      </div>
                    </div>
                    
-                   <div className="grid grid-cols-2 gap-4">
-                     <div className="space-y-2 min-w-0">
-                       <Label htmlFor="phone" className="text-sm">Phone</Label>
+                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                     <div className="space-y-1.5 sm:space-y-2 min-w-0">
+                       <Label htmlFor="phone" className="text-xs sm:text-sm">Phone</Label>
                        <Input
                          id="phone"
                          value={userProfile?.phone || ''}
@@ -650,8 +650,8 @@ const Profile = () => {
                        />
                      </div>
                      
-                     <div className="space-y-2 min-w-0">
-                       <Label htmlFor="location" className="text-sm">Location</Label>
+                     <div className="space-y-1.5 sm:space-y-2 min-w-0">
+                       <Label htmlFor="location" className="text-xs sm:text-sm">Location</Label>
                        <Input
                          id="location"
                          value={userProfile?.location || ''}
@@ -665,8 +665,8 @@ const Profile = () => {
                    </div>
                 </div>
 
-                 <div className="space-y-2">
-                   <Label htmlFor="bio">Bio</Label>
+                 <div className="space-y-1.5 sm:space-y-2">
+                   <Label htmlFor="bio" className="text-xs sm:text-sm">Bio</Label>
                    <textarea
                      id="bio"
                      className="w-full p-3 border border-border rounded-md bg-background text-foreground disabled:opacity-50 resize-none text-sm"
@@ -682,7 +682,7 @@ const Profile = () => {
                    </p>
                  </div>
                 {isEditing && (
-                  <div className="flex gap-4">
+                  <div className="flex gap-3 sm:gap-4">
                     <Button onClick={handleSave}>Save Changes</Button>
                     <Button variant="outline" onClick={() => setIsEditing(false)}>
                       Cancel
