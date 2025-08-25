@@ -397,9 +397,11 @@ const Auth = () => {
       <div className="w-full max-w-md">
         {/* Professional Logo and Branding */}
         <div className="text-center mb-12">
-          <div className="bg-primary/10 w-24 h-24 rounded-xl flex items-center justify-center mx-auto mb-6">
-            <Shield className="w-12 h-12 text-primary" />
-          </div>
+          <img 
+            src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
+            alt="PropSwipes Logo" 
+            className="h-24 w-24 mx-auto mb-6 object-contain"
+          />
           <h1 className="text-4xl font-bold mb-2">
             <span className="text-foreground">Prop</span><span className="text-blue-500">Swipes</span>
           </h1>
