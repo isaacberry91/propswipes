@@ -1239,9 +1239,9 @@ const ListProperty = () => {
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Add Property Tab Content */}
         {activeTab === "add" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="space-y-8">
             {/* Main Form Card */}
-            <div className="lg:col-span-2">
+            <div>
               <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-muted/20 to-background border-b border-border/50">
                   <CardTitle className="text-2xl font-bold flex items-center gap-3">
@@ -1343,7 +1343,7 @@ const ListProperty = () => {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div>
               {/* Tips Card */}
               <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/5 to-accent/10 backdrop-blur-sm">
                 <CardHeader>
