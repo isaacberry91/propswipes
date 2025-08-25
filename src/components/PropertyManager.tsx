@@ -273,7 +273,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
             <Card key={property.id} className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow duration-200">{/* Added proper border and shadow */}
               <div className="flex flex-col sm:flex-row">
                 {/* Left Side - Image and Buttons - Made smaller */}
-                <div className="w-full sm:w-34 md:w-38 flex-shrink-0 flex flex-col">{/* Updated width to w-34/w-38 */}
+                <div className="w-full sm:w-40 md:w-48 flex-shrink-0 flex flex-col">{/* Made card width bigger */}
                   <div className="relative">
                     {property.images && property.images.length > 0 ? (
                       <img 
