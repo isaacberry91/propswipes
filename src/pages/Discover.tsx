@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, BookmarkPlus, MapPin, Bed, Bath, Square, Crown, Lock, ArrowLeft, ArrowRight } from "lucide-react";
+import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -767,18 +767,18 @@ const Discover = () => {
                   <span className="text-sm font-semibold text-primary">{formatPrice(properties[currentIndex].price)}</span>
                 </div>
                 
-                {/* Swipe Direction Indicators */}
+                {/* Dating App Style Swipe Indicators */}
                 {isDragging && dragOffset.x > 50 && (
                   <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
                     <div className="bg-green-500 rounded-full p-4">
-                      <Eye className="w-8 h-8 text-white" />
+                      <Heart className="w-8 h-8 text-white" />
                     </div>
                   </div>
                 )}
                 {isDragging && dragOffset.x < -50 && (
                   <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
                     <div className="bg-red-500 rounded-full p-4">
-                      <ArrowLeft className="w-8 h-8 text-white" />
+                      <X className="w-8 h-8 text-white" />
                     </div>
                   </div>
                 )}
@@ -830,39 +830,32 @@ const Discover = () => {
               </div>
             </Card>
             
-            {/* Professional Property Action Buttons */}
-            <div className="flex justify-center gap-3 mt-6">
+            {/* Dating App Style Action Buttons */}
+            <div className="flex justify-center gap-6 mt-6">
               <Button
                 variant="outline"
-                size="lg"
+                size="icon-lg"
                 onClick={() => handleSwipe('left')}
                 disabled={isAnimating}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-muted text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+                className="rounded-full w-16 h-16 border-2 border-red-200 hover:bg-red-50 hover:border-red-300 transition-all duration-200 shadow-lg"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Not Interested
+                <X className="w-8 h-8 text-red-500" />
               </Button>
               
               <Button
-                variant="gradient"
-                size="lg"
+                variant="love"
+                size="icon-lg"
                 onClick={() => handleSwipe('right')}
                 disabled={isAnimating || (!hasUnlimitedLikes() && dailyLikesUsed >= 10)}
                 className={`
-                  flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200
+                  rounded-full w-16 h-16 shadow-lg transition-all duration-200
                   ${!hasUnlimitedLikes() && dailyLikesUsed >= 10 ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
                 {!hasUnlimitedLikes() && dailyLikesUsed >= 10 ? (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    Locked
-                  </>
+                  <Lock className="w-8 h-8" />
                 ) : (
-                  <>
-                    <BookmarkPlus className="w-4 h-4" />
-                    Save Property
-                  </>
+                  <Heart className="w-8 h-8 text-white" />
                 )}
               </Button>
             </div>
