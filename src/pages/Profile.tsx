@@ -549,203 +549,213 @@ const Profile = () => {
               <div className="absolute bottom-8 left-8 h-28 w-28 rounded-full bg-gradient-to-tr from-secondary/15 to-transparent blur-2xl animate-pulse delay-1000"></div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-r from-primary/5 to-secondary/5 blur-3xl"></div>
               
-              <div className="relative z-10 p-4 sm:p-6 lg:p-8">
+              <div className="relative z-10 p-4 sm:p-6 lg:p-10 xl:p-12">
                 {/* Elegant Header */}
-                <div className="mb-6 lg:mb-8">
+                <div className="mb-6 lg:mb-10">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
                       <Shield className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
                     </div>
                     <div>
-                      <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+                      <h2 className="text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
                         Professional Profile
                       </h2>
-                      <p className="text-muted-foreground text-sm lg:text-base mt-1">
+                      <p className="text-muted-foreground text-sm lg:text-base xl:text-lg mt-1">
                         Manage your professional real estate credentials
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Main Profile Section - Responsive Grid */}
-                <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 lg:gap-8 mb-6 lg:mb-8">
-                  {/* Avatar and Status Column */}
-                  <div className="xl:col-span-1 flex flex-col items-center xl:items-start space-y-4 lg:space-y-6">
-                    <div className="relative group">
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-secondary blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
-                      <div className="relative">
-                        <Avatar className="h-24 w-24 sm:h-32 sm:w-32 lg:h-36 lg:w-36 border-4 border-background shadow-2xl ring-4 ring-primary/10">
-                          <AvatarImage src={userProfile?.avatar_url} />
-                          <AvatarFallback className="text-2xl lg:text-3xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
-                            {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        {isEditing && (
-                          <div className="absolute -bottom-2 -right-2 flex gap-2">
-                            <Button
-                              size="sm"
-                              className="rounded-full h-10 w-10 lg:h-12 lg:w-12 p-0 shadow-lg bg-primary hover:bg-primary/90 border-2 border-background"
-                              onClick={triggerFileUpload}
-                              disabled={uploadingAvatar}
-                            >
-                              <Camera className="w-4 h-4 lg:w-5 lg:h-5" />
-                            </Button>
-                            {userProfile?.avatar_url && (
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                className="rounded-full h-10 w-10 lg:h-12 lg:w-12 p-0 shadow-lg border-2 border-background"
-                                onClick={handleRemoveAvatar}
-                                disabled={uploadingAvatar}
-                              >
-                                <Trash2 className="w-4 h-4 lg:w-5 lg:h-5" />
-                              </Button>
+                {/* Main Profile Section - Better responsive layout */}
+                <div className="max-w-7xl mx-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12">
+                    {/* Avatar and Status Column - Fixed width on large screens */}
+                    <div className="lg:col-span-4 xl:col-span-3">
+                      <div className="flex flex-col items-center lg:items-start space-y-4 lg:space-y-6 lg:sticky lg:top-6">
+                        <div className="relative group">
+                          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-secondary blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
+                          <div className="relative">
+                            <Avatar className="h-24 w-24 sm:h-32 sm:w-32 lg:h-36 lg:w-36 xl:h-40 xl:w-40 border-4 border-background shadow-2xl ring-4 ring-primary/10">
+                              <AvatarImage src={userProfile?.avatar_url} />
+                              <AvatarFallback className="text-2xl lg:text-3xl xl:text-4xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
+                                {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            {isEditing && (
+                              <div className="absolute -bottom-2 -right-2 flex gap-2">
+                                <Button
+                                  size="sm"
+                                  className="rounded-full h-10 w-10 lg:h-12 lg:w-12 p-0 shadow-lg bg-primary hover:bg-primary/90 border-2 border-background"
+                                  onClick={triggerFileUpload}
+                                  disabled={uploadingAvatar}
+                                >
+                                  <Camera className="w-4 h-4 lg:w-5 lg:h-5" />
+                                </Button>
+                                {userProfile?.avatar_url && (
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    className="rounded-full h-10 w-10 lg:h-12 lg:w-12 p-0 shadow-lg border-2 border-background"
+                                    onClick={handleRemoveAvatar}
+                                    disabled={uploadingAvatar}
+                                  >
+                                    <Trash2 className="w-4 h-4 lg:w-5 lg:h-5" />
+                                  </Button>
+                                )}
+                              </div>
                             )}
+                          </div>
+                        </div>
+                        
+                        <div className="text-center lg:text-left space-y-3 lg:space-y-4 w-full">
+                          <div>
+                            <h3 className="text-xl lg:text-2xl xl:text-3xl font-bold text-foreground mb-2">
+                              {userProfile?.display_name || user?.email?.split('@')[0]}
+                            </h3>
+                            <p className="text-muted-foreground font-medium text-sm lg:text-base break-all">{user?.email}</p>
+                          </div>
+                          
+                          <div className="flex flex-wrap justify-center lg:justify-start gap-2 lg:gap-3">
+                            <Badge variant={subscription.isActive ? "default" : "secondary"} className="px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-medium shadow-lg">
+                              {subscription.isActive ? <Crown className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" /> : <Star className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" />}
+                              {getTierDisplayName()}
+                            </Badge>
+                            <Badge variant="outline" className="capitalize px-3 lg:px-4 py-1.5 lg:py-2 rounded-full border-primary/30 text-primary bg-primary/5 shadow-sm text-xs lg:text-sm">
+                              {userProfile?.user_type || 'buyer'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Form Fields Column - Responsive width */}
+                    <div className="lg:col-span-8 xl:col-span-9">
+                      <div className="space-y-6 lg:space-y-8">
+                        {/* Form Grid - Responsive columns */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+                          <div className="space-y-2 lg:space-y-3">
+                            <Label htmlFor="displayName" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
+                              <User className="w-4 h-4 text-primary" />
+                              Display Name
+                            </Label>
+                            <div className="relative group">
+                              <Input
+                                id="displayName"
+                                value={userProfile?.display_name || ''}
+                                onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
+                                disabled={!isEditing}
+                                className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11 lg:h-12"
+                                maxLength={50}
+                              />
+                              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 lg:space-y-3">
+                            <Label htmlFor="email" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-muted-foreground" />
+                              Email
+                            </Label>
+                            <Input
+                              id="email"
+                              type="email"
+                              value={user?.email || ''}
+                              disabled={true}
+                              className="rounded-xl bg-muted/60 border-muted-foreground/20 shadow-sm h-11 lg:h-12"
+                              title={user?.email || ''}
+                            />
+                          </div>
+                          
+                          <div className="space-y-2 lg:space-y-3 md:col-span-2 xl:col-span-1">
+                            <Label htmlFor="phone" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
+                              <Smartphone className="w-4 h-4 text-primary" />
+                              Phone
+                            </Label>
+                            <div className="relative group">
+                              <Input
+                                id="phone"
+                                value={userProfile?.phone || ''}
+                                onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
+                                disabled={!isEditing}
+                                placeholder="Phone number"
+                                className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11 lg:h-12"
+                              />
+                              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Location - Full width */}
+                        <div className="space-y-2 lg:space-y-3">
+                          <Label htmlFor="location" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
+                            <Home className="w-4 h-4 text-primary" />
+                            Location
+                          </Label>
+                          <div className="relative group">
+                            <Input
+                              id="location"
+                              value={userProfile?.location || ''}
+                              onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
+                              disabled={!isEditing}
+                              placeholder="Your location"
+                              className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11 lg:h-12"
+                              maxLength={100}
+                            />
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                          </div>
+                        </div>
+                        
+                        {/* Bio - Full width */}
+                        <div className="space-y-2 lg:space-y-3">
+                          <Label htmlFor="bio" className="text-sm lg:text-base font-semibold text-foreground flex items-center gap-2">
+                            <Edit2 className="w-4 h-4 text-primary" />
+                            Bio
+                          </Label>
+                          <div className="relative group">
+                            <textarea
+                              id="bio"
+                              className="w-full min-h-[100px] lg:min-h-[120px] xl:min-h-[140px] p-4 lg:p-5 border-2 border-primary/20 rounded-xl bg-background/80 backdrop-blur-sm text-foreground disabled:opacity-50 resize-none focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm text-sm lg:text-base"
+                              value={userProfile?.bio || ''}
+                              onChange={(e) => setUserProfile({...userProfile, bio: e.target.value})}
+                              disabled={!isEditing}
+                              placeholder="Tell others about yourself..."
+                              maxLength={150}
+                            />
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                          </div>
+                          <div className="flex justify-between items-center text-xs lg:text-sm">
+                            <span className="text-muted-foreground">Share your professional story</span>
+                            <span className={`font-medium transition-colors duration-300 ${
+                              (userProfile?.bio?.length || 0) > 140 ? 'text-destructive' : 
+                              (userProfile?.bio?.length || 0) > 120 ? 'text-yellow-600' : 'text-muted-foreground'
+                            }`}>
+                              {userProfile?.bio?.length || 0}/150 characters
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        {isEditing && (
+                          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 pt-4 lg:pt-6">
+                            <Button 
+                              onClick={handleSave}
+                              className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 h-11 lg:h-12 text-sm lg:text-base"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Save Changes
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setIsEditing(false)}
+                              className="flex-1 rounded-xl border-primary/30 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 h-11 lg:h-12 text-sm lg:text-base"
+                            >
+                              Cancel
+                            </Button>
                           </div>
                         )}
                       </div>
                     </div>
-                    
-                    <div className="text-center xl:text-left space-y-3 lg:space-y-4 w-full">
-                      <div>
-                        <h3 className="text-xl lg:text-2xl font-bold text-foreground mb-2">
-                          {userProfile?.display_name || user?.email}
-                        </h3>
-                        <p className="text-muted-foreground font-medium text-sm lg:text-base break-all">{user?.email}</p>
-                      </div>
-                      
-                      <div className="flex flex-wrap justify-center xl:justify-start gap-2 lg:gap-3">
-                        <Badge variant={subscription.isActive ? "default" : "secondary"} className="px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-medium shadow-lg">
-                          {subscription.isActive ? <Crown className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" /> : <Star className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" />}
-                          {getTierDisplayName()}
-                        </Badge>
-                        <Badge variant="outline" className="capitalize px-3 lg:px-4 py-1.5 lg:py-2 rounded-full border-primary/30 text-primary bg-primary/5 shadow-sm text-xs lg:text-sm">
-                          {userProfile?.user_type || 'buyer'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Form Fields Column - Takes up more space on desktop */}
-                  <div className="xl:col-span-3 space-y-4 lg:space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-                      <div className="space-y-2 lg:space-y-3">
-                        <Label htmlFor="displayName" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                          <User className="w-4 h-4 text-primary" />
-                          Display Name
-                        </Label>
-                        <div className="relative group">
-                          <Input
-                            id="displayName"
-                            value={userProfile?.display_name || ''}
-                            onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
-                            disabled={!isEditing}
-                            className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm"
-                            maxLength={50}
-                          />
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 lg:space-y-3">
-                        <Label htmlFor="email" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                          <AlertCircle className="w-4 h-4 text-muted-foreground" />
-                          Email
-                        </Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={user?.email || ''}
-                          disabled={true}
-                          className="rounded-xl bg-muted/60 border-muted-foreground/20 shadow-sm"
-                          title={user?.email || ''}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2 lg:space-y-3">
-                        <Label htmlFor="phone" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                          <Smartphone className="w-4 h-4 text-primary" />
-                          Phone
-                        </Label>
-                        <div className="relative group">
-                          <Input
-                            id="phone"
-                            value={userProfile?.phone || ''}
-                            onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
-                            disabled={!isEditing}
-                            placeholder="Phone number"
-                            className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm"
-                          />
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2 lg:space-y-3 md:col-span-2 xl:col-span-3">
-                        <Label htmlFor="location" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                          <Home className="w-4 h-4 text-primary" />
-                          Location
-                        </Label>
-                        <div className="relative group">
-                          <Input
-                            id="location"
-                            value={userProfile?.location || ''}
-                            onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
-                            disabled={!isEditing}
-                            placeholder="Your location"
-                            className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm"
-                            maxLength={100}
-                          />
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2 lg:space-y-3">
-                      <Label htmlFor="bio" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                        <Edit2 className="w-4 h-4 text-primary" />
-                        Bio
-                      </Label>
-                      <div className="relative group">
-                        <textarea
-                          id="bio"
-                          className="w-full min-h-[100px] lg:min-h-[120px] p-4 border-2 border-primary/20 rounded-xl bg-background/80 backdrop-blur-sm text-foreground disabled:opacity-50 resize-none focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm"
-                          value={userProfile?.bio || ''}
-                          onChange={(e) => setUserProfile({...userProfile, bio: e.target.value})}
-                          disabled={!isEditing}
-                          placeholder="Tell others about yourself..."
-                          maxLength={150}
-                        />
-                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                      </div>
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-muted-foreground">Share your professional story</span>
-                        <span className={`font-medium transition-colors duration-300 ${
-                          (userProfile?.bio?.length || 0) > 140 ? 'text-destructive' : 
-                          (userProfile?.bio?.length || 0) > 120 ? 'text-yellow-600' : 'text-muted-foreground'
-                        }`}>
-                          {userProfile?.bio?.length || 0}/150 characters
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {isEditing && (
-                      <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 pt-4">
-                        <Button 
-                          onClick={handleSave}
-                          className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-2" />
-                          Save Changes
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setIsEditing(false)}
-                          className="flex-1 rounded-xl border-primary/30 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
