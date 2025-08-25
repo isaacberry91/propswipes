@@ -505,38 +505,38 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-md mx-auto px-4 py-8">
+      <div className="max-w-sm sm:max-w-2xl lg:max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Professional Header */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 lg:mb-12">
           <div>
-            <h1 className="text-4xl font-bold text-foreground">Account Dashboard</h1>
-            <p className="text-lg text-muted-foreground mt-2">Manage your professional real estate profile</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Account Dashboard</h1>
+            <p className="text-base sm:text-lg text-muted-foreground mt-2">Manage your professional real estate profile</p>
           </div>
           <Button
             onClick={() => setIsEditing(!isEditing)}
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 self-start sm:self-center"
           >
             <Edit2 className="w-4 h-4" />
             {isEditing ? "Cancel" : "Edit Profile"}
           </Button>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-5 bg-card border border-border rounded-lg overflow-hidden">
-            <TabsTrigger value="profile" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
+        <Tabs defaultValue="profile" className="space-y-6 lg:space-y-8">
+          <TabsList className="grid w-full grid-cols-5 bg-card border border-border rounded-lg overflow-hidden h-12 lg:h-14">
+            <TabsTrigger value="profile" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-xs sm:text-sm lg:text-base">
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="properties" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
+            <TabsTrigger value="properties" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-xs sm:text-sm lg:text-base">
               <span>Properties</span>
             </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
+            <TabsTrigger value="subscription" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-xs sm:text-sm lg:text-base">
               <span>Subscription</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
+            <TabsTrigger value="settings" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-xs sm:text-sm lg:text-base">
               <span>Settings</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
+            <TabsTrigger value="security" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-xs sm:text-sm lg:text-base">
               <span>Security</span>
             </TabsTrigger>
           </TabsList>
@@ -549,30 +549,30 @@ const Profile = () => {
               <div className="absolute bottom-8 left-8 h-28 w-28 rounded-full bg-gradient-to-tr from-secondary/15 to-transparent blur-2xl animate-pulse delay-1000"></div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-r from-primary/5 to-secondary/5 blur-3xl"></div>
               
-              <div className="relative z-10 p-4 sm:p-6 lg:p-10 xl:p-12">
-                {/* Elegant Header */}
-                <div className="mb-6 lg:mb-10">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
-                      <Shield className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
-                        Professional Profile
-                      </h2>
-                      <p className="text-muted-foreground text-sm lg:text-base xl:text-lg mt-1">
-                        Manage your professional real estate credentials
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <div className="relative z-10 p-4 sm:p-6 lg:p-8 xl:p-10">
+                 {/* Elegant Header */}
+                 <div className="mb-6 lg:mb-8">
+                   <div className="flex items-center gap-3 mb-4">
+                     <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
+                       <Shield className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
+                     </div>
+                     <div>
+                       <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+                         Professional Profile
+                       </h2>
+                       <p className="text-muted-foreground text-sm lg:text-base xl:text-lg mt-1">
+                         Manage your professional real estate credentials
+                       </p>
+                     </div>
+                   </div>
+                 </div>
 
-                {/* Main Profile Section - Better responsive layout */}
-                <div className="max-w-7xl mx-auto">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-12">
-                    {/* Avatar and Status Column - Fixed width on large screens */}
-                    <div className="lg:col-span-4 xl:col-span-3">
-                      <div className="flex flex-col items-center lg:items-start space-y-4 lg:space-y-6 lg:sticky lg:top-6">
+                 {/* Main Profile Section - Better responsive layout */}
+                 <div className="w-full">
+                   <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-4 gap-6 lg:gap-8 xl:gap-10">
+                     {/* Avatar and Status Column - Fixed width on large screens */}
+                     <div className="lg:col-span-2 xl:col-span-1">
+                       <div className="flex flex-col items-center lg:items-start space-y-4 lg:space-y-6">
                         <div className="relative group">
                           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-secondary blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
                           <div className="relative">
@@ -629,9 +629,9 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    {/* Form Fields Column - Responsive width */}
-                    <div className="lg:col-span-8 xl:col-span-9">
-                      <div className="space-y-6 lg:space-y-8">
+                     {/* Form Fields Column - Responsive width */}
+                     <div className="lg:col-span-3 xl:col-span-3">
+                       <div className="space-y-6 lg:space-y-8">
                         {/* Form Grid - Responsive columns */}
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
                           <div className="space-y-2 lg:space-y-3">
