@@ -215,77 +215,98 @@ const Matches = () => {
             </Button>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {matches.map((match) => (
-              <Card key={match.id} className="p-4 shadow-card border-0 hover:shadow-xl transition-all duration-300">
-                <div className="flex gap-4">
-                  {/* Property Image */}
-                  <div className="relative flex-shrink-0">
-                    <img 
-                      src={match.property.image} 
-                      alt={match.property.title}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
-                  </div>
-                  
-                  {/* Match Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-semibold text-foreground text-sm truncate">
-                          {match.property.title}
-                        </h3>
-                        <div className="flex items-center text-xs text-muted-foreground mt-1">
-                          <MapPin className="w-3 h-3 mr-1" />
-                          <span>{match.property.location}</span>
+              <Card key={match.id} className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-xl transition-all duration-500 hover:scale-[1.02]">
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                
+                <div className="relative p-6">
+                  <div className="flex gap-4">
+                    {/* Property Image with elegant frame */}
+                    <div className="relative flex-shrink-0">
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 p-1">
+                        <img 
+                          src={match.property.image} 
+                          alt={match.property.title}
+                          className="w-24 h-24 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-lg" />
+                      </div>
+                      {/* Floating heart icon */}
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-love to-love/80 rounded-full flex items-center justify-center shadow-md">
+                        <Heart className="w-3 h-3 text-white fill-white" />
+                      </div>
+                    </div>
+                    
+                    {/* Match Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-foreground text-lg leading-tight group-hover:text-primary transition-colors">
+                            {match.property.title}
+                          </h3>
+                          <div className="flex items-center text-sm text-muted-foreground mt-1">
+                            <MapPin className="w-4 h-4 mr-1 text-primary/70" />
+                            <span>{match.property.location}</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-2xl font-bold text-primary">
+                            {match.property.price}
+                          </span>
                         </div>
                       </div>
-                      <span className="text-primary font-semibold text-sm">
-                        {match.property.price}
-                      </span>
-                    </div>
-                    
-                    {/* Matched User Info */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <img 
-                        src={match.matchedUser.avatar} 
-                        alt={match.matchedUser.name}
-                        className="w-6 h-6 object-cover rounded-full"
-                      />
-                      <span className="text-sm font-medium text-foreground">
-                        {match.matchedUser.name}
-                      </span>
-                      <span className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full">
-                        {match.matchedUser.type}
-                      </span>
-                    </div>
-                    
-                    {/* Last Message */}
-                    <p className="text-sm text-muted-foreground truncate mb-3">
-                      {match.lastMessage}
-                    </p>
-                    
-                    {/* Match Time & Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-xs text-muted-foreground">
-                        <Clock className="w-3 h-3 mr-1" />
-                        <span>{match.matchedAt}</span>
+                      
+                      {/* Matched User Info with elegant styling */}
+                      <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-gradient-to-r from-accent/20 to-accent/10 border border-accent/30">
+                        <div className="relative">
+                          <img 
+                            src={match.matchedUser.avatar} 
+                            alt={match.matchedUser.name}
+                            className="w-8 h-8 object-cover rounded-full ring-2 ring-primary/30"
+                          />
+                          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+                        </div>
+                        <div className="flex-1">
+                          <span className="text-sm font-semibold text-foreground">
+                            {match.matchedUser.name}
+                          </span>
+                          <span className="ml-2 text-xs bg-gradient-to-r from-primary/20 to-primary/10 text-primary px-2 py-1 rounded-full border border-primary/20">
+                            {match.matchedUser.type}
+                          </span>
+                        </div>
                       </div>
                       
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => handleChatClick(match.id)}
-                        className="relative"
-                      >
-                        <MessageCircle className="w-4 h-4 mr-1" />
-                        Chat
-                        {match.unreadCount > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-love text-love-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                            {match.unreadCount}
-                          </span>
-                        )}
-                      </Button>
+                      {/* Last Message with elegant styling */}
+                      <div className="mb-4 p-3 rounded-lg bg-muted/30 border-l-4 border-primary/40">
+                        <p className="text-sm text-muted-foreground italic">
+                          "{match.lastMessage}"
+                        </p>
+                      </div>
+                      
+                      {/* Match Time & Actions */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-xs text-muted-foreground bg-accent/20 px-3 py-1 rounded-full">
+                          <Clock className="w-3 h-3 mr-1 text-primary/70" />
+                          <span>{match.matchedAt}</span>
+                        </div>
+                        
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleChatClick(match.id)}
+                          className="relative bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground shadow-md hover:shadow-lg transition-all duration-300 rounded-full px-6"
+                        >
+                          <MessageCircle className="w-4 h-4 mr-2" />
+                          Chat
+                          {match.unreadCount > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-love text-love-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center shadow-md animate-pulse">
+                              {match.unreadCount}
+                            </span>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
