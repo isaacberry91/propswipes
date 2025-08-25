@@ -833,17 +833,17 @@ const Discover = () => {
             {/* Dating App Style Action Buttons */}
             <div className="flex justify-center gap-6 mt-6">
               <Button
-                variant="outline"
+                variant="default"
                 size="icon-lg"
                 onClick={() => handleSwipe('left')}
                 disabled={isAnimating}
-                className="rounded-full w-16 h-16 border-2 border-red-200 hover:bg-red-50 hover:border-red-300 transition-all duration-200 shadow-lg"
+                className="rounded-full w-16 h-16 shadow-lg transition-all duration-200"
               >
-                <X className="w-8 h-8 text-red-500" />
+                <X className="w-8 h-8 text-white" />
               </Button>
               
               <Button
-                variant="love"
+                variant="default"
                 size="icon-lg"
                 onClick={() => handleSwipe('right')}
                 disabled={isAnimating || (!hasUnlimitedLikes() && dailyLikesUsed >= 10)}
@@ -853,7 +853,7 @@ const Discover = () => {
                 `}
               >
                 {!hasUnlimitedLikes() && dailyLikesUsed >= 10 ? (
-                  <Lock className="w-8 h-8" />
+                  <Lock className="w-8 h-8 text-white" />
                 ) : (
                   <Heart className="w-8 h-8 text-white" />
                 )}
