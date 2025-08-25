@@ -22,6 +22,7 @@ import Admin from "./pages/Admin";
 import PropertyDetails from "./pages/PropertyDetails";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Contact from "./pages/Contact";
 import Navigation from "./components/Navigation";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -137,6 +138,7 @@ const App = () => {
                  } />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms-of-use" element={<Terms />} />
+                  <Route path="/contact" element={<Contact />} />
                  <Route path="/property/:propertyId" element={<PropertyDetails />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
