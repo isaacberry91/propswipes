@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, Home, Users, MessageCircle, ArrowRight } from "lucide-react";
+import { Shield, Home, Users, MessageCircle, ArrowRight, CheckCircle, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/propswipes-hero.jpg";
 
@@ -10,80 +10,88 @@ const Index = () => {
   const features = [
     {
       icon: Home,
-      title: "Discover Properties",
-      description: "Swipe through beautiful properties tailored to your preferences"
+      title: "Professional Property Discovery",
+      description: "Browse verified property listings from trusted real estate professionals"
     },
     {
-      icon: Heart,
-      title: "Smart Matching",
-      description: "Get matched with people interested in the same properties"
+      icon: Shield,
+      title: "Secure & Verified",
+      description: "All listings are verified and property owners are authenticated"
     },
     {
       icon: MessageCircle,
-      title: "Direct Chat",
-      description: "Connect instantly with potential buyers, sellers, or co-investors"
+      title: "Direct Communication",
+      description: "Connect securely with property owners and licensed real estate agents"
     },
     {
       icon: Users,
-      title: "Community",
-      description: "Join a community of property enthusiasts and investors"
+      title: "Trusted Community",
+      description: "Join thousands of verified users in our professional real estate network"
     }
+  ];
+
+  const benefits = [
+    "Verified property listings only",
+    "Professional real estate network",
+    "Secure messaging system",
+    "Advanced search filters",
+    "Mobile-optimized platform",
+    "Expert customer support"
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10" />
-        <div className="relative max-w-4xl mx-auto px-4 py-16 text-center">
-          <div className="mb-8">
+      {/* Professional Hero Section */}
+      <div className="relative overflow-hidden bg-gradient-subtle">
+        <div className="relative max-w-7xl mx-auto px-4 py-20 text-center">
+          <div className="mb-12">
             <img 
               src={heroImage} 
-              alt="Propswipes Hero"
-              className="w-64 h-48 object-cover rounded-2xl mx-auto shadow-card animate-float"
+              alt="Professional Real Estate Platform"
+              className="w-80 h-60 object-cover rounded-xl mx-auto shadow-lg"
             />
           </div>
           
-          <h1 className="text-5xl font-bold text-foreground mb-4">
-            Prop<span className="text-primary">swipes</span>
+          <h1 className="text-6xl font-bold text-foreground mb-6">
+            Professional Real Estate Discovery
           </h1>
-          <p className="text-xl text-muted-foreground mb-2">
-            Tinder for Real Estate
+          <p className="text-2xl text-muted-foreground mb-4 max-w-4xl mx-auto">
+            Connect with verified property owners and licensed real estate professionals
           </p>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Swipe through properties, match with like-minded buyers, and find your perfect real estate opportunity together.
+          <p className="text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
+            Discover your next investment opportunity through our secure, professional platform designed for serious real estate buyers and sellers.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button 
-              variant="gradient" 
               size="xl"
               onClick={() => navigate('/auth')}
-              className="text-lg"
+              className="text-lg px-8 py-4"
             >
-              Get Started
+              <Shield className="w-6 h-6 mr-3" />
+              Join Professional Network
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button 
               variant="outline" 
               size="xl"
               onClick={() => navigate('/auth')}
-              className="text-lg"
+              className="text-lg px-8 py-4"
             >
-              Sign In
+              Sign In to Account
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Features Section */}
-      <div className="max-w-6xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            How Propswipes Works
+      {/* Professional Features Section */}
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-foreground mb-6">
+            Professional Real Estate Platform
           </h2>
-          <p className="text-lg text-muted-foreground">
-            Find your perfect property match in three simple steps
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Advanced tools and verified connections for serious real estate professionals and investors
           </p>
         </div>
         
@@ -91,14 +99,14 @@ const Index = () => {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card key={index} className="p-6 text-center shadow-card border-0 hover:shadow-xl transition-all duration-300 hover:animate-float">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-8 h-8 text-primary" />
+              <Card key={index} className="p-8 text-center border border-border bg-card hover:shadow-lg transition-all duration-300">
+                <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-6">
+                  <Icon className="w-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
+                <h3 className="text-xl font-semibold text-foreground mb-4">
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground">
+                <p className="text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
               </Card>
@@ -107,23 +115,62 @@ const Index = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
-      <div className="bg-gradient-to-r from-primary/5 via-secondary/5 to-primary/5 py-16">
+      {/* Trust & Security Section */}
+      <div className="bg-card/50 py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl font-bold text-foreground mb-6">
+                Trusted by Real Estate Professionals
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                Our platform maintains the highest standards of security and verification to ensure all users are legitimate real estate professionals, property owners, and serious buyers.
+              </p>
+              <div className="space-y-4">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
+                    <span className="text-foreground font-medium">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-gradient-subtle rounded-xl p-8 text-center">
+              <div className="flex justify-center space-x-2 mb-6">
+                {[1,2,3,4,5].map((star) => (
+                  <Star key={star} className="w-8 h-8 text-primary fill-primary" />
+                ))}
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-4">
+                Excellent Customer Satisfaction
+              </h3>
+              <p className="text-lg text-muted-foreground mb-6">
+                "Professional platform with excellent verification process and customer support"
+              </p>
+              <p className="text-foreground font-semibold">
+                - Real Estate Professional
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Professional CTA Section */}
+      <div className="bg-background py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Ready to Find Your Property Match?
+          <h2 className="text-4xl font-bold text-foreground mb-6">
+            Ready to Join Our Professional Network?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Join thousands of users already discovering their perfect properties
+          <p className="text-xl text-muted-foreground mb-12">
+            Connect with verified real estate professionals and discover premium property opportunities
           </p>
           <Button 
-            variant="gradient" 
             size="xl"
             onClick={() => navigate('/auth')}
-            className="text-lg"
+            className="text-lg px-10 py-4"
           >
-            <Heart className="w-5 h-5 mr-2" />
-            Start Matching Now
+            <Shield className="w-6 h-6 mr-3" />
+            Get Started Today
           </Button>
         </div>
       </div>

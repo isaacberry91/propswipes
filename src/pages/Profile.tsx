@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -505,96 +505,109 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-md mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Professional Header */}
+        <div className="flex items-center justify-between mb-12">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground">Account Dashboard</h1>
+            <p className="text-lg text-muted-foreground mt-2">Manage your professional real estate profile</p>
+          </div>
           <Button
             onClick={() => setIsEditing(!isEditing)}
             variant="outline"
-            size="sm"
+            className="flex items-center gap-2"
           >
-            <Edit2 className="w-4 h-4 mr-2" />
-            {isEditing ? "Cancel" : "Edit"}
+            <Edit2 className="w-4 h-4" />
+            {isEditing ? "Cancel" : "Edit Profile"}
           </Button>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="flex justify-between gap-0 p-0.5 h-auto">
-            <TabsTrigger value="profile" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
-              <User className="w-2.5 h-2.5" />
+        <Tabs defaultValue="profile" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-5 bg-card border border-border">
+            <TabsTrigger value="profile" className="flex items-center gap-2 py-3">
+              <User className="w-4 h-4" />
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="properties" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
-              <Home className="w-2.5 h-2.5" />
+            <TabsTrigger value="properties" className="flex items-center gap-2 py-3">
+              <Home className="w-4 h-4" />
               <span>Properties</span>
             </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
-              <CreditCard className="w-2.5 h-2.5" />
+            <TabsTrigger value="subscription" className="flex items-center gap-2 py-3">
+              <CreditCard className="w-4 h-4" />
               <span>Subscription</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
-              <Settings className="w-2.5 h-2.5" />
+            <TabsTrigger value="settings" className="flex items-center gap-2 py-3">
+              <Settings className="w-4 h-4" />
               <span>Settings</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-0.5 py-0.5 px-1 text-[9px] sm:text-xs">
-              <Shield className="w-2.5 h-2.5" />
+            <TabsTrigger value="security" className="flex items-center gap-2 py-3">
+              <Shield className="w-4 h-4" />
               <span>Security</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Profile Tab */}
+          {/* Professional Profile Tab */}
           <TabsContent value="profile">
-            <Card className="p-6 overflow-hidden">
-              <div className="space-y-4">
-                {/* Avatar Section */}
-                <div className="flex items-start gap-4">
-                   <div className="relative shrink-0">
-                     <Avatar className="w-20 h-20">
-                       <AvatarImage src={userProfile?.avatar_url} />
-                       <AvatarFallback className="text-lg">
-                         {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
-                       </AvatarFallback>
-                     </Avatar>
-                     {isEditing && (
-                       <div className="absolute -bottom-1 -right-1 flex gap-1">
-                         <Button
-                           size="sm"
-                           className="rounded-full w-6 h-6 p-0"
-                           onClick={triggerFileUpload}
-                           disabled={uploadingAvatar}
-                         >
-                           <Camera className="w-3 h-3" />
-                         </Button>
-                         {userProfile?.avatar_url && (
+            <Card className="border border-border bg-card">
+              <CardHeader className="border-b border-border">
+                <CardTitle className="text-2xl font-bold flex items-center gap-3">
+                  <Shield className="w-6 h-6 text-primary" />
+                  Professional Profile
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Manage your professional real estate information and credentials
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="space-y-8">
+                  {/* Professional Avatar Section */}
+                  <div className="flex items-start gap-6">
+                     <div className="relative">
+                       <Avatar className="w-24 h-24">
+                         <AvatarImage src={userProfile?.avatar_url} />
+                         <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                           {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
+                         </AvatarFallback>
+                       </Avatar>
+                       {isEditing && (
+                         <div className="absolute -bottom-2 -right-2 flex gap-2">
                            <Button
                              size="sm"
-                             variant="destructive"
-                             className="rounded-full w-6 h-6 p-0"
-                             onClick={handleRemoveAvatar}
+                             className="rounded-full w-8 h-8 p-0"
+                             onClick={triggerFileUpload}
                              disabled={uploadingAvatar}
                            >
-                             <Trash2 className="w-3 h-3" />
+                             <Camera className="w-4 h-4" />
                            </Button>
-                         )}
+                           {userProfile?.avatar_url && (
+                             <Button
+                               size="sm"
+                               variant="destructive"
+                               className="rounded-full w-8 h-8 p-0"
+                               onClick={handleRemoveAvatar}
+                               disabled={uploadingAvatar}
+                             >
+                               <Trash2 className="w-4 h-4" />
+                             </Button>
+                           )}
+                         </div>
+                       )}
+                    </div>
+                     <div className="flex-1">
+                       <h2 className="text-3xl font-bold text-foreground mb-2">{userProfile?.display_name || user?.email}</h2>
+                       <p className="text-lg text-muted-foreground mb-1">{user?.email}</p>
+                       <p className="text-base text-muted-foreground capitalize mb-4">{userProfile?.user_type || 'buyer'}</p>
+                       <div className="flex items-center gap-3">
+                         <Badge variant={subscription.isActive ? "default" : "secondary"} className="flex items-center gap-2 px-3 py-1">
+                           {subscription.isActive ? <Crown className="w-4 h-4" /> : <Star className="w-4 h-4" />}
+                           <span>{getTierDisplayName()}</span>
+                         </Badge>
+                         <Badge variant="outline" className="capitalize px-3 py-1">
+                           <span>{userProfile?.user_type || 'buyer'}</span>
+                         </Badge>
                        </div>
-                     )}
-                  </div>
-                   <div className="flex-1 min-w-0">
-                     <h2 className="text-xl font-bold text-foreground truncate">{userProfile?.display_name || user?.email}</h2>
-                     <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
-                     <p className="text-xs text-muted-foreground capitalize truncate">{userProfile?.user_type || 'buyer'}</p>
-                     <div className="flex items-center gap-2 mt-2">
-                       <Badge variant={subscription.isActive ? "default" : "secondary"} className="flex items-center gap-1 text-xs">
-                         {subscription.isActive ? <Crown className="w-3 h-3" /> : <Star className="w-3 h-3" />}
-                         <span className="truncate max-w-[80px]">{getTierDisplayName()}</span>
-                       </Badge>
-                       <Badge variant="outline" className="capitalize text-xs">
-                         <span className="truncate">{userProfile?.user_type || 'buyer'}</span>
-                       </Badge>
                      </div>
-                   </div>
-                </div>
+                  </div>
 
                 {/* Profile Information */}
                 <div className="grid grid-cols-1 gap-4">
@@ -676,7 +689,8 @@ const Profile = () => {
                     </Button>
                   </div>
                 )}
-              </div>
+                </div>
+              </CardContent>
             </Card>
           </TabsContent>
 

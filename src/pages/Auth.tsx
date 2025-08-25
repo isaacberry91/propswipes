@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Phone, Mail, Lock, User, MapPin, Users, ArrowLeft, Apple } from "lucide-react";
+import { Shield, Mail, Lock, User, MapPin, Users, ArrowLeft, Apple, Phone } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
@@ -48,16 +48,16 @@ const Auth = () => {
       ? 'https://c53d60b9-f832-47ac-aabd-6a1765b647a5.lovableproject.com/discover'
       : `${window.location.origin}/discover`;
 
-    console.log('PropSwipes Auth: Starting sign up process...');
-    console.log('PropSwipes Auth: Email:', email);
-    console.log('PropSwipes Auth: Is Capacitor:', isCapacitor);
-    console.log('PropSwipes Auth: Window location:', window.location);
-    console.log('PropSwipes Auth: Redirect URL:', redirectUrl);
-    console.log('PropSwipes Auth: Navigator online:', navigator.onLine);
+    console.log('Professional Real Estate Platform: Starting sign up process...');
+    console.log('Professional Real Estate Platform: Email:', email);
+    console.log('Professional Real Estate Platform: Is Capacitor:', isCapacitor);
+    console.log('Professional Real Estate Platform: Window location:', window.location);
+    console.log('Professional Real Estate Platform: Redirect URL:', redirectUrl);
+    console.log('Professional Real Estate Platform: Navigator online:', navigator.onLine);
 
     try {
       // Test network connectivity first
-      console.log('PropSwipes Auth: Testing network connectivity...');
+      console.log('Professional Real Estate Platform: Testing network connectivity...');
       
       const displayName = `${firstName} ${lastName}`.trim();
       const { data, error } = await supabase.auth.signUp({
@@ -77,10 +77,10 @@ const Auth = () => {
         }
       });
 
-      console.log('PropSwipes Auth: Sign up response:', { data, error });
+      console.log('Professional Real Estate Platform: Sign up response:', { data, error });
 
       if (error) {
-        console.error('PropSwipes Auth: Sign up error:', error);
+        console.error('Professional Real Estate Platform: Sign up error:', error);
         if (error.message.includes('already registered')) {
           toast({
             title: "Account exists! 👋",
@@ -95,34 +95,34 @@ const Auth = () => {
           }, 1000);
         } else {
           toast({
-            title: "Sign up failed",
+            title: "Registration failed",
             description: error.message,
             variant: "destructive",
             duration: 5000
           });
         }
       } else {
-        console.log('PropSwipes Auth: Sign up successful');
+        console.log('Professional Real Estate Platform: Sign up successful');
         // Check if user is immediately signed in (auto-confirm enabled)
         if (data.user && data.session) {
-          console.log('PropSwipes Auth: User auto-confirmed, navigating to discover...');
+          console.log('Professional Real Estate Platform: User auto-confirmed, navigating to discover...');
           toast({
-            title: "Welcome to PropSwipes! 🎉",
-            description: "Account created successfully! Let's start swiping!",
+            title: "Welcome to the Professional Network! 🎉",
+            description: "Account created successfully! Let's explore professional real estate opportunities!",
             duration: 5000
           });
           navigate('/discover');
         } else {
-          console.log('PropSwipes Auth: User needs email confirmation');
+          console.log('Professional Real Estate Platform: User needs email confirmation');
           toast({
-            title: "Welcome to PropSwipes! 🎉",
-            description: "Check your email to confirm your account and start swiping!",
+            title: "Welcome to the Professional Network! 🎉",
+            description: "Check your email to confirm your account and start exploring professional opportunities!",
             duration: 5000
           });
         }
       }
     } catch (error) {
-      console.error('PropSwipes Auth: Unexpected error:', error);
+      console.error('Professional Real Estate Platform: Unexpected error:', error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -138,12 +138,12 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    console.log('🔐 PropSwipes Auth: Starting sign in process...');
-    console.log('🔐 PropSwipes Auth: Email:', email);
-    console.log('🔐 PropSwipes Auth: Password length:', password.length);
-    console.log('🔐 PropSwipes Auth: Supabase URL:', 'https://jkctleefoomwpaglrvie.supabase.co');
-    console.log('🔐 PropSwipes Auth: User agent:', navigator.userAgent);
-    console.log('🔐 PropSwipes Auth: Online status:', navigator.onLine);
+    console.log('🔐 Professional Real Estate Platform: Starting sign in process...');
+    console.log('🔐 Professional Real Estate Platform: Email:', email);
+    console.log('🔐 Professional Real Estate Platform: Password length:', password.length);
+    console.log('🔐 Professional Real Estate Platform: Supabase URL:', 'https://jkctleefoomwpaglrvie.supabase.co');
+    console.log('🔐 Professional Real Estate Platform: User agent:', navigator.userAgent);
+    console.log('🔐 Professional Real Estate Platform: Online status:', navigator.onLine);
 
     try {
       console.log('🔐 PropSwipes Auth: Making sign in request...');
@@ -393,28 +393,26 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-primary/5">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md">
-        {/* Logo and Branding */}
-        <div className="text-center mb-8 animate-fade-in">
-          <img 
-            src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
-            alt="PropSwipes Logo" 
-            className="h-32 w-32 mx-auto mb-4 object-contain hover:scale-105 transition-transform duration-300"
-          />
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            PropSwipes
+        {/* Professional Logo and Branding */}
+        <div className="text-center mb-12">
+          <div className="bg-primary/10 w-24 h-24 rounded-xl flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-12 h-12 text-primary" />
+          </div>
+          <h1 className="text-4xl font-bold text-foreground mb-2">
+            Professional Real Estate Network
           </h1>
-          <p className="text-muted-foreground mt-2">
-            Where property dreams meet reality ✨
+          <p className="text-lg text-muted-foreground">
+            Secure platform for verified real estate professionals
           </p>
         </div>
 
-        <Card className="backdrop-blur-sm bg-card/95 border border-border/50 shadow-xl animate-scale-in">
-          <CardHeader className="text-center space-y-1 pb-6">
-            <CardTitle className="text-2xl font-bold">Get Started</CardTitle>
-            <CardDescription>
-              Join thousands finding their perfect property match
+        <Card className="border border-border bg-card shadow-lg">
+          <CardHeader className="text-center space-y-2 pb-8">
+            <CardTitle className="text-2xl font-bold text-foreground">Access Your Account</CardTitle>
+            <CardDescription className="text-base">
+              Join thousands of verified real estate professionals
             </CardDescription>
           </CardHeader>
           <CardContent>
