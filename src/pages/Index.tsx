@@ -26,7 +26,7 @@ const Index = () => {
     {
       icon: Users,
       title: "Trusted Community",
-      description: "Join thousands of verified users in our professional real estate network"
+      description: "Join thousands of verified users in our PropSwipes network"
     }
   ];
 

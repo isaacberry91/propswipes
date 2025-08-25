@@ -400,8 +400,8 @@ const Auth = () => {
           <div className="bg-primary/10 w-24 h-24 rounded-xl flex items-center justify-center mx-auto mb-6">
             <Shield className="w-12 h-12 text-primary" />
           </div>
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            Professional Real Estate Network
+          <h1 className="text-4xl font-bold mb-2">
+            <span className="text-foreground">Prop</span><span className="text-blue-500">Swipes</span>
           </h1>
           <p className="text-lg text-muted-foreground">
             Secure platform for verified real estate professionals
