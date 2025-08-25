@@ -739,15 +739,18 @@ const Discover = () => {
             <Card 
               ref={cardRef}
               className={`
-                relative overflow-hidden bg-card shadow-card rounded-2xl border-0 h-[500px] cursor-grab select-none transition-transform
+                relative overflow-hidden bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-black/50 
+                shadow-2xl border border-white/20 dark:border-gray-800/50 rounded-3xl h-[540px] cursor-grab select-none 
+                transition-all duration-500 ease-out hover:shadow-3xl backdrop-blur-sm
                 ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
                 ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
-                ${isDragging ? 'cursor-grabbing' : ''}
+                ${isDragging ? 'cursor-grabbing scale-[1.02]' : 'hover:scale-[1.01]'}
               `}
               style={{
                 transform: isDragging && !isAnimating ? 
                   `translateX(${dragOffset.x}px) translateY(${dragOffset.y * 0.1}px) rotate(${dragOffset.x * 0.1}deg)` : 
-                  'none'
+                  'none',
+                boxShadow: isDragging ? '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)' : ''
               }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
@@ -757,74 +760,98 @@ const Discover = () => {
               onTouchMove={handleTouchMove}
               onTouchEnd={handleDragEnd}
             >
-              <div className="relative h-64">
+              {/* Main Image with Elegant Overlay */}
+              <div className="relative h-72 overflow-hidden rounded-t-3xl">
                 <img 
                   src={properties[currentIndex].images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=600&fit=crop"} 
                   alt={properties[currentIndex].title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                 />
-                <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm rounded-full px-3 py-1">
-                  <span className="text-sm font-semibold text-primary">{formatPrice(properties[currentIndex].price)}</span>
+                
+                {/* Gradient Overlay for Better Text Readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                
+                {/* Price Badge - Elegant Glass Morphism */}
+                <div className="absolute top-5 left-5 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl px-4 py-2 shadow-lg">
+                  <span className="text-white font-bold text-lg drop-shadow-sm">{formatPrice(properties[currentIndex].price)}</span>
+                </div>
+                
+                {/* Property Type Badge */}
+                <div className="absolute top-5 right-5 bg-primary/90 backdrop-blur-sm rounded-xl px-3 py-1.5">
+                  <span className="text-white text-sm font-medium">{properties[currentIndex].property_type}</span>
                 </div>
                 
                 {/* Dating App Style Swipe Indicators */}
                 {isDragging && dragOffset.x > 50 && (
-                  <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                    <div className="bg-green-500 rounded-full p-4">
-                      <Heart className="w-8 h-8 text-white" />
+                  <div className="absolute inset-0 bg-emerald-500/30 backdrop-blur-sm flex items-center justify-center rounded-t-3xl">
+                    <div className="bg-emerald-500 rounded-full p-6 shadow-2xl animate-pulse">
+                      <Heart className="w-10 h-10 text-white" />
                     </div>
                   </div>
                 )}
                 {isDragging && dragOffset.x < -50 && (
-                  <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
-                    <div className="bg-red-500 rounded-full p-4">
-                      <X className="w-8 h-8 text-white" />
+                  <div className="absolute inset-0 bg-red-500/30 backdrop-blur-sm flex items-center justify-center rounded-t-3xl">
+                    <div className="bg-red-500 rounded-full p-6 shadow-2xl animate-pulse">
+                      <X className="w-10 h-10 text-white" />
                     </div>
                   </div>
                 )}
               </div>
               
-              <div className="p-4 h-[236px] flex flex-col">
-                <div className="mb-3">
-                  <h3 className="text-lg font-bold text-foreground truncate">{properties[currentIndex].title}</h3>
-                  <div className="flex items-center text-muted-foreground">
-                    <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-                    <span className="text-sm truncate">{properties[currentIndex].city}, {properties[currentIndex].state}</span>
+              {/* Content Section with Elegant Styling */}
+              <div className="p-6 h-[268px] flex flex-col relative">
+                {/* Subtle Inner Shadow for Depth */}
+                <div className="absolute inset-0 rounded-b-3xl shadow-inner pointer-events-none" />
+                
+                {/* Title and Location */}
+                <div className="mb-4 relative z-10">
+                  <h3 className="text-xl font-bold text-foreground mb-2 leading-tight">{properties[currentIndex].title}</h3>
+                  <div className="flex items-center text-muted-foreground/80">
+                    <div className="bg-muted/50 rounded-full p-1.5 mr-2">
+                      <MapPin className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="text-sm font-medium">{properties[currentIndex].city}, {properties[currentIndex].state}</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                  <div className="flex items-center">
-                    <Bed className="w-4 h-4 mr-1" />
-                    <span>{properties[currentIndex].bedrooms}</span>
+                {/* Property Stats with Icons */}
+                <div className="grid grid-cols-3 gap-3 mb-4 relative z-10">
+                  <div className="bg-muted/30 rounded-xl p-3 flex flex-col items-center text-center border border-muted/20">
+                    <Bed className="w-5 h-5 text-primary mb-1" />
+                    <span className="text-xs text-muted-foreground font-medium">Bedrooms</span>
+                    <span className="text-sm font-bold text-foreground">{properties[currentIndex].bedrooms}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Bath className="w-4 h-4 mr-1" />
-                    <span>{properties[currentIndex].bathrooms}</span>
+                  <div className="bg-muted/30 rounded-xl p-3 flex flex-col items-center text-center border border-muted/20">
+                    <Bath className="w-5 h-5 text-primary mb-1" />
+                    <span className="text-xs text-muted-foreground font-medium">Bathrooms</span>
+                    <span className="text-sm font-bold text-foreground">{properties[currentIndex].bathrooms}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Square className="w-4 h-4 mr-1" />
-                    <span>{formatSquareFeet(properties[currentIndex].square_feet)} sqft</span>
+                  <div className="bg-muted/30 rounded-xl p-3 flex flex-col items-center text-center border border-muted/20">
+                    <Square className="w-5 h-5 text-primary mb-1" />
+                    <span className="text-xs text-muted-foreground font-medium">Sq Ft</span>
+                    <span className="text-sm font-bold text-foreground">{formatSquareFeet(properties[currentIndex].square_feet)}</span>
                   </div>
                 </div>
                 
-                <p className="text-muted-foreground text-sm mb-3 line-clamp-2 flex-1">
+                {/* Description */}
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-2 flex-1 leading-relaxed relative z-10">
                   {properties[currentIndex].description || "No description available."}
                 </p>
                 
-                <div className="flex flex-wrap gap-1">
+                {/* Amenities with Elegant Pills */}
+                <div className="flex flex-wrap gap-2 relative z-10">
                   {properties[currentIndex].amenities?.slice(0, 3).map((amenity) => (
-                    <span 
+                    <div 
                       key={amenity}
-                      className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs"
+                      className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 text-primary px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm"
                     >
                       {amenity}
-                    </span>
+                    </div>
                   ))}
                   {(!properties[currentIndex].amenities || properties[currentIndex].amenities.length === 0) && (
-                    <span className="bg-accent text-accent-foreground px-2 py-1 rounded-full text-xs">
+                    <div className="bg-gradient-to-r from-accent/80 to-accent/60 text-accent-foreground px-3 py-1.5 rounded-full text-xs font-medium">
                       {properties[currentIndex].property_type}
-                    </span>
+                    </div>
                   )}
                 </div>
               </div>
