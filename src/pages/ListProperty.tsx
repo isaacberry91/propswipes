@@ -1174,7 +1174,7 @@ const ListProperty = () => {
       {/* Elegant Header Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b border-border/50">
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="relative max-w-6xl mx-auto px-4 py-12">
+        <div className="relative max-w-md mx-auto px-4 py-12">
           <div className="text-center space-y-6">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/15 rounded-2xl mb-6">
               <Home className="w-10 h-10 text-primary" />
@@ -1236,7 +1236,7 @@ const ListProperty = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-md mx-auto px-4 py-8">
         {/* Add Property Tab Content */}
         {activeTab === "add" && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

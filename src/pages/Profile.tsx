@@ -505,7 +505,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-md mx-auto px-4 py-8">
         {/* Professional Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
