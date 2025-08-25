@@ -32,12 +32,12 @@ const Navigation = () => {
                 variant={isActive ? "default" : "ghost"}
                 size="sm"
                 onClick={() => navigate(item.path)}
-                className={`flex flex-col items-center gap-1 h-auto py-2 px-4 ${
+                className={`flex flex-col items-center gap-1 h-auto py-2 px-2 sm:px-4 ${
                   isActive ? 'text-primary-foreground' : 'text-muted-foreground'
                 }`}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-xs">{item.label}</span>
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="text-[10px] sm:text-xs font-medium leading-tight">{item.label}</span>
               </Button>
             );
           })}
