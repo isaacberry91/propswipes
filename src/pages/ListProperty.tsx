@@ -1119,103 +1119,286 @@ const ListProperty = () => {
     </div>
   );
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-secondary/10 to-accent/5 p-4">
-      <div className="max-w-md mx-auto">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Home className="w-8 h-8 text-primary" />
-            {subscription.isActive && subscription.tier?.startsWith('seller') && (
-              <Crown className="w-6 h-6 text-amber-500" />
-            )}
-          </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">Property Management</h1>
-          <p className="text-muted-foreground">Create and manage your property listings</p>
-          
-          {!subscription.isActive && (
-            <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                <div>
-                  <h3 className="font-semibold text-amber-800 dark:text-amber-200">Free Tier Limits</h3>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    You can list 1 property for free. Upgrade to a seller plan for unlimited listings and professional tools.
-                  </p>
-                </div>
-              </div>
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full bg-white/90 backdrop-blur-sm border-0 shadow-2xl">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <Shield className="w-8 h-8 text-primary" />
             </div>
-          )}
+            <CardTitle className="text-2xl">Authentication Required</CardTitle>
+            <CardDescription>Please log in to list your property</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => navigate('/auth')} 
+              className="w-full"
+            >
+              Sign In
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-muted/10">
+      {/* Elegant Header Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b border-border/50">
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        <div className="relative max-w-6xl mx-auto px-4 py-12">
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/15 rounded-2xl mb-6">
+              <Home className="w-10 h-10 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              {isEditing ? "Update Your Property" : "List Your Property"}
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              {isEditing ? "Make changes to your property listing" : "Share your property with thousands of potential buyers and renters"}
+            </p>
+            
+            {/* Subscription Status Badge */}
+            <div className="flex items-center justify-center gap-3">
+              <Badge variant={subscription.isActive ? "default" : "secondary"} className="px-4 py-2 text-sm">
+                {subscription.isActive ? <Crown className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+                {subscription.isActive ? "Professional Account" : "Free Account"}
+              </Badge>
+              {subscription.isActive && (
+                <Badge variant="outline" className="px-3 py-1 text-xs">
+                  {currentPropertyCount}/{canListProperties(currentPropertyCount + 1) ? "Unlimited" : "1"} Properties
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Multi-Step Progress Indicator */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-4">
+            {[
+              { step: 1, label: "Photos", icon: Camera },
+              { step: 2, label: "Details", icon: Home },
+              { step: 3, label: "Features", icon: Plus }
+            ].map((item, index) => (
+              <div key={item.step} className="flex items-center">
+                <div className={`
+                  flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300
+                  ${currentStep >= item.step 
+                    ? 'bg-primary border-primary text-primary-foreground shadow-lg' 
+                    : 'bg-background border-border text-muted-foreground'
+                  }
+                `}>
+                  <item.icon className="w-5 h-5" />
+                </div>
+                <span className={`ml-3 text-sm font-medium ${currentStep >= item.step ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  {item.label}
+                </span>
+                {index < 2 && (
+                  <div className={`w-8 h-0.5 mx-4 transition-colors ${currentStep > item.step ? 'bg-primary' : 'bg-border'}`} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
-        <Tabs defaultValue="create" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="create">
-              <Plus className="w-4 h-4 mr-2" />
-              Create
-            </TabsTrigger>
-            <TabsTrigger value="properties">
-              <List className="w-4 h-4 mr-2" />
-              My Properties
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Create Property Tab */}
-          <TabsContent value="create">
-            <Card className="p-8 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {renderPhotosSection()}
-                
-                <Separator />
-                
-                {renderBasicInfo()}
-                
-                <Separator />
-                
-                {renderPropertyDetails()}
-                
-                <Separator />
-                
-                {renderFeatures()}
-                
-                <div className="pt-6">
-                  <Button 
-                    type="submit" 
-                    size="lg" 
-                    className="w-full"
-                    disabled={!canListProperties(currentPropertyCount) || isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                        {isEditing ? "Saving..." : "Creating Listing..."}
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-5 h-5 mr-2" />
-                        {isEditing ? "Save Property" : "List Property"}
-                      </>
-                    )}
-                  </Button>
-                  
-                  {!canListProperties(currentPropertyCount) && (
-                    <p className="text-center text-sm text-muted-foreground mt-2">
-                      <Button variant="link" onClick={() => navigate('/subscription')} className="p-0 h-auto text-primary">
-                        Upgrade your plan
-                      </Button> to list more properties
-                    </p>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Form Card */}
+          <div className="lg:col-span-2">
+            <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm overflow-hidden">
+              <form onSubmit={handleSubmit}>
+                {/* Step Content */}
+                <CardContent className="p-8">
+                  {currentStep === 1 && (
+                    <div className="space-y-8">
+                      <div className="text-center space-y-2">
+                        <h2 className="text-2xl font-bold text-foreground">Property Photos</h2>
+                        <p className="text-muted-foreground">Add beautiful photos to showcase your property</p>
+                      </div>
+                      {renderPhotosSection()}
+                    </div>
                   )}
+
+                  {currentStep === 2 && (
+                    <div className="space-y-8">
+                      <div className="text-center space-y-2">
+                        <h2 className="text-2xl font-bold text-foreground">Property Information</h2>
+                        <p className="text-muted-foreground">Tell us about your property's key details</p>
+                      </div>
+                      
+                      <Tabs defaultValue="basic" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50">
+                          <TabsTrigger value="basic" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                            Basic Info
+                          </TabsTrigger>
+                          <TabsTrigger value="details" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                            Property Details
+                          </TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="basic" className="space-y-6">
+                          {renderBasicInfo()}
+                        </TabsContent>
+                        
+                        <TabsContent value="details" className="space-y-6">
+                          {renderPropertyDetails()}
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  )}
+
+                  {currentStep === 3 && (
+                    <div className="space-y-8">
+                      <div className="text-center space-y-2">
+                        <h2 className="text-2xl font-bold text-foreground">Features & Amenities</h2>
+                        <p className="text-muted-foreground">Highlight what makes your property special</p>
+                      </div>
+                      {renderFeatures()}
+                    </div>
+                  )}
+                </CardContent>
+
+                {/* Navigation Footer */}
+                <div className="bg-gradient-to-r from-muted/30 to-background border-t border-border/50 px-8 py-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      {currentStep > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setCurrentStep(currentStep - 1)}
+                          className="px-6"
+                        >
+                          Previous
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center space-x-4">
+                      {currentStep < 3 ? (
+                        <Button
+                          type="button"
+                          onClick={() => setCurrentStep(currentStep + 1)}
+                          className="px-8 shadow-lg"
+                        >
+                          Next Step
+                        </Button>
+                      ) : (
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting || !canListProperties(currentPropertyCount)}
+                          className="px-8 shadow-lg bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
+                        >
+                          {isSubmitting ? (
+                            <div className="flex items-center space-x-2">
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              <span>{isEditing ? "Updating..." : "Publishing..."}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <span>{isEditing ? "Update Property" : "Publish Listing"}</span>
+                              <Plus className="w-4 h-4" />
+                            </div>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </form>
             </Card>
-          </TabsContent>
+          </div>
 
-          {/* Properties Management Tab */}
-          <TabsContent value="properties">
-            <Card className="p-6 shadow-xl border-0 bg-card/95 backdrop-blur-sm">
-              <PropertyManager onPropertyUpdate={() => {}} />
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Tips Card */}
+            <Card className="border-0 shadow-xl bg-gradient-to-br from-primary/5 to-accent/10 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-primary" />
+                  Listing Tips
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
+                    <p>Add high-quality photos to get 3x more views</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
+                    <p>Include detailed descriptions of unique features</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
+                    <p>Price competitively to attract more buyers</p>
+                  </div>
+                </div>
+              </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+
+            {/* Subscription Benefits */}
+            {!subscription.isActive && (
+              <Card className="border-0 shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2 text-amber-700 dark:text-amber-200">
+                    <Crown className="w-5 h-5" />
+                    Upgrade Benefits
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3 text-sm text-amber-700 dark:text-amber-300">
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
+                      <p>Unlimited property listings</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
+                      <p>Priority placement in search</p>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-2 h-2 bg-amber-500 rounded-full mt-2 flex-shrink-0" />
+                      <p>Advanced analytics & insights</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="w-full bg-amber-600 hover:bg-amber-700"
+                    onClick={() => navigate('/subscription')}
+                  >
+                    Upgrade Now
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Your Listings Section */}
+        {!isEditing && (
+          <div className="mt-12">
+            <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-muted/20 to-background border-b border-border/50">
+                <CardTitle className="flex items-center gap-3">
+                  <List className="w-5 h-5 text-primary" />
+                  Your Property Listings
+                </CardTitle>
+                <CardDescription>
+                  Manage and track your existing property listings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <PropertyManager />
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
