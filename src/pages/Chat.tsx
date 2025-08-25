@@ -568,8 +568,8 @@ const Chat = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-card border-b border-border p-4">
-        <div className="flex items-center gap-3 max-w-2xl mx-auto">
+      <div className="bg-card/80 backdrop-blur-sm border-b border-border/50 p-4 sticky top-0 z-10">
+        <div className="flex items-center gap-3 max-w-md mx-auto">
           <Button variant="ghost" size="icon" onClick={() => navigate('/matches')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -662,8 +662,8 @@ const Chat = () => {
       </div>
 
       {/* Property Info */}
-      <div className="bg-accent/30 border-b border-border p-4">
-        <div className="max-w-2xl mx-auto">
+      <div className="bg-gradient-to-r from-accent/20 to-accent/30 border-b border-border/50 p-4">
+        <div className="max-w-md mx-auto">
           <Card 
             className="p-3 bg-card border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
             onClick={() => setShowPropertyDetails(true)}
@@ -692,18 +692,18 @@ const Chat = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="max-w-2xl mx-auto space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-background/50 to-background">
+        <div className="max-w-md mx-auto space-y-4">
           {messages.map((msg) => (
             <div
               key={msg.id}
               className={`flex ${msg.senderId === 'me' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[70%] rounded-lg p-3 ${
+                className={`max-w-[70%] rounded-2xl p-3 shadow-sm ${
                   msg.senderId === 'me'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-card text-card-foreground border border-border'
+                    ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-md'
+                    : 'bg-card text-card-foreground border border-border/50 rounded-bl-md backdrop-blur-sm'
                 }`}
               >
                 {msg.text && <p className="text-sm">{msg.text}</p>}
@@ -749,8 +749,8 @@ const Chat = () => {
       </div>
 
       {/* Message Input */}
-      <div className="border-t border-border bg-card p-4">
-        <form onSubmit={handleSendMessage} className="max-w-2xl mx-auto">
+      <div className="border-t border-border/50 bg-card/90 backdrop-blur-sm p-4 sticky bottom-0">
+        <form onSubmit={handleSendMessage} className="max-w-md mx-auto">
           <div className="flex gap-2">
             <input
               type="file"
