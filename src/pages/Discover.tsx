@@ -635,7 +635,7 @@ const Discover = () => {
               <img 
                 src="/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png" 
                 alt="PropSwipes" 
-                className="w-5 h-5 sm:w-6 sm:h-6"
+                className="w-6 h-6"
               />
               <span className="text-sm sm:text-base font-bold text-primary">PropertyMatch</span>
               {subscription.isActive && (
