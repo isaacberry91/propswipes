@@ -549,34 +549,34 @@ const Profile = () => {
               <div className="absolute bottom-8 left-8 h-28 w-28 rounded-full bg-gradient-to-tr from-secondary/15 to-transparent blur-2xl animate-pulse delay-1000"></div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-r from-primary/5 to-secondary/5 blur-3xl"></div>
               
-              <div className="relative z-10 p-8">
+              <div className="relative z-10 p-4 sm:p-6 lg:p-8">
                 {/* Elegant Header */}
-                <div className="mb-8 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="mb-6 lg:mb-8">
+                  <div className="flex items-center gap-3 mb-4">
                     <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
-                      <Shield className="w-8 h-8 text-primary" />
+                      <Shield className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+                      <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
                         Professional Profile
                       </h2>
-                      <p className="text-muted-foreground text-sm mt-1">
+                      <p className="text-muted-foreground text-sm lg:text-base mt-1">
                         Manage your professional real estate credentials
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Main Profile Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                {/* Main Profile Section - Responsive Grid */}
+                <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 lg:gap-8 mb-6 lg:mb-8">
                   {/* Avatar and Status Column */}
-                  <div className="lg:col-span-1 flex flex-col items-center space-y-6">
+                  <div className="xl:col-span-1 flex flex-col items-center xl:items-start space-y-4 lg:space-y-6">
                     <div className="relative group">
                       <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary to-secondary blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
                       <div className="relative">
-                        <Avatar className="h-36 w-36 border-4 border-background shadow-2xl ring-4 ring-primary/10">
+                        <Avatar className="h-24 w-24 sm:h-32 sm:w-32 lg:h-36 lg:w-36 border-4 border-background shadow-2xl ring-4 ring-primary/10">
                           <AvatarImage src={userProfile?.avatar_url} />
-                          <AvatarFallback className="text-3xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
+                          <AvatarFallback className="text-2xl lg:text-3xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
                             {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
                           </AvatarFallback>
                         </Avatar>
@@ -584,21 +584,21 @@ const Profile = () => {
                           <div className="absolute -bottom-2 -right-2 flex gap-2">
                             <Button
                               size="sm"
-                              className="rounded-full h-12 w-12 p-0 shadow-lg bg-primary hover:bg-primary/90 border-2 border-background"
+                              className="rounded-full h-10 w-10 lg:h-12 lg:w-12 p-0 shadow-lg bg-primary hover:bg-primary/90 border-2 border-background"
                               onClick={triggerFileUpload}
                               disabled={uploadingAvatar}
                             >
-                              <Camera className="w-5 h-5" />
+                              <Camera className="w-4 h-4 lg:w-5 lg:h-5" />
                             </Button>
                             {userProfile?.avatar_url && (
                               <Button
                                 size="sm"
                                 variant="destructive"
-                                className="rounded-full h-12 w-12 p-0 shadow-lg border-2 border-background"
+                                className="rounded-full h-10 w-10 lg:h-12 lg:w-12 p-0 shadow-lg border-2 border-background"
                                 onClick={handleRemoveAvatar}
                                 disabled={uploadingAvatar}
                               >
-                                <Trash2 className="w-5 h-5" />
+                                <Trash2 className="w-4 h-4 lg:w-5 lg:h-5" />
                               </Button>
                             )}
                           </div>
@@ -606,30 +606,30 @@ const Profile = () => {
                       </div>
                     </div>
                     
-                    <div className="text-center space-y-4">
+                    <div className="text-center xl:text-left space-y-3 lg:space-y-4 w-full">
                       <div>
-                        <h3 className="text-2xl font-bold text-foreground mb-2">
+                        <h3 className="text-xl lg:text-2xl font-bold text-foreground mb-2">
                           {userProfile?.display_name || user?.email}
                         </h3>
-                        <p className="text-muted-foreground font-medium">{user?.email}</p>
+                        <p className="text-muted-foreground font-medium text-sm lg:text-base break-all">{user?.email}</p>
                       </div>
                       
-                      <div className="flex flex-wrap justify-center gap-3">
-                        <Badge variant={subscription.isActive ? "default" : "secondary"} className="px-4 py-2 rounded-full text-sm font-medium shadow-lg">
-                          {subscription.isActive ? <Crown className="w-4 h-4 mr-2" /> : <Star className="w-4 h-4 mr-2" />}
+                      <div className="flex flex-wrap justify-center xl:justify-start gap-2 lg:gap-3">
+                        <Badge variant={subscription.isActive ? "default" : "secondary"} className="px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-xs lg:text-sm font-medium shadow-lg">
+                          {subscription.isActive ? <Crown className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" /> : <Star className="w-3 h-3 lg:w-4 lg:h-4 mr-1.5 lg:mr-2" />}
                           {getTierDisplayName()}
                         </Badge>
-                        <Badge variant="outline" className="capitalize px-4 py-2 rounded-full border-primary/30 text-primary bg-primary/5 shadow-sm">
+                        <Badge variant="outline" className="capitalize px-3 lg:px-4 py-1.5 lg:py-2 rounded-full border-primary/30 text-primary bg-primary/5 shadow-sm text-xs lg:text-sm">
                           {userProfile?.user_type || 'buyer'}
                         </Badge>
                       </div>
                     </div>
                   </div>
 
-                  {/* Form Fields Column */}
-                  <div className="lg:col-span-2 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
+                  {/* Form Fields Column - Takes up more space on desktop */}
+                  <div className="xl:col-span-3 space-y-4 lg:space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+                      <div className="space-y-2 lg:space-y-3">
                         <Label htmlFor="displayName" className="text-sm font-semibold text-foreground flex items-center gap-2">
                           <User className="w-4 h-4 text-primary" />
                           Display Name
@@ -647,7 +647,7 @@ const Profile = () => {
                         </div>
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-2 lg:space-y-3">
                         <Label htmlFor="email" className="text-sm font-semibold text-foreground flex items-center gap-2">
                           <AlertCircle className="w-4 h-4 text-muted-foreground" />
                           Email
@@ -662,7 +662,7 @@ const Profile = () => {
                         />
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-2 lg:space-y-3">
                         <Label htmlFor="phone" className="text-sm font-semibold text-foreground flex items-center gap-2">
                           <Smartphone className="w-4 h-4 text-primary" />
                           Phone
@@ -680,7 +680,7 @@ const Profile = () => {
                         </div>
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-2 lg:space-y-3 md:col-span-2 xl:col-span-3">
                         <Label htmlFor="location" className="text-sm font-semibold text-foreground flex items-center gap-2">
                           <Home className="w-4 h-4 text-primary" />
                           Location
@@ -700,7 +700,7 @@ const Profile = () => {
                       </div>
                     </div>
                     
-                    <div className="space-y-3">
+                    <div className="space-y-2 lg:space-y-3">
                       <Label htmlFor="bio" className="text-sm font-semibold text-foreground flex items-center gap-2">
                         <Edit2 className="w-4 h-4 text-primary" />
                         Bio
@@ -708,7 +708,7 @@ const Profile = () => {
                       <div className="relative group">
                         <textarea
                           id="bio"
-                          className="w-full min-h-[120px] p-4 border-2 border-primary/20 rounded-xl bg-background/80 backdrop-blur-sm text-foreground disabled:opacity-50 resize-none focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm"
+                          className="w-full min-h-[100px] lg:min-h-[120px] p-4 border-2 border-primary/20 rounded-xl bg-background/80 backdrop-blur-sm text-foreground disabled:opacity-50 resize-none focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm"
                           value={userProfile?.bio || ''}
                           onChange={(e) => setUserProfile({...userProfile, bio: e.target.value})}
                           disabled={!isEditing}
@@ -729,7 +729,7 @@ const Profile = () => {
                     </div>
                     
                     {isEditing && (
-                      <div className="flex gap-4 pt-4">
+                      <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 pt-4">
                         <Button 
                           onClick={handleSave}
                           className="flex-1 rounded-xl bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
@@ -751,7 +751,6 @@ const Profile = () => {
               </div>
             </div>
           </TabsContent>
-
           {/* Properties Tab */}
           <TabsContent value="properties">
             <PropertyManager />
