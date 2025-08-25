@@ -249,7 +249,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
   }
 
   return (
-    <div className="max-w-md mx-auto p-4 space-y-6">
+    <div className="max-w-md sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl mx-auto p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-semibold">My Properties</h3>
         <Badge variant="outline">
@@ -268,9 +268,9 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
           </Card>
         </div>
       ) : (
-        <div className="space-y-6 mx-6">{/* Matched spacing between cards (space-y-6) with side margins (mx-6) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow duration-200">
+            <Card key={property.id} className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow duration-200 w-full">
               {/* Row 1: Full-width image and status badge */}
               <div className="relative">
                 {property.images && property.images.length > 0 ? (
@@ -296,9 +296,9 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                     variant="outline"
                     size="sm"
                     onClick={() => handleView(property)}
-                    className="flex-1"
+                    className="px-3 py-2 min-w-[80px]"
                   >
-                    <Eye className="w-4 h-4 mr-2" />
+                    <Eye className="w-4 h-4 mr-1" />
                     View
                   </Button>
                   
@@ -310,9 +310,9 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                           console.log('🔧 EDIT BUTTON CLICKED!', property.id, property.title);
                           handleEdit(property);
                         }}
-                        className="flex-1"
+                        className="px-3 py-2 min-w-[80px]"
                       >
-                        <Edit className="w-4 h-4 mr-2" />
+                        <Edit className="w-4 h-4 mr-1" />
                         Edit
                       </Button>
                      
@@ -321,9 +321,9 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                           <Button
                             variant="destructive"
                             size="sm"
-                            className="flex-1"
+                            className="px-3 py-2 min-w-[80px]"
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
+                            <Trash2 className="w-4 h-4 mr-1" />
                             Delete
                           </Button>
                         </AlertDialogTrigger>
