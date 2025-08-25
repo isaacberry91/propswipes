@@ -268,7 +268,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
           </Card>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="space-y-6">
           {properties.map((property) => (
             <Card key={property.id} className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow duration-200 w-full">
               {/* Row 1: Full-width image and status badge */}
