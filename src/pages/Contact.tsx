@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 const Contact = () => {
 
@@ -27,6 +27,19 @@ const Contact = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <Phone className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Phone</h3>
+                  <p className="text-muted-foreground">+1(888) 249-1599</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Monday - Friday, 9 AM - 6 PM EST
+                  </p>
+                </div>
+              </div>
+
               <div className="flex items-start space-x-4">
                 <div className="bg-primary/10 p-3 rounded-lg">
                   <Mail className="h-6 w-6 text-primary" />
