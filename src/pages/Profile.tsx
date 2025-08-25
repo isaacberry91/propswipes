@@ -524,24 +524,19 @@ const Profile = () => {
 
         <Tabs defaultValue="profile" className="space-y-8">
           <TabsList className="grid w-full grid-cols-5 bg-card border border-border rounded-lg overflow-hidden">
-            <TabsTrigger value="profile" className="flex items-center justify-center gap-1 px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
-              <User className="hidden sm:block w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="profile" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="properties" className="flex items-center justify-center gap-1 px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
-              <Home className="hidden sm:block w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="properties" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
               <span>Properties</span>
             </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center justify-center gap-1 px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
-              <CreditCard className="hidden sm:block w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="subscription" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
               <span>Subscription</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center justify-center gap-1 px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
-              <Settings className="hidden sm:block w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="settings" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
               <span>Settings</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center justify-center gap-1 px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
-              <Shield className="hidden sm:block w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <TabsTrigger value="security" className="flex items-center justify-center px-0.5 sm:px-2 py-2 text-[11px] sm:text-sm">
               <span>Security</span>
             </TabsTrigger>
           </TabsList>
