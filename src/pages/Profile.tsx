@@ -557,7 +557,7 @@ const Profile = () => {
                         <Shield className="w-5 h-5 text-primary" />
                       </div>
                       <div>
-                        <h2 className="text-lg font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+                        <h2 className="text-lg font-bold bg-gradient-to-r from-primary via-primary/60 to-primary/20 bg-clip-text text-transparent">
                           Professional Profile
                         </h2>
                         <p className="text-muted-foreground text-xs">
