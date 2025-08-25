@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock } from "lucide-react";
+import { Eye, BookmarkPlus, MapPin, Bed, Bath, Square, Crown, Lock, ArrowLeft, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -499,8 +499,8 @@ const Discover = () => {
         
         
         toast({
-          title: "Property Liked! 💕",
-          description: `You liked ${property.title}. Looking for matches...`,
+          title: "Property Saved! 📋",
+          description: `${property.title} has been added to your saved properties.`,
           duration: 5000
         });
         
@@ -508,9 +508,9 @@ const Discover = () => {
         // This would be expanded to check if the property owner also liked the user
       } else {
         toast({
-          title: "Property Passed",
-          description: "Looking for your next match...",
-          duration: 5000
+          title: "Property Skipped",
+          description: "Continuing your property search...",
+          duration: 3000
         });
       }
     } catch (error) {
@@ -771,14 +771,14 @@ const Discover = () => {
                 {isDragging && dragOffset.x > 50 && (
                   <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
                     <div className="bg-green-500 rounded-full p-4">
-                      <Heart className="w-8 h-8 text-white" />
+                      <Eye className="w-8 h-8 text-white" />
                     </div>
                   </div>
                 )}
                 {isDragging && dragOffset.x < -50 && (
                   <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
                     <div className="bg-red-500 rounded-full p-4">
-                      <X className="w-8 h-8 text-white" />
+                      <ArrowLeft className="w-8 h-8 text-white" />
                     </div>
                   </div>
                 )}
@@ -830,32 +830,39 @@ const Discover = () => {
               </div>
             </Card>
             
-            {/* Action Buttons */}
-            <div className="flex justify-center gap-6 mt-4">
+            {/* Professional Property Action Buttons */}
+            <div className="flex justify-center gap-3 mt-6">
               <Button
                 variant="outline"
-                size="icon"
+                size="lg"
                 onClick={() => handleSwipe('left')}
                 disabled={isAnimating}
-                className="rounded-full w-14 h-14 border-2 hover:bg-red-50 hover:border-red-300"
+                className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-muted text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
               >
-                <X className="w-6 h-6 text-red-500" />
+                <ArrowLeft className="w-4 h-4" />
+                Not Interested
               </Button>
               
               <Button
-                variant="outline"
-                size="icon"
+                variant="gradient"
+                size="lg"
                 onClick={() => handleSwipe('right')}
                 disabled={isAnimating || (!hasUnlimitedLikes() && dailyLikesUsed >= 10)}
                 className={`
-                  rounded-full w-14 h-14 border-2 hover:bg-green-50 hover:border-green-300
+                  flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200
                   ${!hasUnlimitedLikes() && dailyLikesUsed >= 10 ? 'opacity-50 cursor-not-allowed' : ''}
                 `}
               >
                 {!hasUnlimitedLikes() && dailyLikesUsed >= 10 ? (
-                  <Lock className="w-6 h-6 text-gray-400" />
+                  <>
+                    <Lock className="w-4 h-4" />
+                    Locked
+                  </>
                 ) : (
-                  <Heart className="w-6 h-6 text-green-500" />
+                  <>
+                    <BookmarkPlus className="w-4 h-4" />
+                    Save Property
+                  </>
                 )}
               </Button>
             </div>
