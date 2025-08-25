@@ -833,13 +833,13 @@ const Discover = () => {
             {/* Dating App Style Action Buttons */}
             <div className="flex justify-center gap-6 mt-6">
               <Button
-                variant="default"
+                variant="outline"
                 size="icon-lg"
                 onClick={() => handleSwipe('left')}
                 disabled={isAnimating}
                 className="rounded-full w-16 h-16 shadow-lg transition-all duration-200"
               >
-                <X className="w-8 h-8 text-white" />
+                <X className="w-8 h-8" />
               </Button>
               
               <Button
