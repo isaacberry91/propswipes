@@ -549,23 +549,23 @@ const Profile = () => {
               <div className="absolute bottom-8 left-8 h-28 w-28 rounded-full bg-gradient-to-tr from-secondary/15 to-transparent blur-2xl animate-pulse delay-1000"></div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-gradient-to-r from-primary/5 to-secondary/5 blur-3xl"></div>
               
-                <div className="relative z-10 p-4 sm:p-6 lg:p-8 xl:p-10">
-                 {/* Elegant Header */}
-                 <div className="mb-6 lg:mb-8">
-                   <div className="flex items-center gap-3 mb-4">
-                     <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
-                       <Shield className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
-                     </div>
-                     <div>
-                       <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
-                         Professional Profile
-                       </h2>
-                       <p className="text-muted-foreground text-sm lg:text-base xl:text-lg mt-1">
-                         Manage your professional real estate credentials
-                       </p>
-                     </div>
-                   </div>
-                 </div>
+                 <div className="relative z-10 p-4">
+                  {/* Elegant Header */}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 backdrop-blur-sm border border-primary/20">
+                        <Shield className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+                          Professional Profile
+                        </h2>
+                        <p className="text-muted-foreground text-xs">
+                          Manage your professional real estate credentials
+                        </p>
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Main Profile Section - Mobile-first layout */}
                   <div className="w-full">
