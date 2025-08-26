@@ -593,15 +593,14 @@ const Auth = () => {
                         <Phone className="h-4 w-4" />
                         Phone
                       </Label>
-                      <Input
-                        id="signup-phone"
-                        type="tel"
-                        placeholder="+1 (555) 123-4567"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="transition-all focus:ring-2 focus:ring-primary/20"
-                        required
-                      />
+                    <Input
+                      id="signup-phone"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
+                    />
                     </div>
                   </div>
 
@@ -617,7 +616,6 @@ const Auth = () => {
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                       className="transition-all focus:ring-2 focus:ring-primary/20"
-                      required
                     />
                   </div>
 
