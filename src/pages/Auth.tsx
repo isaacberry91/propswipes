@@ -414,7 +414,7 @@ const Auth = () => {
           <CardHeader className="text-center space-y-2 pb-8">
             <CardTitle className="text-2xl font-bold text-foreground">Access Your Account</CardTitle>
             <CardDescription className="text-base">
-              Join thousands of verified real estate professionals
+              Join PropSwipes
             </CardDescription>
           </CardHeader>
           <CardContent>
