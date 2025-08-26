@@ -69,7 +69,7 @@ const Index = () => {
               className="text-lg px-8 py-4"
             >
               <Shield className="w-6 h-6 mr-3" />
-              Join Professional Network
+              Join PropSwipes
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
             <Button 
