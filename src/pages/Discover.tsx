@@ -43,8 +43,13 @@ const Discover = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedRadius, setSelectedRadius] = useState(10);
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    return localStorage.getItem('propswipes_selected_location') || "";
+  });
+  const [selectedRadius, setSelectedRadius] = useState(() => {
+    const stored = localStorage.getItem('propswipes_selected_radius');
+    return stored ? parseInt(stored) : 10;
+  });
   const [searchFilters, setSearchFilters] = useState<SearchFiltersType>({
     priceRange: [200000, 2000000],
     bedrooms: 'any',
@@ -597,6 +602,9 @@ const Discover = () => {
     console.log('🔍 Getting properties for location:', { location, radius });
     setSelectedLocation(location);
     setSelectedRadius(radius);
+    // Persist to localStorage
+    localStorage.setItem('propswipes_selected_location', location);
+    localStorage.setItem('propswipes_selected_radius', radius.toString());
     setCurrentIndex(0);
     
     // Geocode the location to get coordinates for map
@@ -620,6 +628,7 @@ const Discover = () => {
 
   const handleRadiusChange = (newRadius: number) => {
     setSelectedRadius(newRadius);
+    localStorage.setItem('propswipes_selected_radius', newRadius.toString());
     if (selectedLocation) {
       getPropertiesForLocation(selectedLocation, newRadius);
     }
