@@ -158,11 +158,12 @@ const PropertyDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-md mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between p-4 border-b">
           <Button 
-            variant="outline" 
+            variant="ghost" 
+            size="sm"
             onClick={() => navigate('/profile')}
             className="flex items-center gap-2"
           >
@@ -170,218 +171,204 @@ const PropertyDetails = () => {
             Back
           </Button>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {getStatusIcon(property.status)}
-            <Badge className={getStatusColor(property.status)}>
+            <Badge className={getStatusColor(property.status)} variant="outline">
               {property.status}
             </Badge>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Property Images */}
-            <Card className="overflow-hidden">
-              {property.images && property.images.length > 0 ? (
-                <Carousel className="w-full">
-                  <CarouselContent>
-                    {property.images.map((image, index) => (
-                      <CarouselItem key={index}>
-                        <div className="relative">
-                          <img 
-                            src={image} 
-                            alt={`${property.title} - ${index + 1}`}
-                            className="w-full h-96 object-cover"
-                          />
-                          <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                            {index + 1} / {property.images.length}
-                          </div>
-                        </div>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  {property.images.length > 1 && (
-                    <>
-                      <CarouselPrevious className="left-4" />
-                      <CarouselNext className="right-4" />
-                    </>
-                  )}
-                </Carousel>
-              ) : (
-                <div className="w-full h-96 bg-muted flex items-center justify-center">
-                  <Home className="w-16 h-16 text-muted-foreground" />
-                </div>
+        {/* Property Images */}
+        <div className="relative">
+          {property.images && property.images.length > 0 ? (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {property.images.map((image, index) => (
+                  <CarouselItem key={index}>
+                    <div className="relative">
+                      <img 
+                        src={image} 
+                        alt={`${property.title} - ${index + 1}`}
+                        className="w-full h-80 object-cover"
+                      />
+                      <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                        {index + 1} / {property.images.length}
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {property.images.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-4" />
+                  <CarouselNext className="right-4" />
+                </>
               )}
+            </Carousel>
+          ) : (
+            <div className="w-full h-80 bg-muted flex items-center justify-center">
+              <Home className="w-16 h-16 text-muted-foreground" />
+            </div>
+          )}
+        </div>
+
+        {/* Property Content */}
+        <div className="p-4 space-y-6">
+          {/* Title and Price */}
+          <div>
+            <h1 className="text-2xl font-bold text-foreground mb-2">{property.title}</h1>
+            <div className="flex items-start gap-1 text-muted-foreground mb-3">
+              <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <span className="text-sm">{property.address}, {property.city}, {property.state} {property.zip_code}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-green-600" />
+              <span className="text-2xl font-bold text-green-600">
+                ${property.price.toLocaleString()}
+              </span>
+            </div>
+          </div>
+
+          {/* Property Details */}
+          <Card className="p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Bed className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <p className="text-xl font-bold">{property.bedrooms || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground">Bedrooms</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Bath className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <p className="text-xl font-bold">{property.bathrooms || 'N/A'}</p>
+                <p className="text-xs text-muted-foreground">Bathrooms</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Square className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <p className="text-xl font-bold">
+                  {property.square_feet ? property.square_feet.toLocaleString() : 'N/A'}
+                </p>
+                <p className="text-xs text-muted-foreground">Sq Ft</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Home className="w-4 h-4 text-muted-foreground" />
+                </div>
+                <p className="text-xl font-bold capitalize">{property.property_type}</p>
+                <p className="text-xs text-muted-foreground">Type</p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Description */}
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-3">Description</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {property.description || 'No description available.'}
+            </p>
+          </Card>
+
+          {/* Amenities */}
+          {property.amenities && property.amenities.length > 0 && (
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3">Amenities</h3>
+              <div className="flex flex-wrap gap-2">
+                {property.amenities.map((amenity, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {amenity}
+                  </Badge>
+                ))}
+              </div>
             </Card>
+          )}
 
-            {/* Property Info */}
-            <Card className="p-6">
-              <div className="space-y-6">
-                {/* Title and Price */}
+          {/* Owner Information */}
+          {property.profiles && (
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Property Owner
+              </h3>
+              
+              <div className="space-y-3">
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{property.title}</h1>
-                  <div className="flex items-center gap-4 text-muted-foreground mb-4">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{property.address}, {property.city}, {property.state} {property.zip_code}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-6 h-6 text-green-600" />
-                    <span className="text-3xl font-bold text-green-600">
-                      ${property.price.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Property Details */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Bed className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-2xl font-bold">{property.bedrooms || 'N/A'}</p>
-                    <p className="text-sm text-muted-foreground">Bedrooms</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Bath className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-2xl font-bold">{property.bathrooms || 'N/A'}</p>
-                    <p className="text-sm text-muted-foreground">Bathrooms</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Square className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-2xl font-bold">
-                      {property.square_feet ? property.square_feet.toLocaleString() : 'N/A'}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Sq Ft</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Home className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-2xl font-bold capitalize">{property.property_type}</p>
-                    <p className="text-sm text-muted-foreground">Type</p>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Description */}
-                <div>
-                  <h3 className="text-xl font-semibold mb-3">Description</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {property.description || 'No description available.'}
+                  <p className="font-medium text-foreground">
+                    {property.profiles.display_name || 'Unknown Owner'}
+                  </p>
+                  <p className="text-sm text-muted-foreground capitalize">
+                    {property.profiles.user_type}
                   </p>
                 </div>
-
-                {/* Amenities */}
-                {property.amenities && property.amenities.length > 0 && (
+                
+                {property.profiles.phone && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className="w-4 h-4 text-muted-foreground" />
+                    <span>{property.profiles.phone}</span>
+                  </div>
+                )}
+                
+                {property.profiles.location && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span>{property.profiles.location}</span>
+                  </div>
+                )}
+                
+                {property.profiles.bio && (
                   <div>
-                    <h3 className="text-xl font-semibold mb-3">Amenities</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {property.amenities.map((amenity, index) => (
-                        <Badge key={index} variant="secondary">
-                          {amenity}
-                        </Badge>
-                      ))}
-                    </div>
+                    <p className="text-sm text-muted-foreground">{property.profiles.bio}</p>
                   </div>
                 )}
               </div>
             </Card>
-          </div>
+          )}
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Owner Information */}
-            {property.profiles && (
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  Property Owner
-                </h3>
-                
-                <div className="space-y-4">
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {property.profiles.display_name || 'Unknown Owner'}
-                    </p>
-                    <p className="text-sm text-muted-foreground capitalize">
-                      {property.profiles.user_type}
-                    </p>
-                  </div>
-                  
-                  {property.profiles.phone && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <span>{property.profiles.phone}</span>
-                    </div>
-                  )}
-                  
-                  {property.profiles.location && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <span>{property.profiles.location}</span>
-                    </div>
-                  )}
-                  
-                  {property.profiles.bio && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">{property.profiles.bio}</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            )}
-
-            {/* Property Timeline */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Timeline
-              </h3>
-              
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Listed</p>
-                    <p className="text-muted-foreground">
-                      {new Date(property.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Last Updated</p>
-                    <p className="text-muted-foreground">
-                      {new Date(property.updated_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
+          {/* Property Timeline */}
+          <Card className="p-4">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Timeline
+            </h3>
+            
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">Listed</p>
+                  <p className="text-muted-foreground">
+                    {new Date(property.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
                 </div>
               </div>
-            </Card>
-          </div>
+              
+              <div className="flex items-center gap-3">
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">Last Updated</p>
+                  <p className="text-muted-foreground">
+                    {new Date(property.updated_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     </div>
