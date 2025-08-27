@@ -78,20 +78,14 @@ const Admin = () => {
       // Load active properties with detailed logging
       const { data: propertiesData, error: propertiesError } = await supabase
         .from('properties')
-        .select(`
-          *,
-          profiles!properties_owner_id_fkey(display_name)
-        `)
+        .select('*')
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       // Load deleted properties
       const { data: deletedPropertiesData } = await supabase
         .from('properties')
-        .select(`
-          *,
-          profiles!properties_owner_id_fkey(display_name)
-        `)
+        .select('*')
         .not('deleted_at', 'is', null)
         .order('deleted_at', { ascending: false });
 
@@ -132,23 +126,15 @@ const Admin = () => {
         .from('matches')
         .select('*', { count: 'exact', head: true });
 
-      // Load moderation data
+      // Load moderation data - using simple selects since foreign keys don't exist
       const { data: reportsData } = await supabase
         .from('reports')
-        .select(`
-          *,
-          reporter:reporter_id(display_name, avatar_url),
-          reported_user:reported_user_id(display_name, avatar_url, user_type)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       const { data: blockedUsersData } = await supabase
         .from('blocked_users')
-        .select(`
-          *,
-          blocker:blocker_id(display_name, avatar_url),
-          blocked:blocked_id(display_name, avatar_url, user_type)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       const { count: pendingReportsCount } = await supabase
@@ -521,37 +507,31 @@ const Admin = () => {
                       <TableBody>
                         {reports.map((report) => (
                           <TableRow key={report.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <Avatar className="w-8 h-8">
-                                  <AvatarImage src={report.reporter?.avatar_url} />
-                                  <AvatarFallback>
-                                    {report.reporter?.display_name?.charAt(0) || 'U'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="font-medium">
-                                  {report.reporter?.display_name || 'Unknown User'}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <Avatar className="w-8 h-8">
-                                  <AvatarImage src={report.reported_user?.avatar_url} />
-                                  <AvatarFallback>
-                                    {report.reported_user?.display_name?.charAt(0) || 'U'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <div className="font-medium">
-                                    {report.reported_user?.display_name || 'Unknown User'}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {report.reported_user?.user_type || 'Unknown'}
-                                  </div>
-                                </div>
-                              </div>
-                            </TableCell>
+                             <TableCell>
+                               <div className="flex items-center gap-3">
+                                 <Avatar className="w-8 h-8">
+                                   <AvatarFallback>U</AvatarFallback>
+                                 </Avatar>
+                                 <span className="font-medium">
+                                   {report.reporter_id || 'Unknown User'}
+                                 </span>
+                               </div>
+                             </TableCell>
+                             <TableCell>
+                               <div className="flex items-center gap-3">
+                                 <Avatar className="w-8 h-8">
+                                   <AvatarFallback>U</AvatarFallback>
+                                 </Avatar>
+                                 <div>
+                                   <div className="font-medium">
+                                     {report.reported_user_id || 'Unknown User'}
+                                   </div>
+                                   <div className="text-sm text-muted-foreground">
+                                     Reported User
+                                   </div>
+                                 </div>
+                               </div>
+                             </TableCell>
                             <TableCell>
                               <Badge variant="outline">{report.report_type}</Badge>
                             </TableCell>
@@ -667,37 +647,31 @@ const Admin = () => {
                       <TableBody>
                         {blockedUsers.map((block) => (
                           <TableRow key={block.id}>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <Avatar className="w-8 h-8">
-                                  <AvatarImage src={block.blocker?.avatar_url} />
-                                  <AvatarFallback>
-                                    {block.blocker?.display_name?.charAt(0) || 'U'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="font-medium">
-                                  {block.blocker?.display_name || 'Unknown User'}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-3">
-                                <Avatar className="w-8 h-8">
-                                  <AvatarImage src={block.blocked?.avatar_url} />
-                                  <AvatarFallback>
-                                    {block.blocked?.display_name?.charAt(0) || 'U'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <div className="font-medium">
-                                    {block.blocked?.display_name || 'Unknown User'}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {block.blocked?.user_type || 'Unknown'}
-                                  </div>
-                                </div>
-                              </div>
-                            </TableCell>
+                             <TableCell>
+                               <div className="flex items-center gap-3">
+                                 <Avatar className="w-8 h-8">
+                                   <AvatarFallback>U</AvatarFallback>
+                                 </Avatar>
+                                 <span className="font-medium">
+                                   {block.blocker_id || 'Unknown User'}
+                                 </span>
+                               </div>
+                             </TableCell>
+                             <TableCell>
+                               <div className="flex items-center gap-3">
+                                 <Avatar className="w-8 h-8">
+                                   <AvatarFallback>U</AvatarFallback>
+                                 </Avatar>
+                                 <div>
+                                   <div className="font-medium">
+                                     {block.blocked_id || 'Unknown User'}
+                                   </div>
+                                   <div className="text-sm text-muted-foreground">
+                                     Blocked User
+                                   </div>
+                                 </div>
+                               </div>
+                             </TableCell>
                             <TableCell className="max-w-xs">
                               <div className="truncate" title={block.reason}>
                                 {block.reason || 'No reason provided'}
