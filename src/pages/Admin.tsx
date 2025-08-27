@@ -250,20 +250,22 @@ const Admin = () => {
 
   const handleDeleteProperty = async (propertyId: string) => {
     try {
+      // Soft delete to avoid FK violations (e.g., property_swipes references)
       const { error } = await supabase
         .from('properties')
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .eq('id', propertyId);
 
       if (error) throw error;
 
       toast({
         title: "Property deleted",
-        description: "Property listing has been permanently deleted",
+        description: "The listing was archived and removed from active view.",
         duration: 5000
       });
       loadData();
     } catch (error) {
+      console.error('Admin delete property failed:', error);
       toast({
         title: "Error",
         description: "Failed to delete property",
@@ -825,9 +827,9 @@ const Admin = () => {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                                <AlertDialogTitle>Archive Property</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  This will permanently delete "{property.title}" and all associated data. This action cannot be undone.
+                                  This will archive "{property.title}" and remove it from active listings. Related activity remains for audit.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -836,7 +838,7 @@ const Admin = () => {
                                   onClick={() => handleDeleteProperty(property.id)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
-                                  Delete Forever
+                                  Archive
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
