@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,8 @@ import { Bell, BellOff, Smartphone, CheckCircle, AlertTriangle } from "lucide-re
 import { useToast } from "@/hooks/use-toast";
 import { notificationService } from "@/services/notificationService";
 import { Capacitor } from "@capacitor/core";
-
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 interface PushNotificationsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -21,10 +22,13 @@ export const PushNotificationsDialog = ({ open, onOpenChange }: PushNotification
   const [isInitializing, setIsInitializing] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<'default' | 'granted' | 'denied'>('default');
   const [isNative, setIsNative] = useState(false);
+  const { user } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
       checkNotificationStatus();
+      fetchPreferences();
     }
   }, [open]);
 
@@ -33,70 +37,129 @@ export const PushNotificationsDialog = ({ open, onOpenChange }: PushNotification
     
     if ('Notification' in window) {
       setPermissionStatus(Notification.permission);
-      setPushEnabled(Notification.permission === 'granted');
+    }
+  };
+
+  const fetchPreferences = async () => {
+    if (!user) return;
+    try {
+      // Get user profile ID first
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (profileError) throw profileError;
+
+      const { data: prefs, error } = await supabase
+        .from('notification_preferences' as any)
+        .select('*')
+        .eq('profile_id', profile.id)
+        .maybeSingle();
+      if (error) throw error;
+
+      if (prefs) {
+        const enabled = Boolean((prefs as any).match_notifications) && Boolean((prefs as any).message_notifications);
+        setPushEnabled(enabled);
+      }
+    } catch (e) {
+      console.error('Error loading push preferences:', e);
     }
   };
 
   const handleEnablePushNotifications = async () => {
-    setIsInitializing(true);
-    
+    setIsSaving(true);
     try {
-      if ('Notification' in window) {
-        const permission = await Notification.requestPermission();
-        setPermissionStatus(permission);
-        
-        if (permission === 'granted') {
-          // Initialize the notification service
+      if (!user) throw new Error('Not authenticated');
+
+      // Get profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (profileError) throw profileError;
+
+      // Save preference (enable)
+      const { error: upsertError } = await supabase
+        .from('notification_preferences' as any)
+        .upsert({
+          profile_id: profile.id,
+          match_notifications: true,
+          message_notifications: true,
+        }, { onConflict: 'profile_id' });
+      if (upsertError) throw upsertError;
+
+      setPushEnabled(true);
+
+      // Try to initialize push on native; on web, don't block saving
+      if (Capacitor.isNativePlatform()) {
+        try {
+          setIsInitializing(true);
           await notificationService.initialize();
-          setPushEnabled(true);
-          
-          toast({
-            title: "Push notifications enabled",
-            description: "You'll now receive push notifications for new messages and matches.",
-          });
-        } else {
-          toast({
-            title: "Permission denied",
-            description: "Push notifications require permission. Please enable them in your browser settings.",
-            variant: "destructive",
-          });
+        } catch (err) {
+          console.warn('Push init failed (non-fatal):', err);
+        } finally {
+          setIsInitializing(false);
         }
-      } else {
-        toast({
-          title: "Not supported",
-          description: "Push notifications are not supported in this browser.",
-          variant: "destructive",
-        });
       }
+
+      toast({
+        title: 'Preferences saved',
+        description: 'Push notifications enabled. On web, delivery may be limited.',
+      });
     } catch (error) {
       console.error('Error enabling push notifications:', error);
       toast({
-        title: "Error enabling notifications",
-        description: "Please try again or check your browser settings.",
-        variant: "destructive",
+        title: 'Error enabling',
+        description: 'Could not save your preference. Please try again.',
+        variant: 'destructive',
       });
     } finally {
-      setIsInitializing(false);
+      setIsSaving(false);
     }
   };
 
   const handleDisablePushNotifications = async () => {
+    setIsSaving(true);
     try {
-      // Remove push token from backend
+      if (!user) throw new Error('Not authenticated');
+
+      // Get profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      if (profileError) throw profileError;
+
+      // Save preference (disable)
+      const { error: upsertError } = await supabase
+        .from('notification_preferences' as any)
+        .upsert({
+          profile_id: profile.id,
+          match_notifications: false,
+          message_notifications: false,
+        }, { onConflict: 'profile_id' });
+      if (upsertError) throw upsertError;
+
+      // Remove push token from backend (noop on web)
       await notificationService.removePushToken();
       setPushEnabled(false);
-      
+
       toast({
-        title: "Push notifications disabled",
-        description: "You will no longer receive push notifications.",
+        title: 'Preferences saved',
+        description: 'Push notifications disabled.',
       });
     } catch (error) {
       console.error('Error disabling push notifications:', error);
       toast({
-        title: "Error disabling notifications",
-        description: "Please try again.",
-        variant: "destructive",
+        title: 'Error disabling',
+        description: 'Could not save your preference. Please try again.',
+        variant: 'destructive',
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -134,6 +197,9 @@ export const PushNotificationsDialog = ({ open, onOpenChange }: PushNotification
             <Bell className="w-5 h-5" />
             Push Notifications
           </DialogTitle>
+          <DialogDescription>
+            Manage your push notification preference. Saving works in browser; delivery requires the native app.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">
@@ -168,7 +234,7 @@ export const PushNotificationsDialog = ({ open, onOpenChange }: PushNotification
                 id="push-toggle"
                 checked={pushEnabled}
                 onCheckedChange={pushEnabled ? handleDisablePushNotifications : handleEnablePushNotifications}
-                disabled={isInitializing}
+                disabled={isInitializing || isSaving}
               />
             </div>
           </Card>
