@@ -494,7 +494,9 @@ const ListProperty = () => {
   };
 
   const handleGallerySelect = async () => {
-    if (images.length >= 10) {
+    const remainingSlots = 10 - images.length;
+    
+    if (remainingSlots <= 0) {
       toast({
         title: "Maximum photos reached",
         description: "You can upload up to 10 photos total.",
@@ -503,22 +505,60 @@ const ListProperty = () => {
     }
 
     try {
-      const image = await CapacitorCamera.getPhoto({
-        quality: 80,
-        resultType: CameraResultType.DataUrl,
-        source: CameraSource.Photos,
-        allowEditing: true
-      });
+      const selectedImages: { file: File; dataUrl: string }[] = [];
+      let continueSelecting = true;
+      
+      while (continueSelecting && selectedImages.length < remainingSlots) {
+        try {
+          const image = await CapacitorCamera.getPhoto({
+            quality: 80,
+            resultType: CameraResultType.DataUrl,
+            source: CameraSource.Photos,
+            allowEditing: true
+          });
 
-      if (image.dataUrl) {
-        // Convert data URL to File object
-        const response = await fetch(image.dataUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
-        
-        setImages(prev => [...prev, file]);
-        setImageUrls(prev => [...prev, image.dataUrl]);
+          if (image.dataUrl) {
+            // Convert data URL to File object
+            const response = await fetch(image.dataUrl);
+            const blob = await response.blob();
+            const file = new File([blob], `photo_${Date.now()}_${selectedImages.length}.jpg`, { type: 'image/jpeg' });
+            
+            selectedImages.push({ file, dataUrl: image.dataUrl });
+            
+            // Check if user wants to select more photos and hasn't reached limit
+            const remaining = remainingSlots - selectedImages.length;
+            if (remaining > 0) {
+              const continueSelection = await new Promise<boolean>((resolve) => {
+                const result = confirm(`Photo added! You can add ${remaining} more photo(s). Select another photo?`);
+                resolve(result);
+              });
+              
+              if (!continueSelection) {
+                continueSelecting = false;
+              }
+            } else {
+              continueSelecting = false;
+            }
+          } else {
+            continueSelecting = false;
+          }
+        } catch (selectionError) {
+          // User cancelled selection
+          continueSelecting = false;
+        }
       }
+      
+      // Add all selected images at once
+      if (selectedImages.length > 0) {
+        setImages(prev => [...prev, ...selectedImages.map(img => img.file)]);
+        setImageUrls(prev => [...prev, ...selectedImages.map(img => img.dataUrl)]);
+        
+        toast({
+          title: `${selectedImages.length} photo(s) added!`,
+          description: `Successfully added ${selectedImages.length} photo(s) to your property listing.`,
+        });
+      }
+      
     } catch (error) {
       console.error('Error selecting from gallery:', error);
       toast({
