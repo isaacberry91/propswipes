@@ -656,7 +656,7 @@ const Discover = () => {
             <div className="flex items-center gap-1.5 sm:gap-2">
               {!hasUnlimitedLikes() && (
                 <div className="bg-accent px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs h-8 flex items-center">
-                  {10 - dailyLikesUsed} views left
+                  {10 - dailyLikesUsed} likes left
                 </div>
               )}
               <SearchFiltersComponent 
