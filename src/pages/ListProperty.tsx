@@ -505,58 +505,63 @@ const ListProperty = () => {
     }
 
     try {
-      const selectedImages: { file: File; dataUrl: string }[] = [];
-      let continueSelecting = true;
-      
-      while (continueSelecting && selectedImages.length < remainingSlots) {
-        try {
-          const image = await CapacitorCamera.getPhoto({
-            quality: 80,
-            resultType: CameraResultType.DataUrl,
-            source: CameraSource.Photos,
-            allowEditing: true
-          });
-
-          if (image.dataUrl) {
-            // Convert data URL to File object
-            const response = await fetch(image.dataUrl);
-            const blob = await response.blob();
-            const file = new File([blob], `photo_${Date.now()}_${selectedImages.length}.jpg`, { type: 'image/jpeg' });
-            
-            selectedImages.push({ file, dataUrl: image.dataUrl });
-            
-            // Check if user wants to select more photos and hasn't reached limit
-            const remaining = remainingSlots - selectedImages.length;
-            if (remaining > 0) {
-              const continueSelection = await new Promise<boolean>((resolve) => {
-                const result = confirm(`Photo added! You can add ${remaining} more photo(s). Select another photo?`);
-                resolve(result);
-              });
-              
-              if (!continueSelection) {
-                continueSelecting = false;
-              }
-            } else {
-              continueSelecting = false;
-            }
-          } else {
-            continueSelecting = false;
-          }
-        } catch (selectionError) {
-          // User cancelled selection
-          continueSelecting = false;
-        }
-      }
-      
-      // Add all selected images at once
-      if (selectedImages.length > 0) {
-        setImages(prev => [...prev, ...selectedImages.map(img => img.file)]);
-        setImageUrls(prev => [...prev, ...selectedImages.map(img => img.dataUrl)]);
+      // On web, use multiple file selection
+      if (typeof window !== 'undefined' && !(window as any).Capacitor) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.multiple = true;
         
-        toast({
-          title: `${selectedImages.length} photo(s) added!`,
-          description: `Successfully added ${selectedImages.length} photo(s) to your property listing.`,
+        input.onchange = async (e) => {
+          const files = Array.from((e.target as HTMLInputElement).files || []);
+          const selectedFiles = files.slice(0, remainingSlots);
+          
+          if (selectedFiles.length > 0) {
+            const newImageUrls: string[] = [];
+            
+            for (const file of selectedFiles) {
+              const dataUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target?.result as string);
+                reader.readAsDataURL(file);
+              });
+              newImageUrls.push(dataUrl);
+            }
+            
+            setImages(prev => [...prev, ...selectedFiles]);
+            setImageUrls(prev => [...prev, ...newImageUrls]);
+            
+            toast({
+              title: `${selectedFiles.length} photo(s) added!`,
+              description: `Successfully added ${selectedFiles.length} photo(s) to your property listing.`,
+            });
+          }
+        };
+        
+        input.click();
+      } else {
+        // On mobile, use Capacitor's native gallery picker (single selection)
+        const image = await CapacitorCamera.getPhoto({
+          quality: 80,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Photos,
+          allowEditing: true
         });
+
+        if (image.dataUrl) {
+          // Convert data URL to File object
+          const response = await fetch(image.dataUrl);
+          const blob = await response.blob();
+          const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+          
+          setImages(prev => [...prev, file]);
+          setImageUrls(prev => [...prev, image.dataUrl]);
+          
+          toast({
+            title: "Photo added!",
+            description: "Successfully added photo to your property listing.",
+          });
+        }
       }
       
     } catch (error) {
