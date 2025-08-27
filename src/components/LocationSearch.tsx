@@ -392,9 +392,9 @@ const LocationSearch = ({
           console.log('📍 Setting map center to GPS coordinates:', coords);
           setMapCenter(coords);
           
-          // Create a location string with coordinates that can be parsed
-          const locationName = `Current Location (${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)})`;
-          console.log('📍 Using location name with coordinates:', locationName);
+          // Create a clean location string for display
+          const locationName = "Current Location";
+          console.log('📍 Using location name:', locationName);
           
           // Call onChange with coordinates directly
           onChange(locationName, selectedRadius);
