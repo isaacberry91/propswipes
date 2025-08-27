@@ -37,6 +37,7 @@ import { ActiveSessionsDialog } from "@/components/ActiveSessionsDialog";
 import { EmailNotificationsDialog } from "@/components/EmailNotificationsDialog";
 import { PushNotificationsDialog } from "@/components/PushNotificationsDialog";
 import { PrivacySettingsDialog } from "@/components/PrivacySettingsDialog";
+import { NotificationsList } from "@/components/NotificationsList";
 
 const Profile = () => {
   const { toast } = useToast();
