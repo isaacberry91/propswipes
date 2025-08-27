@@ -31,6 +31,12 @@ const config: CapacitorConfig = {
     Browser: {
       presentationStyle: 'popover'
     },
+    Camera: {
+      allowEditing: false,
+      quality: 90,
+      saveToGallery: false,
+      source: 'prompt'
+    },
     NativePurchases: {
       androidPublicKey: '',
       usesStoreKit2IfAvailable: false
