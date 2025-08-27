@@ -24,15 +24,17 @@ export const NotificationsList = () => {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [profileId, setProfileId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchNotifications = async () => {
-    if (!user) return;
+    if (!user || !profileId) return;
 
     try {
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
+        .eq('recipient_id', profileId)
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -51,11 +53,13 @@ export const NotificationsList = () => {
   };
 
   const markAsRead = async (notificationId: string) => {
+    if (!profileId) return;
     try {
       const { error } = await supabase
         .from('notifications')
         .update({ read_at: new Date().toISOString() })
-        .eq('id', notificationId);
+        .eq('id', notificationId)
+        .eq('recipient_id', profileId);
 
       if (error) throw error;
 
@@ -68,10 +72,12 @@ export const NotificationsList = () => {
       );
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      toast({ title: 'Error', description: 'Failed to update notification.', variant: 'destructive' });
     }
   };
 
   const markAllAsRead = async () => {
+    if (!profileId) return;
     try {
       const unreadIds = notifications
         .filter(n => !n.read_at)
@@ -82,7 +88,8 @@ export const NotificationsList = () => {
       const { error } = await supabase
         .from('notifications')
         .update({ read_at: new Date().toISOString() })
-        .in('id', unreadIds);
+        .in('id', unreadIds)
+        .eq('recipient_id', profileId);
 
       if (error) throw error;
 
@@ -108,8 +115,21 @@ export const NotificationsList = () => {
   };
 
   useEffect(() => {
-    fetchNotifications();
+    if (!user) { setProfileId(null); return; }
+    supabase.rpc('get_user_profile_id_for_auth_user')
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error loading profile id:', error);
+          setProfileId(null);
+        } else {
+          setProfileId((data as string) ?? null);
+        }
+      });
   }, [user]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [profileId]);
 
   if (loading) {
     return (
