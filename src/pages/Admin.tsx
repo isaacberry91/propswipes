@@ -28,7 +28,7 @@ import {
   ExternalLink
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { adminSupabase } from "@/lib/adminSupabase";
+import { supabase } from "@/integrations/supabase/client";
 import AdminAuth from "@/components/AdminAuth";
 
 const Admin = () => {
@@ -68,7 +68,7 @@ const Admin = () => {
       console.log('🔧 Admin Debug: Loading data...');
       
       // Load users
-      const { data: usersData } = await adminSupabase
+      const { data: usersData } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
@@ -76,14 +76,14 @@ const Admin = () => {
       console.log('🔧 Admin Debug: Users loaded:', usersData?.length);
 
       // Load active properties with detailed logging
-      const { data: propertiesData, error: propertiesError } = await adminSupabase
+      const { data: propertiesData, error: propertiesError } = await supabase
         .from('properties')
         .select('*')
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       // Load deleted properties
-      const { data: deletedPropertiesData } = await adminSupabase
+      const { data: deletedPropertiesData } = await supabase
         .from('properties')
         .select('*')
         .not('deleted_at', 'is', null)
@@ -95,24 +95,24 @@ const Admin = () => {
       });
 
       // Load stats with detailed logging
-      const { count: userCount } = await adminSupabase
+      const { count: userCount } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
-      const { count: propertyCount } = await adminSupabase
+      const { count: propertyCount } = await supabase
         .from('properties')
         .select('*', { count: 'exact', head: true })
         .is('deleted_at', null);
 
       console.log('🔧 Admin Debug: Total properties count:', propertyCount);
 
-      const { count: pendingCount, error: pendingError } = await adminSupabase
+      const { count: pendingCount, error: pendingError } = await supabase
         .from('properties')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending')
         .is('deleted_at', null);
 
-      const { count: deletedCount } = await adminSupabase
+      const { count: deletedCount } = await supabase
         .from('properties')
         .select('*', { count: 'exact', head: true })
         .not('deleted_at', 'is', null);
@@ -122,31 +122,31 @@ const Admin = () => {
         error: pendingError
       });
 
-      const { count: matchCount } = await adminSupabase
+      const { count: matchCount } = await supabase
         .from('matches')
         .select('*', { count: 'exact', head: true });
 
       // Load moderation data - using simple selects since foreign keys don't exist
-      const { data: reportsData } = await adminSupabase
+      const { data: reportsData } = await supabase
         .from('reports')
         .select('*')
         .order('created_at', { ascending: false });
 
-      const { data: blockedUsersData } = await adminSupabase
+      const { data: blockedUsersData } = await supabase
         .from('blocked_users')
         .select('*')
         .order('created_at', { ascending: false });
 
-      const { count: pendingReportsCount } = await adminSupabase
+      const { count: pendingReportsCount } = await supabase
         .from('reports')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
 
-      const { count: totalReportsCount } = await adminSupabase
+      const { count: totalReportsCount } = await supabase
         .from('reports')
         .select('*', { count: 'exact', head: true });
 
-      const { count: totalBlocksCount } = await adminSupabase
+      const { count: totalBlocksCount } = await supabase
         .from('blocked_users')
         .select('*', { count: 'exact', head: true });
 
@@ -200,7 +200,7 @@ const Admin = () => {
 
   const handleApproveProperty = async (propertyId: string) => {
     try {
-      const { error } = await adminSupabase
+      const { error } = await supabase
         .from('properties')
         .update({ status: 'approved' })
         .eq('id', propertyId);
@@ -225,7 +225,7 @@ const Admin = () => {
 
   const handleRejectProperty = async (propertyId: string) => {
     try {
-      const { error } = await adminSupabase
+      const { error } = await supabase
         .from('properties')
         .update({ status: 'rejected' })
         .eq('id', propertyId);
@@ -251,7 +251,7 @@ const Admin = () => {
   const handleDeleteProperty = async (propertyId: string) => {
     try {
       // Soft delete to avoid FK violations (e.g., property_swipes references)
-      const { error } = await adminSupabase
+      const { error } = await supabase
         .from('properties')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', propertyId);
@@ -282,7 +282,7 @@ const Admin = () => {
 
   const handleResolveReport = async (reportId: string) => {
     try {
-      const { error } = await adminSupabase
+      const { error } = await supabase
         .from('reports')
         .update({ 
           status: 'resolved',
@@ -308,7 +308,7 @@ const Admin = () => {
 
   const handleDismissReport = async (reportId: string) => {
     try {
-      const { error } = await adminSupabase
+      const { error } = await supabase
         .from('reports')
         .update({ 
           status: 'dismissed',
@@ -334,7 +334,7 @@ const Admin = () => {
 
   const handleUnblockUser = async (blockId: string) => {
     try {
-      const { error } = await adminSupabase
+      const { error } = await supabase
         .from('blocked_users')
         .delete()
         .eq('id', blockId);
@@ -354,7 +354,6 @@ const Admin = () => {
       });
     }
   };
-
   const handleViewProfile = (userId: string) => {
     // Navigate to the profile page with the user ID
     window.open(`/profile/${userId}`, '_blank');

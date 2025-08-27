@@ -39,7 +39,21 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
 
       if (data.isValid) {
         console.log('🔧 Admin password verified successfully');
+
+        // Sign in as admin user so RLS admin policies apply
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: data.adminEmail,
+          password: data.adminPassword,
+        });
+
+        if (signInError) {
+          console.error('Admin sign-in failed:', signInError);
+          setError('Could not establish admin session.');
+          return;
+        }
+
         localStorage.setItem("admin-authenticated", "true");
+        localStorage.setItem("admin-session-email", data.adminEmail);
         
         toast({
           title: "Admin Access Granted",
