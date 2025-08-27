@@ -147,7 +147,8 @@ const Chat = () => {
             property_type,
             amenities,
             address,
-            description
+            description,
+            deleted_at
           )
         `)
         .eq('id', matchId)
@@ -200,7 +201,8 @@ const Chat = () => {
           type: property.property_type,
           amenities: property.amenities || [],
           address: property.address,
-          description: property.description
+          description: property.description,
+          isDeleted: !!property.deleted_at
         }
       };
 
@@ -746,65 +748,78 @@ const Chat = () => {
 
       {/* Message Input */}
       <div className="border-t border-border/50 bg-card/90 backdrop-blur-sm p-4 sticky bottom-0">
-        <form onSubmit={handleSendMessage} className="max-w-md mx-auto">
-          <div className="flex gap-2">
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect(file);
-              }}
-              accept="*/*"
-            />
-            <input
-              type="file"
-              ref={imageInputRef}
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFileSelect(file);
-              }}
-              accept="image/*"
-            />
-            <Button 
-              type="button" 
-              variant="ghost" 
-              size="icon"
-              className="shrink-0"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-            >
-              <Paperclip className="w-4 h-4" />
-            </Button>
-            <Button 
-              type="button" 
-              variant="ghost" 
-              size="icon"
-              className="shrink-0"
-              onClick={() => imageInputRef.current?.click()}
-              disabled={uploading}
-            >
-              <Image className="w-4 h-4" />
-            </Button>
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder={uploading ? "Uploading..." : "Type a message..."}
-              className="flex-1"
-              disabled={uploading}
-            />
-            <Button 
-              type="submit" 
-              variant="default" 
-              size="icon"
-              disabled={uploading || (!message.trim())}
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+        {match.property.isDeleted ? (
+          <div className="max-w-md mx-auto">
+            <Card className="p-4 bg-destructive/10 border-destructive/20">
+              <div className="flex items-center gap-2 text-center justify-center">
+                <X className="w-4 h-4 text-destructive" />
+                <p className="text-sm text-destructive font-medium">
+                  This property has been removed. You can view previous messages but cannot send new ones.
+                </p>
+              </div>
+            </Card>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSendMessage} className="max-w-md mx-auto">
+            <div className="flex gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileSelect(file);
+                }}
+                accept="*/*"
+              />
+              <input
+                type="file"
+                ref={imageInputRef}
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileSelect(file);
+                }}
+                accept="image/*"
+              />
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon"
+                className="shrink-0"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                <Paperclip className="w-4 h-4" />
+              </Button>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon"
+                className="shrink-0"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={uploading}
+              >
+                <Image className="w-4 h-4" />
+              </Button>
+              <Input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={uploading ? "Uploading..." : "Type a message..."}
+                className="flex-1"
+                disabled={uploading}
+              />
+              <Button 
+                type="submit" 
+                variant="default" 
+                size="icon"
+                disabled={uploading || (!message.trim())}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </form>
+        )}
       </div>
 
       {/* User Profile Dialog */}
