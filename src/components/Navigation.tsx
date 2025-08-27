@@ -10,7 +10,7 @@ const Navigation = () => {
     { path: "/discover", icon: Home, label: "Discover" },
     { path: "/matches", icon: Heart, label: "Matches" },
     { path: "/list", icon: Plus, label: "List" },
-    { path: "/notifications", icon: Bell, label: "Notifications" },
+    
     { path: "/profile", icon: User, label: "Profile" },
   ];
 

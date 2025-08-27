@@ -523,7 +523,7 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6 lg:space-y-8">
-          <TabsList className="grid w-full grid-cols-5 bg-card border border-border rounded-lg overflow-hidden h-12 lg:h-14">
+          <TabsList className="grid w-full grid-cols-6 bg-card border border-border rounded-lg overflow-hidden h-12 lg:h-14">
             <TabsTrigger value="profile" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
               <span>Profile</span>
             </TabsTrigger>
@@ -532,6 +532,9 @@ const Profile = () => {
             </TabsTrigger>
             <TabsTrigger value="subscription" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
               <span>Subscription</span>
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
+              <span>Notifications</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
               <span>Settings</span>
@@ -947,7 +950,12 @@ const Profile = () => {
                  )}
                </Card>
              </div>
-           </TabsContent>
+            </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications">
+            <NotificationsList />
+          </TabsContent>
 
           {/* Settings Tab */}
           <TabsContent value="settings">
