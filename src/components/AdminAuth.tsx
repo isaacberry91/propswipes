@@ -40,14 +40,37 @@ const AdminAuth = ({ onAuthenticated }: AdminAuthProps) => {
       if (data.isValid) {
         console.log('🔧 Admin password verified successfully');
 
-        // Sign in as admin user so RLS admin policies apply
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        // Try to sign in as the admin user so RLS admin policies apply
+        let { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email: data.adminEmail,
           password: data.adminPassword,
         });
 
         if (signInError) {
-          console.error('Admin sign-in failed:', signInError);
+          console.warn('Admin sign-in failed, attempting to create admin user:', signInError);
+
+          // Attempt to create the admin user via edge function, then sign in again
+          const { data: createData, error: createError } = await supabase.functions.invoke('create-admin-user', {
+            body: { password }
+          });
+
+          if (createError) {
+            console.error('Create admin user failed:', createError);
+            setError('Could not establish admin session.');
+            return;
+          }
+
+          // Retry sign-in after creation
+          const retry = await supabase.auth.signInWithPassword({
+            email: data.adminEmail,
+            password: data.adminPassword,
+          });
+          signInData = retry.data;
+          signInError = retry.error;
+        }
+
+        if (signInError) {
+          console.error('Admin sign-in failed after creation attempt:', signInError);
           setError('Could not establish admin session.');
           return;
         }
