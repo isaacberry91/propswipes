@@ -134,7 +134,7 @@ const Chat = () => {
           property_id,
           buyer_id,
           seller_id,
-          properties!inner (
+          properties!left (
             id,
             title,
             city,
@@ -179,7 +179,7 @@ const Chat = () => {
       // Use shared utility to resolve user profile (no joined profile since we removed joins)
       const resolvedUser = await resolveUserProfile(otherUserProfileId, null);
       
-      const property = matchData.properties;
+      const propertyData = matchData.properties;
 
       const transformedMatch = {
         id: matchData.id,
@@ -187,22 +187,22 @@ const Chat = () => {
         sellerId: matchData.seller_id,
         user: resolvedUser,
         property: {
-          title: property.title,
-          location: `${property.city}, ${property.state}`,
-          price: new Intl.NumberFormat('en-US', {
+          title: propertyData?.title || 'Removed Property',
+          location: propertyData ? `${propertyData.city}, ${propertyData.state}` : '—',
+          price: propertyData?.price != null ? new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
             minimumFractionDigits: 0,
-          }).format(property.price),
-          image: property.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
-          bedrooms: property.bedrooms,
-          bathrooms: property.bathrooms,
-          sqft: property.square_feet,
-          type: property.property_type,
-          amenities: property.amenities || [],
-          address: property.address,
-          description: property.description,
-          isDeleted: !!property.deleted_at
+          }).format(propertyData.price) : '—',
+          image: propertyData?.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png",
+          bedrooms: propertyData?.bedrooms,
+          bathrooms: propertyData?.bathrooms,
+          sqft: propertyData?.square_feet,
+          type: propertyData?.property_type,
+          amenities: propertyData?.amenities || [],
+          address: propertyData?.address,
+          description: propertyData?.description,
+          isDeleted: !propertyData || !!propertyData.deleted_at
         }
       };
 

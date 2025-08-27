@@ -108,21 +108,8 @@ const ChatManagement = () => {
         return;
       }
 
-      // Check if user has properties (making them eligible for chat management)
-      const { data: userProperties } = await supabase
-        .from('properties')
-        .select('id')
-        .eq('owner_id', userProfile.id)
-        .is('deleted_at', null)
-        .limit(1);
-
-      const hasProperties = userProperties && userProperties.length > 0;
-
-      // Allow access if user is a seller OR has properties
-      if (userProfile.user_type !== 'seller' && !hasProperties) {
-        navigate('/matches');
-        return;
-      }
+      // Note: All authenticated users can access Chat Management to review past conversations.
+      // We'll simply proceed to fetch matches; empty state will be shown if none.
 
       // Fetch ALL matches for this user (both as buyer and seller)
       const { data: matches, error } = await supabase
@@ -133,7 +120,7 @@ const ChatManagement = () => {
           seller_id,
           property_id,
           created_at,
-          properties!inner (
+          properties!left (
             title,
             images,
             price

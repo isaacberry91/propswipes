@@ -82,13 +82,14 @@ const Matches = () => {
           property_id,
           buyer_id,
           seller_id,
-          properties!inner (
+          properties!left (
             id,
             title,
             city,
             state,
             price,
-            images
+            images,
+            deleted_at
           ),
           buyer_profile:profiles!buyer_id (
             id,
@@ -138,15 +139,15 @@ const Matches = () => {
         return {
           id: match.id,
           property: {
-            id: property.id,
-            title: property.title,
-            location: `${property.city}, ${property.state}`,
-            price: new Intl.NumberFormat('en-US', {
+            id: property?.id || match.property_id,
+            title: property?.title || 'Removed Property',
+            location: property ? `${property.city}, ${property.state}` : '—',
+            price: property?.price != null ? new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: 'USD',
               minimumFractionDigits: 0,
-            }).format(property.price),
-            image: property.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"
+            }).format(property.price) : '—',
+            image: property?.images?.[0] || "/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"
           },
           matchedUser: {
             name: resolvedUser.name,
@@ -184,7 +185,7 @@ const Matches = () => {
           <h1 className="text-3xl font-bold text-foreground mb-2">Property Connections</h1>
           <p className="text-muted-foreground">Connect with interested parties for property opportunities</p>
           
-          {(userType === 'seller' || hasProperties) && (
+          {(userType === 'seller' || hasProperties || matches.length > 0) && (
             <div className="mt-6">
               <Button 
                 variant="outline" 
