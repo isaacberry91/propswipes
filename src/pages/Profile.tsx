@@ -524,7 +524,7 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6 lg:space-y-8">
-          <TabsList className="grid w-full grid-cols-6 bg-card border border-border rounded-lg overflow-hidden h-12 lg:h-14">
+          <TabsList className="grid w-full grid-cols-3 grid-rows-2 bg-card border border-border rounded-lg overflow-hidden h-24 lg:h-28 gap-0">
             <TabsTrigger value="profile" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
               <span>Profile</span>
             </TabsTrigger>
