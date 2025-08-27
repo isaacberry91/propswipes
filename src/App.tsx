@@ -17,6 +17,7 @@ import ChatManagement from "./pages/ChatManagement";
 import Profile from "./pages/Profile";
 import Subscription from "./pages/Subscription";
 import TestSubscription from "./pages/TestSubscription";
+import Notifications from "./pages/Notifications";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import PropertyDetails from "./pages/PropertyDetails";
@@ -131,12 +132,17 @@ const App = () => {
                    <Subscription />
                  </ProtectedRoute>
                } />
-               <Route path="/test-subscription" element={
-                 <ProtectedRoute>
-                   <TestSubscription />
-                 </ProtectedRoute>
-                 } />
-                  <Route path="/privacy" element={<Privacy />} />
+                <Route path="/test-subscription" element={
+                  <ProtectedRoute>
+                    <TestSubscription />
+                  </ProtectedRoute>
+                  } />
+                <Route path="/notifications" element={
+                  <ProtectedRoute>
+                    <Notifications />
+                  </ProtectedRoute>
+                } />
+                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms-of-use" element={<Terms />} />
                   <Route path="/contact" element={<Contact />} />
                  <Route path="/property/:propertyId" element={<PropertyDetails />} />
