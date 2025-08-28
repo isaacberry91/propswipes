@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock } from "lucide-react"; // Force rebuild to clear cache
+import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock, User } from "lucide-react"; // Force rebuild to clear cache
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +26,11 @@ interface Property {
   amenities: string[];
   description: string;
   property_type: string;
+  owner?: {
+    id: string;
+    display_name: string;
+    avatar_url: string;
+  };
 }
 
 interface SearchFiltersType {
@@ -224,10 +230,17 @@ const Discover = () => {
 
       const swipedIds = (swipes || []).map((s: any) => s.property_id);
 
-      // 2) Build query with location and filters
+      // 2) Build query with location and filters - include owner information
       let query = supabase
         .from('properties')
-        .select('*')
+        .select(`
+          *,
+          profiles!owner_id (
+            id,
+            display_name,
+            avatar_url
+          )
+        `)
         .eq('status', 'approved')
         .is('deleted_at', null);
 
@@ -334,7 +347,14 @@ const Discover = () => {
         });
         setProperties([]);
       } else {
-        let filteredData = data || [];
+        let filteredData = data?.map((property: any) => ({
+          ...property,
+          owner: property.profiles ? {
+            id: property.profiles.id,
+            display_name: property.profiles.display_name,
+            avatar_url: property.profiles.avatar_url
+          } : undefined
+        })) || [];
         console.log('🔍 Before location filtering:', filteredData.length);
 
         // Location-based radius filtering (client-side) - improved for current location
@@ -866,6 +886,26 @@ const Discover = () => {
                     </div>
                   )}
                 </div>
+                
+                {/* Property Lister Information */}
+                {properties[currentIndex].owner && (
+                  <div className="flex items-center gap-2 pt-3 border-t border-muted/20 relative z-10">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage 
+                        src={properties[currentIndex].owner.avatar_url} 
+                        alt={properties[currentIndex].owner.display_name}
+                      />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
+                        <User className="w-4 h-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-foreground truncate block">
+                        Listed by {properties[currentIndex].owner.display_name || 'Property Owner'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </Card>
             
