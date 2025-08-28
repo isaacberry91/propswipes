@@ -830,19 +830,17 @@ const Discover = () => {
                 {/* Subtle Inner Shadow for Depth */}
                 <div className="absolute inset-0 rounded-b-3xl shadow-inner pointer-events-none" />
                 
-                {/* Title and Location */}
+                {/* Title and Location with Price */}
                 <div className="mb-4 relative z-10">
                   <h3 className="text-xl font-bold text-foreground mb-2 leading-tight">{properties[currentIndex].title}</h3>
-                  <div className="flex items-center text-muted-foreground/80">
-                    <div className="bg-muted/50 rounded-full p-1.5 mr-2">
-                      <MapPin className="w-3.5 h-3.5" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-muted-foreground/80">
+                      <div className="bg-muted/50 rounded-full p-1.5 mr-2">
+                        <MapPin className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-sm font-medium">{properties[currentIndex].city}, {properties[currentIndex].state}</span>
                     </div>
-                    <span className="text-sm font-medium">{properties[currentIndex].city}, {properties[currentIndex].state}</span>
-                  </div>
-                  
-                  {/* Price Display */}
-                  <div className="mb-4 relative z-10">
-                    <span className="text-2xl font-bold text-primary">{formatPrice(properties[currentIndex].price)}</span>
+                    <span className="text-xl font-bold text-primary">{formatPrice(properties[currentIndex].price)}</span>
                   </div>
                 </div>
                 
