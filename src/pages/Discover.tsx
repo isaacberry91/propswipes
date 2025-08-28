@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock, User } from "lucide-react"; // Force rebuild to clear cache
@@ -47,6 +47,7 @@ interface SearchFiltersType {
 const Discover = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [selectedLocation, setSelectedLocation] = useState(() => {
@@ -79,11 +80,28 @@ const Discover = () => {
   const { subscription, hasUnlimitedLikes } = useSubscription();
   const [mapCenter, setMapCenter] = useState<[number, number]>([-74.006, 40.7128]); // Default NYC
 
+  const handleImageTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (isDragging || isAnimating) return;
+    
+    e.stopPropagation();
+    const currentProperty = properties[currentIndex];
+    const imageCount = currentProperty?.images?.length || 1;
+    
+    if (imageCount > 1) {
+      setCurrentImageIndex((prev) => (prev + 1) % imageCount);
+    }
+  }, [isDragging, isAnimating, properties, currentIndex]);
+
   useEffect(() => {
     if (user) {
       fetchUserProfile();
     }
   }, [user]);
+
+  // Reset image index when property changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [currentIndex]);
 
   // Debug effect to track selectedRadius changes
   useEffect(() => {
@@ -807,17 +825,43 @@ const Discover = () => {
               {/* Main Image with Elegant Overlay */}
               <div className="relative h-72 overflow-hidden rounded-t-3xl">
                 <img 
-                  src={properties[currentIndex].images?.[0] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=600&fit=crop"} 
-                  alt={properties[currentIndex].title}
-                  className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                  src={properties[currentIndex].images?.[currentImageIndex] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=600&fit=crop"} 
+                  alt={`${properties[currentIndex].title} - Image ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover transition-all duration-300"
+                  onClick={handleImageTap}
+                  onTouchStart={handleImageTap}
                 />
                 
                 {/* Gradient Overlay for Better Text Readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                 
+                {/* Image Counter Dots */}
+                {properties[currentIndex].images && properties[currentIndex].images.length > 1 && (
+                  <div className="absolute top-4 left-4 flex gap-1.5">
+                    {properties[currentIndex].images.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                          index === currentImageIndex 
+                            ? 'bg-white shadow-lg scale-110' 
+                            : 'bg-white/50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Tap indicator for multiple images */}
+                {properties[currentIndex].images && properties[currentIndex].images.length > 1 && (
+                  <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
+                    <span className="text-white text-xs font-medium">
+                      {currentImageIndex + 1}/{properties[currentIndex].images.length}
+                    </span>
+                  </div>
+                )}
                 
                 {/* Property Type Badge */}
-                <div className="absolute top-5 right-5 bg-primary/90 backdrop-blur-sm rounded-xl px-3 py-1.5">
+                <div className="absolute bottom-4 right-4 bg-primary/90 backdrop-blur-sm rounded-xl px-3 py-1.5">
                   <span className="text-white text-sm font-medium">{properties[currentIndex].property_type}</span>
                 </div>
                 
