@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock, User } from "lucide-react"; // Force rebuild to clear cache
+import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock, User, Eye } from "lucide-react"; // Force rebuild to clear cache
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,6 +11,7 @@ import LocationSearch from "@/components/LocationSearch";
 import PropertyMap from "@/components/PropertyMap";
 import SubscriptionPrompt from "@/components/SubscriptionPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Property {
   id: string;
@@ -74,6 +75,7 @@ const Discover = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -801,7 +803,7 @@ const Discover = () => {
               ref={cardRef}
               className={`
                 relative overflow-hidden bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-black/50 
-                shadow-2xl border border-white/20 dark:border-gray-800/50 rounded-3xl cursor-grab select-none 
+                shadow-2xl border border-white/20 dark:border-gray-800/50 rounded-3xl cursor-pointer select-none 
                 transition-all duration-500 ease-out hover:shadow-3xl backdrop-blur-sm flex-1
                 ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
                 ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
@@ -821,6 +823,7 @@ const Discover = () => {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleDragEnd}
+              onClick={() => setSelectedProperty(properties[currentIndex])}
             >
               {/* Main Image with Elegant Overlay */}
               <div className="relative h-72 overflow-hidden rounded-t-3xl">
@@ -828,8 +831,14 @@ const Discover = () => {
                   src={properties[currentIndex].images?.[currentImageIndex] || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=600&fit=crop"} 
                   alt={`${properties[currentIndex].title} - Image ${currentImageIndex + 1}`}
                   className="w-full h-full object-cover transition-all duration-300"
-                  onClick={handleImageTap}
-                  onTouchStart={handleImageTap}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleImageTap(e);
+                  }}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    handleImageTap(e);
+                  }}
                 />
                 
                 {/* Gradient Overlay for Better Text Readability */}
@@ -969,7 +978,10 @@ const Discover = () => {
               <Button
                 variant="outline"
                 size="icon-lg"
-                onClick={() => handleSwipe('left')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSwipe('left');
+                }}
                 disabled={isAnimating}
                 className="rounded-full w-16 h-16 shadow-lg transition-all duration-200"
               >
@@ -977,9 +989,25 @@ const Discover = () => {
               </Button>
               
               <Button
+                variant="outline"
+                size="icon-lg"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedProperty(properties[currentIndex]);
+                }}
+                disabled={isAnimating}
+                className="rounded-full w-12 h-12 shadow-lg transition-all duration-200 border-blue-500 text-blue-500 hover:bg-blue-50"
+              >
+                <Eye className="w-6 h-6" />
+              </Button>
+              
+              <Button
                 variant="default"
                 size="icon-lg"
-                onClick={() => handleSwipe('right')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSwipe('right');
+                }}
                 disabled={isAnimating || (!hasUnlimitedLikes() && dailyLikesUsed >= 10)}
                 className={`
                   rounded-full w-16 h-16 shadow-lg transition-all duration-200
@@ -1001,6 +1029,117 @@ const Discover = () => {
             </div>
           </div>
         )}
+
+        {/* Property Details Modal */}
+        <Dialog open={!!selectedProperty} onOpenChange={() => setSelectedProperty(null)}>
+          <DialogContent className="max-w-md mx-auto max-h-[90vh] overflow-y-auto">
+            {selectedProperty && (
+              <div className="space-y-4">
+                <DialogHeader>
+                  <DialogTitle className="text-xl font-bold">{selectedProperty.title}</DialogTitle>
+                </DialogHeader>
+                
+                {/* Property Images */}
+                <div className="relative">
+                  {selectedProperty.images && selectedProperty.images.length > 0 ? (
+                    <div className="relative">
+                      <img 
+                        src={selectedProperty.images[0]} 
+                        alt={selectedProperty.title}
+                        className="w-full h-64 object-cover rounded-lg"
+                      />
+                      {selectedProperty.images.length > 1 && (
+                        <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-sm">
+                          {selectedProperty.images.length} photos
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
+                      <span className="text-muted-foreground">No image available</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Price and Location */}
+                <div className="space-y-2">
+                  <div className="text-2xl font-bold text-green-600">
+                    ${selectedProperty.price.toLocaleString()}
+                  </div>
+                  <div className="flex items-start gap-1 text-muted-foreground">
+                    <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">{selectedProperty.address}, {selectedProperty.city}</span>
+                  </div>
+                </div>
+
+                {/* Property Details */}
+                <div className="grid grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+                  <div className="text-center">
+                    <div className="text-lg font-bold">{selectedProperty.bedrooms || 'N/A'}</div>
+                    <div className="text-xs text-muted-foreground">Bedrooms</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold">{selectedProperty.bathrooms || 'N/A'}</div>
+                    <div className="text-xs text-muted-foreground">Bathrooms</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold">
+                      {selectedProperty.square_feet ? selectedProperty.square_feet.toLocaleString() : 'N/A'}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Sq Ft</div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <h4 className="font-semibold mb-2">Description</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {selectedProperty.description || 'No description available.'}
+                  </p>
+                </div>
+
+                {/* Amenities */}
+                {selectedProperty.amenities && selectedProperty.amenities.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Amenities</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedProperty.amenities.map((amenity, index) => (
+                        <span key={index} className="px-2 py-1 bg-muted text-xs rounded">
+                          {amenity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-red-500 text-red-500 hover:bg-red-50"
+                    onClick={() => {
+                      handleSwipe('left');
+                      setSelectedProperty(null);
+                    }}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Pass
+                  </Button>
+                  <Button
+                    className="flex-1 bg-green-500 hover:bg-green-600"
+                    onClick={() => {
+                      handleSwipe('right');
+                      setSelectedProperty(null);
+                    }}
+                  >
+                    <Heart className="w-4 h-4 mr-2" />
+                    Like
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
