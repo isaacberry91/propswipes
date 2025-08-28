@@ -862,7 +862,7 @@ const Chat = () => {
               <Input
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder={uploading ? "Uploading..." : "Type a message..."}
+                placeholder={uploading ? "Uploading..." : messages.length === 0 ? "Start the conversation..." : "Type a message..."}
                 className="flex-1"
                 disabled={uploading}
               />
