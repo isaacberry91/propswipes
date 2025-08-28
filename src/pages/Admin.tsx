@@ -67,10 +67,11 @@ const Admin = () => {
     try {
       console.log('🔧 Admin Debug: Loading data...');
       
-      // Load users
+      // Load users (exclude soft-deleted ones)
       const { data: usersData } = await supabase
         .from('profiles')
         .select('*')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
       console.log('🔧 Admin Debug: Users loaded:', usersData?.length);
@@ -97,7 +98,8 @@ const Admin = () => {
       // Load stats with detailed logging
       const { count: userCount } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .is('deleted_at', null);
 
       const { count: propertyCount } = await supabase
         .from('properties')
