@@ -288,8 +288,8 @@ const Discover = () => {
         query = query.not('id', 'in', `(${swipedIds.join(',')})`);
       }
 
-      // Exclude user's own properties
-      query = query.not('owner_id', 'eq', userProfile.id);
+      // Temporarily disable excluding user's own properties for testing
+      // query = query.not('owner_id', 'eq', userProfile.id);
 
 
       // Sorting
