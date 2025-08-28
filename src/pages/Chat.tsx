@@ -37,6 +37,7 @@ const Chat = () => {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportType, setReportType] = useState("");
   const [reportDescription, setReportDescription] = useState("");
+  const [recipientPrivacySettings, setRecipientPrivacySettings] = useState<any>(null);
 
   useEffect(() => {
     if (user && matchId) {
@@ -207,6 +208,7 @@ const Chat = () => {
       };
 
       setMatch(transformedMatch);
+      fetchRecipientPrivacySettings();
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -263,7 +265,51 @@ const Chat = () => {
     }
   };
 
-  // User profile and property details are now loaded from the match data
+  const fetchRecipientPrivacySettings = async () => {
+    if (!match || !user) return;
+    
+    try {
+      // Get current user's profile ID first
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (!userProfile) return;
+      
+      // Get the recipient's profile ID
+      const recipientId = match.buyerId === userProfile.id ? match.sellerId : match.buyerId;
+      
+      const { data: privacySettings } = await supabase
+        .from('privacy_settings')
+        .select('*')
+        .eq('profile_id', recipientId)
+        .single();
+        
+      setRecipientPrivacySettings(privacySettings);
+    } catch (error) {
+      console.error('Error fetching recipient privacy settings:', error);
+      // Default to allowing messages if no settings found
+      setRecipientPrivacySettings(null);
+    }
+  };
+
+  // Check if messaging is allowed based on privacy settings
+  const isMessagingAllowed = () => {
+    if (!recipientPrivacySettings) return true; // Default to allow if no settings
+    
+    const { allow_messages_from } = recipientPrivacySettings;
+    
+    if (allow_messages_from === 'none') return false;
+    if (allow_messages_from === 'everyone') return true;
+    if (allow_messages_from === 'matches_only') {
+      // Check if they are actually matched (we're in a chat, so they should be)
+      return true;
+    }
+    
+    return true; // Default to allow
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -755,6 +801,17 @@ const Chat = () => {
                 <X className="w-4 h-4 text-destructive" />
                 <p className="text-sm text-destructive font-medium">
                   This property has been removed. You can view previous messages but cannot send new ones.
+                </p>
+              </div>
+            </Card>
+          </div>
+        ) : !isMessagingAllowed() ? (
+          <div className="max-w-md mx-auto">
+            <Card className="p-4 bg-muted/50 border-muted">
+              <div className="flex items-center gap-2 text-center justify-center">
+                <Shield className="w-4 h-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground font-medium">
+                  This user has restricted messaging. You can view previous messages but cannot send new ones.
                 </p>
               </div>
             </Card>

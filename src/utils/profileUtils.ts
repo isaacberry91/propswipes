@@ -45,7 +45,7 @@ export const resolveUserProfile = async (
     const { data: supabaseAuth } = await supabase.auth.getUser();
     
     if (supabaseAuth.user) {
-      const { data: directProfile, error } = await supabase.rpc('get_matched_user_profile', { 
+      const { data: directProfile, error } = await supabase.rpc('get_profile_respecting_privacy', { 
         target_profile_id: profileId,
         requesting_user_id: supabaseAuth.user.id
       });

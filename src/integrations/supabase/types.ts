@@ -221,6 +221,45 @@ export type Database = {
         }
         Relationships: []
       }
+      privacy_settings: {
+        Row: {
+          allow_messages_from: string
+          created_at: string
+          id: string
+          profile_id: string
+          profile_visibility: string
+          show_email: boolean
+          show_location: boolean
+          show_online_status: boolean
+          show_phone: boolean
+          updated_at: string
+        }
+        Insert: {
+          allow_messages_from?: string
+          created_at?: string
+          id?: string
+          profile_id: string
+          profile_visibility?: string
+          show_email?: boolean
+          show_location?: boolean
+          show_online_status?: boolean
+          show_phone?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allow_messages_from?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+          profile_visibility?: string
+          show_email?: boolean
+          show_location?: boolean
+          show_online_status?: boolean
+          show_phone?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -579,6 +618,19 @@ export type Database = {
           id: string
           location: string
           phone: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }[]
+      }
+      get_profile_respecting_privacy: {
+        Args: { requesting_user_id?: string; target_profile_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          id: string
+          location: string
+          phone: string
+          show_contact_info: boolean
           user_type: Database["public"]["Enums"]["user_type"]
         }[]
       }

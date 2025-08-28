@@ -50,24 +50,32 @@ export const PrivacySettingsDialog = ({ open, onOpenChange }: PrivacySettingsDia
     
     setLoading(true);
     try {
-      // For now, we'll use the profile data and add privacy settings later
-      // This is a placeholder implementation
+      // Get user's profile ID first
       const { data: profile } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id')
         .eq('user_id', user.id)
         .single();
         
       if (profile) {
-        // Set default values based on existing profile data
-        setSettings({
-          profile_visibility: 'public',
-          show_location: !!profile.location,
-          show_phone: !!profile.phone,
-          show_email: false,
-          allow_messages_from: 'matches_only',
-          show_online_status: true,
-        });
+        // Fetch existing privacy settings
+        const { data: privacySettings } = await supabase
+          .from('privacy_settings')
+          .select('*')
+          .eq('profile_id', profile.id)
+          .single();
+          
+        if (privacySettings) {
+          setSettings({
+            profile_visibility: privacySettings.profile_visibility as 'public' | 'matches_only' | 'private',
+            show_location: privacySettings.show_location,
+            show_phone: privacySettings.show_phone,
+            show_email: privacySettings.show_email,
+            allow_messages_from: privacySettings.allow_messages_from as 'everyone' | 'matches_only' | 'none',
+            show_online_status: privacySettings.show_online_status,
+          });
+        }
+        // If no privacy settings exist, default values are already set in useState
       }
     } catch (error) {
       console.error('Error fetching privacy settings:', error);
@@ -81,14 +89,36 @@ export const PrivacySettingsDialog = ({ open, onOpenChange }: PrivacySettingsDia
     
     setSaving(true);
     try {
-      // For now, we'll just show a success message
-      // In a real implementation, you would save these to a privacy_settings table
-      toast({
-        title: "Privacy settings updated",
-        description: "Your privacy preferences have been saved successfully.",
-      });
-      
-      onOpenChange(false);
+      // Get user's profile ID first
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (profile) {
+        // Upsert privacy settings (insert or update)
+        const { error } = await supabase
+          .from('privacy_settings')
+          .upsert({
+            profile_id: profile.id,
+            profile_visibility: settings.profile_visibility,
+            show_location: settings.show_location,
+            show_phone: settings.show_phone,
+            show_email: settings.show_email,
+            allow_messages_from: settings.allow_messages_from,
+            show_online_status: settings.show_online_status,
+          });
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Privacy settings updated",
+          description: "Your privacy preferences have been saved successfully.",
+        });
+        
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error('Error saving privacy settings:', error);
       toast({
