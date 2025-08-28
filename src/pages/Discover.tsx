@@ -721,8 +721,14 @@ const Discover = () => {
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col items-center justify-center p-2 overflow-hidden">
+      {/* Main Content Area - Dynamic Height Between Header and Bottom Nav */}
+      <div 
+        className="flex-1 flex flex-col items-center p-2 overflow-hidden"
+        style={{
+          height: 'calc(100vh - 140px - 64px)', // Subtract header height (~140px) and bottom nav height (64px)
+          minHeight: '400px'
+        }}
+      >
         {/* Subscription Prompt for Likes */}
         {showLikePrompt && (
           <div className="max-w-sm w-full mb-4">
@@ -766,13 +772,19 @@ const Discover = () => {
             </Button>
           </div>
         ) : (
-          <div className="max-w-sm w-full">
+          <div 
+            className="max-w-sm w-full flex flex-col"
+            style={{
+              height: 'calc(100% - 120px)', // Leave space for action buttons and margin
+              maxHeight: '600px'
+            }}
+          >
             <Card 
               ref={cardRef}
               className={`
                 relative overflow-hidden bg-gradient-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-black/50 
-                shadow-2xl border border-white/20 dark:border-gray-800/50 rounded-3xl h-[540px] cursor-grab select-none 
-                transition-all duration-500 ease-out hover:shadow-3xl backdrop-blur-sm
+                shadow-2xl border border-white/20 dark:border-gray-800/50 rounded-3xl cursor-grab select-none 
+                transition-all duration-500 ease-out hover:shadow-3xl backdrop-blur-sm flex-1
                 ${isAnimating && swipeDirection === 'left' ? 'animate-swipe-left' : ''}
                 ${isAnimating && swipeDirection === 'right' ? 'animate-swipe-right' : ''}
                 ${isDragging ? 'cursor-grabbing scale-[1.02]' : 'hover:scale-[1.01]'}
@@ -781,7 +793,8 @@ const Discover = () => {
                 transform: isDragging && !isAnimating ? 
                   `translateX(${dragOffset.x}px) translateY(${dragOffset.y * 0.1}px) rotate(${dragOffset.x * 0.1}deg)` : 
                   'none',
-                boxShadow: isDragging ? '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)' : ''
+                boxShadow: isDragging ? '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)' : '',
+                minHeight: '400px'
               }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
