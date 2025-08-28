@@ -782,10 +782,6 @@ const Discover = () => {
                 {/* Gradient Overlay for Better Text Readability */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
-                {/* Price Badge - Elegant Glass Morphism */}
-                <div className="absolute top-5 left-5 bg-white/20 backdrop-blur-md border border-white/30 rounded-2xl px-4 py-2 shadow-lg">
-                  <span className="text-white font-bold text-lg drop-shadow-sm">{formatPrice(properties[currentIndex].price)}</span>
-                </div>
                 
                 {/* Property Type Badge */}
                 <div className="absolute top-5 right-5 bg-primary/90 backdrop-blur-sm rounded-xl px-3 py-1.5">
@@ -822,6 +818,11 @@ const Discover = () => {
                       <MapPin className="w-3.5 h-3.5" />
                     </div>
                     <span className="text-sm font-medium">{properties[currentIndex].city}, {properties[currentIndex].state}</span>
+                  </div>
+                  
+                  {/* Price Display */}
+                  <div className="mb-4 relative z-10">
+                    <span className="text-2xl font-bold text-primary">{formatPrice(properties[currentIndex].price)}</span>
                   </div>
                 </div>
                 
