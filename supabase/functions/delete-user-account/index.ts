@@ -13,6 +13,10 @@ serve(async (req) => {
   }
 
   try {
+    // Parse request body for admin operations
+    const body = await req.json().catch(() => ({}));
+    const targetUserId = body?.targetUserId;
+
     // Create admin client for user deletion
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -32,7 +36,7 @@ serve(async (req) => {
       }
     );
 
-    // Get the current user
+    // Get the current user making the request
     const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
 
     if (authError || !user) {
@@ -43,13 +47,31 @@ serve(async (req) => {
       );
     }
 
-    console.log('Deleting account for user:', user.id);
+    // Determine the user to delete
+    let userToDelete = user.id;
+    
+    if (targetUserId) {
+      // Admin deletion - check if current user is admin
+      const isAdmin = ['admin@propswipes.com', 'support@propswipes.com', 'isaacberry91@yahoo.com', 'ankur@furrisic.com', 'developer@furrisic.com'].includes(user.email || '');
+      
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: 'Admin access required for deleting other users' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      userToDelete = targetUserId;
+      console.log('Admin deleting account for user:', targetUserId, 'by admin:', user.email);
+    } else {
+      console.log('Self-deleting account for user:', user.id);
+    }
 
     // Get user's profile ID first
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userToDelete)
       .single();
 
     if (!profile) {
@@ -103,7 +125,7 @@ serve(async (req) => {
     const { error: subscribersError } = await supabaseAdmin
       .from('subscribers')
       .delete()
-      .eq('user_id', user.id);
+      .eq('user_id', userToDelete);
 
     if (subscribersError) {
       console.error('Error deleting subscriptions:', subscribersError);
@@ -123,14 +145,14 @@ serve(async (req) => {
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({ deleted_at: new Date().toISOString() })
-      .eq('user_id', user.id);
+      .eq('user_id', userToDelete);
 
     if (profileError) {
       console.error('Error marking profile as deleted:', profileError);
       throw new Error('Failed to soft delete profile');
     }
 
-    console.log('Successfully soft deleted user account:', user.id);
+    console.log('Successfully soft deleted user account:', userToDelete);
 
     return new Response(
       JSON.stringify({ success: true, message: 'Account deactivated successfully. You can reactivate by contacting support.' }),

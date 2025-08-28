@@ -354,6 +354,46 @@ const Admin = () => {
       });
     }
   };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      // Create a temporary session token for the admin operation
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        throw new Error('No admin session found');
+      }
+
+      const { data, error } = await supabase.functions.invoke('delete-user-account', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: { targetUserId: userId } // Pass the target user ID for admin deletion
+      });
+
+      if (error) {
+        console.error('Error calling delete function:', error);
+        throw new Error(error.message || 'Failed to delete user account');
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: "User account deleted",
+        description: "The user account has been successfully deactivated",
+      });
+      loadData();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user account",
+        variant: "destructive",
+      });
+    }
+  };
   const handleViewProfile = (userId: string) => {
     // Navigate to the profile page with the user ID
     window.open(`/profile/${userId}`, '_blank');
@@ -994,16 +1034,53 @@ const Admin = () => {
                           {new Date(user.created_at).toLocaleDateString()}
                         </p>
                       </TableCell>
-                      <TableCell>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleViewProfile(user.user_id)}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View Profile
-                        </Button>
-                      </TableCell>
+                       <TableCell>
+                         <div className="flex items-center gap-2">
+                           <Button 
+                             size="sm" 
+                             variant="outline"
+                             onClick={() => handleViewProfile(user.user_id)}
+                           >
+                             <Eye className="w-4 h-4 mr-1" />
+                             View Profile
+                           </Button>
+                           <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button size="sm" variant="destructive">
+                                 <UserX className="w-4 h-4 mr-1" />
+                                 Delete
+                               </Button>
+                             </AlertDialogTrigger>
+                             <AlertDialogContent>
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>Delete User Account</AlertDialogTitle>
+                                 <AlertDialogDescription>
+                                   This will permanently deactivate {user.display_name || 'this user'}'s account and remove all their data including:
+                                   <br /><br />
+                                   • Profile information
+                                   <br />
+                                   • Property listings
+                                   <br />
+                                   • Messages and matches
+                                   <br />
+                                   • Swipes and activity
+                                   <br /><br />
+                                   This action cannot be undone.
+                                 </AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                 <AlertDialogAction
+                                   onClick={() => handleDeleteUser(user.user_id)}
+                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                 >
+                                   Yes, delete account
+                                 </AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
+                           </AlertDialog>
+                         </div>
+                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
