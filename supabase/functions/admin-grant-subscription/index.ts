@@ -64,19 +64,13 @@ serve(async (req) => {
       throw new Error('User profile not found');
     }
 
-    // Calculate subscription end date
-    let subscriptionEnd;
-    if (duration === 'lifetime') {
-      // Set to 50 years from now for lifetime
-      subscriptionEnd = new Date();
-      subscriptionEnd.setFullYear(subscriptionEnd.getFullYear() + 50);
-    } else {
-      // Default to 1 year
-      subscriptionEnd = new Date();
-      subscriptionEnd.setFullYear(subscriptionEnd.getFullYear() + (duration || 1));
-    }
+    // Calculate subscription end date (ensure numeric)
+    const now = new Date();
+    const yearsToAdd = duration === 'lifetime' ? 50 : Number(duration || 1);
+    const subscriptionEnd = new Date(now);
+    subscriptionEnd.setFullYear(subscriptionEnd.getFullYear() + yearsToAdd);
 
-    logStep("Calculated subscription end", { subscriptionEnd });
+    logStep("Calculated subscription end", { subscriptionEnd: subscriptionEnd.toISOString() });
 
     // Upsert subscription
     const { data: subscription, error: subscriptionError } = await supabaseClient
