@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      apple_id_mappings: {
+        Row: {
+          apple_id: string
+          created_at: string
+          display_name: string | null
+          email: string
+          id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          apple_id: string
+          created_at?: string
+          display_name?: string | null
+          email: string
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          apple_id?: string
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       blocked_users: {
         Row: {
           blocked_id: string

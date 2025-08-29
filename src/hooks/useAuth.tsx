@@ -33,11 +33,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
 
-        // Register push token when user signs in
-        if (session?.user && event === 'SIGNED_IN') {
-          setTimeout(() => {
-            notificationService.registerCurrentToken();
-          }, 1000); // Small delay to ensure session is fully established
+        // Handle Apple ID mapping for sign-ins
+        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+          const isAppleUser = session.user.app_metadata?.provider === 'apple';
+          
+          if (isAppleUser) {
+            console.log('🔐 PropSwipes Auth: Apple user detected, handling mapping...');
+            
+            // Determine if this is the first login by checking if we have full user metadata
+            const hasFullMetadata = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+            const isFirstLogin = hasFullMetadata || event === 'SIGNED_IN';
+            
+            try {
+              const { data, error } = await supabase.functions.invoke('handle-apple-auth', {
+                body: { user: session.user, isFirstLogin }
+              });
+              
+              if (error) {
+                console.error('🔐 PropSwipes Auth: Apple mapping error:', error);
+              } else {
+                console.log('🔐 PropSwipes Auth: Apple mapping handled successfully');
+              }
+            } catch (error) {
+              console.error('🔐 PropSwipes Auth: Apple mapping exception:', error);
+            }
+          }
+
+          // Register push token when user signs in
+          if (event === 'SIGNED_IN') {
+            setTimeout(() => {
+              notificationService.registerCurrentToken();
+            }, 1000); // Small delay to ensure session is fully established
+          }
         }
       }
     );
