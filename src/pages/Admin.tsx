@@ -25,7 +25,8 @@ import {
   UserX,
   MessageSquare,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Gift
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +52,8 @@ const Admin = () => {
     totalBlocks: 0
   });
   const [loading, setLoading] = useState(true);
+  const [selectedTier, setSelectedTier] = useState("");
+  const [selectedDuration, setSelectedDuration] = useState("1");
 
   useEffect(() => {
     // Check if admin is already authenticated
@@ -273,6 +276,37 @@ const Admin = () => {
         description: "Failed to delete property",
         variant: "destructive",
         duration: 5000
+      });
+    }
+  };
+
+  const handleGrantSubscription = async (userId: string) => {
+    if (!selectedTier) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-grant-subscription', {
+        body: {
+          userId,
+          subscriptionTier: selectedTier,
+          duration: selectedDuration
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Subscription granted!",
+        description: data.message,
+      });
+      
+      setSelectedTier("");
+      setSelectedDuration("1");
+      loadData();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to grant subscription",
+        variant: "destructive",
       });
     }
   };
@@ -1046,6 +1080,62 @@ const Admin = () => {
                              <Eye className="w-4 h-4 mr-1" />
                              View Profile
                            </Button>
+                           <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button size="sm" variant="secondary">
+                                 <Gift className="w-4 h-4 mr-1" />
+                                 Grant Sub
+                               </Button>
+                             </AlertDialogTrigger>
+                             <AlertDialogContent>
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>Grant Free Subscription</AlertDialogTitle>
+                                 <AlertDialogDescription asChild>
+                                   <div>
+                                     <p className="mb-4">Grant a free subscription to {user.display_name || 'this user'}:</p>
+                                     <div className="space-y-4">
+                                       <div>
+                                         <label className="text-sm font-medium mb-2 block">Subscription Tier:</label>
+                                         <select 
+                                           className="w-full p-2 border rounded-md"
+                                           onChange={(e) => setSelectedTier(e.target.value)}
+                                           value={selectedTier}
+                                         >
+                                           <option value="">Select a tier</option>
+                                           <option value="buyer_pro">Buyer Pro</option>
+                                           <option value="seller_basic">Seller Basic</option>
+                                           <option value="seller_professional">Seller Professional</option>
+                                           <option value="seller_enterprise">Seller Enterprise</option>
+                                         </select>
+                                       </div>
+                                       <div>
+                                         <label className="text-sm font-medium mb-2 block">Duration:</label>
+                                         <select 
+                                           className="w-full p-2 border rounded-md"
+                                           onChange={(e) => setSelectedDuration(e.target.value)}
+                                           value={selectedDuration}
+                                         >
+                                           <option value="1">1 Year</option>
+                                           <option value="2">2 Years</option>
+                                           <option value="5">5 Years</option>
+                                           <option value="lifetime">Lifetime</option>
+                                         </select>
+                                       </div>
+                                     </div>
+                                   </div>
+                                 </AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                 <AlertDialogAction
+                                   onClick={() => handleGrantSubscription(user.user_id)}
+                                   disabled={!selectedTier}
+                                 >
+                                   Grant Subscription
+                                 </AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
+                           </AlertDialog>
                            <AlertDialog>
                              <AlertDialogTrigger asChild>
                                <Button size="sm" variant="destructive">
