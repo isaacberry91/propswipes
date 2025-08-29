@@ -581,9 +581,9 @@ const Profile = () => {
                          <div className="relative">
                            <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-background shadow-2xl ring-4 ring-primary/10">
                              <AvatarImage src={userProfile?.avatar_url} />
-                             <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
-                               {userProfile?.display_name?.[0] || user?.email?.[0] || 'U'}
-                             </AvatarFallback>
+                              <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
+                                {(userProfile?.display_name || (user?.user_metadata as any)?.display_name || user?.email || (user?.user_metadata as any)?.email || 'U')?.[0]}
+                              </AvatarFallback>
                            </Avatar>
                            {isEditing && (
                              <div className="absolute -bottom-2 -right-2 flex gap-2">
@@ -614,9 +614,9 @@ const Profile = () => {
                        <div className="text-center space-y-3 w-full">
                          <div>
                            <h3 className="text-xl font-bold text-foreground mb-2">
-                             {userProfile?.display_name || user?.email?.split('@')[0]}
-                           </h3>
-                           <p className="text-muted-foreground font-medium text-sm break-all">{user?.email}</p>
+                              {userProfile?.display_name || (user?.user_metadata as any)?.display_name || user?.email || (user?.user_metadata as any)?.email || 'User'}
+                            </h3>
+                           <p className="text-muted-foreground font-medium text-sm break-all">{user?.email || (user?.user_metadata as any)?.email || ''}</p>
                          </div>
                          
                          <div className="flex flex-wrap justify-center gap-2">
@@ -659,14 +659,14 @@ const Profile = () => {
                                <AlertCircle className="w-4 h-4 text-muted-foreground" />
                                Email
                              </Label>
-                             <Input
-                               id="email"
-                               type="email"
-                               value={user?.email || ''}
-                               disabled={true}
-                               className="rounded-xl bg-muted/60 border-muted-foreground/20 shadow-sm h-11"
-                               title={user?.email || ''}
-                             />
+                              <Input
+                                id="email"
+                                type="email"
+                                value={user?.email || (user?.user_metadata as any)?.email || ''}
+                                disabled={true}
+                                className="rounded-xl bg-muted/60 border-muted-foreground/20 shadow-sm h-11"
+                                title={user?.email || (user?.user_metadata as any)?.email || ''}
+                              />
                            </div>
                            
                            <div className="space-y-2">
