@@ -30,7 +30,7 @@ serve(async (req) => {
       const appleId = user.user_metadata?.sub || user.app_metadata?.provider_id // Apple's subject identifier
       const email = user.email
       
-      // Apple provides names directly on the user object
+      // Apple provides names directly on the user object (passed from client)
       const givenName = user.givenName
       const familyName = user.familyName
       

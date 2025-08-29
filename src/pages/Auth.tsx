@@ -12,6 +12,7 @@ import { Shield, Mail, Lock, User, MapPin, Users, ArrowLeft, Apple, Phone } from
 import { Separator } from "@/components/ui/separator";
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -221,41 +222,88 @@ const Auth = () => {
       const isNative = Capacitor.isNativePlatform();
       
       if (isNative) {
-        // For mobile apps, use in-app browser
-        const redirectUrl = 'https://c53d60b9-f832-47ac-aabd-6a1765b647a5.lovableproject.com/discover';
+        // For mobile apps, first get the Apple ID token with user data
+        console.log('🔐 PropSwipes Auth: Getting Apple ID token...');
         
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider,
-          options: {
-            redirectTo: redirectUrl,
+        try {
+          // Get Apple credentials with user data
+          const result = await SignInWithApple.authorize({
+            clientId: 'com.propswipes.app',
+            redirectURI: 'https://c53d60b9-f832-47ac-aabd-6a1765b647a5.lovableproject.com/discover',
+            scopes: 'name email',
+            state: 'signin',
+            nonce: 'nonce'
+          });
+
+          console.log('🔐 PropSwipes Auth: Apple authorization result:', result);
+
+          // Store user data if available (only provided on first sign-in)
+          let storedUserData = null;
+          if (result.response?.user) {
+            storedUserData = {
+              email: result.response.email,
+              givenName: result.response.givenName,
+              familyName: result.response.familyName
+            };
+            
+            console.log('🔐 PropSwipes Auth: Storing Apple user data:', storedUserData);
+            
+            // Store in localStorage for the edge function to access
+            localStorage.setItem('apple_user_data', JSON.stringify(storedUserData));
           }
-        });
 
-        if (error) {
-          console.error(`🔐 PropSwipes Auth: ${provider} sign in error:`, error);
-          toast({
-            title: "Sign in failed",
-            description: error.message,
-            variant: "destructive",
-            duration: 5000
-          });
-          return;
-        }
+          // Now sign in with the ID token
+          if (result.response?.identityToken) {
+            console.log('🔐 PropSwipes Auth: Signing in with Apple ID token...');
+            
+            const { data, error } = await supabase.auth.signInWithIdToken({
+              provider: 'apple',
+              token: result.response.identityToken,
+              nonce: 'nonce',
+            });
 
-        if (data.url) {
-          console.log(`🔐 PropSwipes Auth: Opening ${provider} OAuth URL in in-app browser`);
-          // Open OAuth URL in in-app browser
-          await Browser.open({
-            url: data.url,
-            presentationStyle: 'popover',
-            toolbarColor: '#000000'
-          });
-          
-          // Listen for the redirect back to the app
-          Browser.addListener('browserFinished', () => {
-            console.log('🔐 PropSwipes Auth: OAuth browser finished');
-            // The auth state will be updated automatically by the auth listener
-          });
+            if (error) {
+              console.error('🔐 PropSwipes Auth: ID token sign in error:', error);
+              toast({
+                title: "Sign in failed",
+                description: error.message,
+                variant: "destructive",
+                duration: 5000
+              });
+              return;
+            }
+
+            console.log('🔐 PropSwipes Auth: ID token sign in successful');
+            
+            // Call our Apple auth handler with the stored user data
+            if (data.user) {
+              try {
+                const userData = storedUserData ? {
+                  ...data.user,
+                  givenName: storedUserData.givenName,
+                  familyName: storedUserData.familyName,
+                  email: storedUserData.email || data.user.email
+                } : data.user;
+
+                await supabase.functions.invoke('handle-apple-auth', {
+                  body: { 
+                    user: userData,
+                    isFirstLogin: !!storedUserData
+                  }
+                });
+                
+                // Clean up stored data
+                localStorage.removeItem('apple_user_data');
+              } catch (handlerError) {
+                console.error('🔐 PropSwipes Auth: Apple auth handler error:', handlerError);
+              }
+            }
+
+            navigate('/discover');
+          }
+        } catch (appleError) {
+          console.error('🔐 PropSwipes Auth: Apple authorization error:', appleError);
+          throw appleError;
         }
       } else {
         // For web, use regular OAuth flow
