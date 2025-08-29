@@ -35,14 +35,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Handle Apple ID mapping for sign-ins
         if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-          const isAppleUser = session.user.app_metadata?.provider === 'apple';
+          const isAppleUser = session.user.app_metadata?.provider === 'apple' || session.user.user_metadata?.provider === 'apple';
           
           if (isAppleUser) {
-            console.log('🔐 PropSwipes Auth: Apple user detected, handling mapping...');
+            console.log('🔐 PropSwipes Auth: Apple user detected, handling mapping...', {
+              hasEmail: !!session.user.email,
+              hasFullName: !!(session.user.user_metadata?.full_name || session.user.user_metadata?.name),
+              event,
+              userMetadata: session.user.user_metadata,
+              appMetadata: session.user.app_metadata
+            });
             
-            // Determine if this is the first login by checking if we have full user metadata
-            const hasFullMetadata = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
-            const isFirstLogin = hasFullMetadata || event === 'SIGNED_IN';
+            // Determine if this is the first login by checking available data
+            const hasFullMetadata = session.user.email && (session.user.user_metadata?.full_name || session.user.user_metadata?.name);
+            const isFirstLogin = event === 'SIGNED_IN' && hasFullMetadata;
             
             try {
               const { data, error } = await supabase.functions.invoke('handle-apple-auth', {
