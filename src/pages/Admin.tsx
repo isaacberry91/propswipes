@@ -37,6 +37,7 @@ const Admin = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+  const [appleUsers, setAppleUsers] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
   const [deletedProperties, setDeletedProperties] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
@@ -78,6 +79,14 @@ const Admin = () => {
         .order('created_at', { ascending: false });
 
       console.log('🔧 Admin Debug: Users loaded:', usersData?.length);
+
+      // Load Apple login users
+      const { data: appleUsersData } = await supabase
+        .from('apple_id_mappings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      console.log('🔧 Admin Debug: Apple users loaded:', appleUsersData?.length);
 
       // Load active properties with detailed logging
       const { data: propertiesData, error: propertiesError } = await supabase
@@ -156,6 +165,7 @@ const Admin = () => {
         .select('*', { count: 'exact', head: true });
 
       setUsers(usersData || []);
+      setAppleUsers(appleUsersData || []);
       setProperties(propertiesData || []);
       setDeletedProperties(deletedPropertiesData || []);
       setReports(reportsData || []);
@@ -1011,37 +1021,39 @@ const Admin = () => {
 
           {/* Users Tab */}
           <TabsContent value="users">
-            <Card className="p-6">
-              <div className="flex items-center gap-4 mb-6">
-                <h3 className="text-lg font-semibold">User Management</h3>
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+            <div className="space-y-6">
+              {/* Regular Users */}
+              <Card className="p-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <h3 className="text-lg font-semibold">User Management</h3>
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search users..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users
-                    .filter(user => 
-                      user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      user.bio?.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                    .map((user) => (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users
+                      .filter(user => 
+                        user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        user.bio?.toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
@@ -1175,9 +1187,149 @@ const Admin = () => {
                        </TableCell>
                     </TableRow>
                   ))}
-                </TableBody>
-              </Table>
-            </Card>
+                  </TableBody>
+                </Table>
+              </Card>
+
+              {/* Apple Login Users */}
+              <Card className="p-6">
+                <div className="flex items-center gap-4 mb-6">
+                  <h3 className="text-lg font-semibold">Apple Login Users</h3>
+                  <Badge variant="outline">
+                    {appleUsers.length} Apple users
+                  </Badge>
+                </div>
+
+                {appleUsers.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No Apple login users found</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Apple User</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Apple ID</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {appleUsers
+                        .filter(user => 
+                          user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          user.display_name?.toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                        .map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10">
+                                <AvatarFallback>
+                                  {user.display_name?.charAt(0) || user.email?.charAt(0) || 'A'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{user.display_name || 'Apple User'}</p>
+                                <p className="text-sm text-muted-foreground">Apple Login</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <p className="text-sm">{user.email || 'Hidden'}</p>
+                          </TableCell>
+                          <TableCell>
+                            <p className="text-sm font-mono">{user.apple_id}</p>
+                          </TableCell>
+                          <TableCell>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(user.created_at).toLocaleDateString()}
+                            </p>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {user.user_id && (
+                                <>
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={() => handleViewProfile(user.user_id)}
+                                  >
+                                    <Eye className="w-4 h-4 mr-1" />
+                                    View Profile
+                                  </Button>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button size="sm" variant="secondary">
+                                        <Gift className="w-4 h-4 mr-1" />
+                                        Grant Sub
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Grant Free Subscription</AlertDialogTitle>
+                                        <AlertDialogDescription asChild>
+                                          <div>
+                                            <p className="mb-4">Grant a free subscription to {user.display_name || user.email || 'this Apple user'}:</p>
+                                            <div className="space-y-4">
+                                              <div>
+                                                <label className="text-sm font-medium mb-2 block">Subscription Tier:</label>
+                                                <select 
+                                                  className="w-full p-2 border rounded-md"
+                                                  onChange={(e) => setSelectedTier(e.target.value)}
+                                                  value={selectedTier}
+                                                >
+                                                  <option value="">Select a tier</option>
+                                                  <option value="buyer_pro">Buyer Pro</option>
+                                                  <option value="seller_basic">Seller Basic</option>
+                                                  <option value="seller_professional">Seller Professional</option>
+                                                  <option value="seller_enterprise">Seller Enterprise</option>
+                                                </select>
+                                              </div>
+                                              <div>
+                                                <label className="text-sm font-medium mb-2 block">Duration:</label>
+                                                <select 
+                                                  className="w-full p-2 border rounded-md"
+                                                  onChange={(e) => setSelectedDuration(e.target.value)}
+                                                  value={selectedDuration}
+                                                >
+                                                  <option value="1">1 Year</option>
+                                                  <option value="2">2 Years</option>
+                                                  <option value="5">5 Years</option>
+                                                  <option value="lifetime">Lifetime</option>
+                                                </select>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() => handleGrantSubscription(user.user_id)}
+                                          disabled={!selectedTier}
+                                        >
+                                          Grant Subscription
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </>
+                              )}
+                              <Badge variant="outline" className="text-xs">
+                                Apple
+                              </Badge>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Analytics Tab */}
