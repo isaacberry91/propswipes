@@ -642,12 +642,12 @@ const Profile = () => {
                                Display Name
                              </Label>
                              <div className="relative group">
-                               <Input
-                                 id="displayName"
-                                 value={userProfile?.display_name || ''}
-                                 onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
-                                 disabled={!isEditing}
-                                 className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
+                              <Input
+                                id="displayName"
+                                value={userProfile?.display_name || user?.user_metadata?.display_name || ''}
+                                onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
+                                disabled={!isEditing}
+                                className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
                                  maxLength={50}
                                />
                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
@@ -675,13 +675,13 @@ const Profile = () => {
                                Phone
                              </Label>
                              <div className="relative group">
-                               <Input
-                                 id="phone"
-                                 value={userProfile?.phone || ''}
-                                 onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
-                                 disabled={!isEditing}
-                                 placeholder="Phone number"
-                                 className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
+                                <Input
+                                  id="phone"
+                                  value={userProfile?.phone || user?.user_metadata?.phone || ''}
+                                  onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
+                                  disabled={!isEditing}
+                                  placeholder="Phone number"
+                                  className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
                                />
                                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                              </div>
@@ -695,9 +695,9 @@ const Profile = () => {
                              Location
                            </Label>
                            <div className="relative group">
-                             <Input
-                               id="location"
-                               value={userProfile?.location || ''}
+                              <Input
+                                id="location"
+                                value={userProfile?.location || user?.user_metadata?.location || ''}
                                onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
                                disabled={!isEditing}
                                placeholder="Your location"
