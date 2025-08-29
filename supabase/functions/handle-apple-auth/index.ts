@@ -26,13 +26,26 @@ serve(async (req) => {
     const isAppleUser = user.app_metadata?.provider === 'apple' || user.user_metadata?.provider === 'apple'
     
     if (isAppleUser) {
-      // Determine if this is first login by checking if we have email and full user data
-      const hasFullUserData = user.email && (user.user_metadata?.full_name || user.user_metadata?.name)
+      // Extract Apple-specific user data
       const appleId = user.user_metadata?.sub || user.app_metadata?.provider_id // Apple's subject identifier
       const email = user.email
-      const name = user.user_metadata?.full_name || user.user_metadata?.name
       
-      console.log('Apple user detected:', { appleId, email, name, hasFullUserData, isFirstLogin })
+      // Apple provides names as familyName and givenName
+      const givenName = user.user_metadata?.given_name || user.user_metadata?.givenName
+      const familyName = user.user_metadata?.family_name || user.user_metadata?.familyName
+      const fullName = user.user_metadata?.full_name || user.user_metadata?.name
+      
+      // Construct display name from available data
+      let displayName = null
+      if (fullName) {
+        displayName = fullName
+      } else if (givenName || familyName) {
+        displayName = [givenName, familyName].filter(Boolean).join(' ')
+      }
+      
+      const hasUserData = email || displayName
+      
+      console.log('Apple user detected:', { appleId, email, givenName, familyName, displayName, hasUserData, isFirstLogin })
 
       // Check if we have any Apple ID mapping already
       const { data: existingMapping, error: lookupError } = await supabaseAdmin
@@ -46,16 +59,16 @@ serve(async (req) => {
         throw lookupError
       }
 
-      if (!existingMapping && (email || name)) {
+      if (!existingMapping && (email || displayName)) {
         // This is a first-time login with some data - store what we have
-        console.log('Storing Apple ID mapping for first login:', { appleId, email, name })
+        console.log('Storing Apple ID mapping for first login:', { appleId, email, displayName })
         
         const { error: mappingError } = await supabaseAdmin
           .from('apple_id_mappings')
           .upsert({
             apple_id: appleId,
             email: email,
-            display_name: name,
+            display_name: displayName,
             user_id: user.id
           }, { 
             onConflict: 'apple_id' 
@@ -67,11 +80,11 @@ serve(async (req) => {
         }
 
         // Update the profile with any available information
-        if (name) {
+        if (displayName) {
           const { error: profileError } = await supabaseAdmin
             .from('profiles')
             .update({
-              display_name: name,
+              display_name: displayName,
               updated_at: new Date().toISOString()
             })
             .eq('user_id', user.id)
@@ -115,14 +128,14 @@ serve(async (req) => {
         } else {
           console.log('No Apple ID mapping found for:', appleId)
           // If we have any user data available, store it
-          if (appleId && (email || name)) {
+          if (appleId && (email || displayName)) {
             console.log('Creating new mapping with available data')
             const { error: mappingError } = await supabaseAdmin
               .from('apple_id_mappings')
               .insert({
                 apple_id: appleId,
                 email: email,
-                display_name: name,
+                display_name: displayName,
                 user_id: user.id
               })
 
