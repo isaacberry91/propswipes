@@ -66,9 +66,20 @@ serve(async (req) => {
 
     // Calculate subscription end date (ensure numeric)
     const now = new Date();
-    const yearsToAdd = duration === 'lifetime' ? 50 : Number(duration || 1);
-    const subscriptionEnd = new Date(now);
-    subscriptionEnd.setFullYear(subscriptionEnd.getFullYear() + yearsToAdd);
+    let subscriptionEnd = new Date(now);
+    
+    if (duration === 'lifetime') {
+      subscriptionEnd.setFullYear(subscriptionEnd.getFullYear() + 50);
+    } else {
+      const yearsToAdd = Number(duration || 1);
+      if (yearsToAdd < 1) {
+        // For fractions of a year (like 1 month = 0.083 years), use months
+        const monthsToAdd = Math.round(yearsToAdd * 12);
+        subscriptionEnd.setMonth(subscriptionEnd.getMonth() + monthsToAdd);
+      } else {
+        subscriptionEnd.setFullYear(subscriptionEnd.getFullYear() + yearsToAdd);
+      }
+    }
 
     logStep("Calculated subscription end", { subscriptionEnd: subscriptionEnd.toISOString() });
 

@@ -1129,11 +1129,12 @@ const Admin = () => {
                                            className="w-full p-2 border rounded-md"
                                            onChange={(e) => setSelectedDuration(e.target.value)}
                                            value={selectedDuration}
-                                         >
-                                           <option value="1">1 Year</option>
-                                           <option value="2">2 Years</option>
-                                           <option value="5">5 Years</option>
-                                           <option value="lifetime">Lifetime</option>
+                                          >
+                                            <option value="0.083">1 Month</option>
+                                            <option value="1">1 Year</option>
+                                            <option value="2">2 Years</option>
+                                            <option value="5">5 Years</option>
+                                            <option value="lifetime">Lifetime</option>
                                          </select>
                                        </div>
                                      </div>
@@ -1298,6 +1299,7 @@ const Admin = () => {
                                                   onChange={(e) => setSelectedDuration(e.target.value)}
                                                   value={selectedDuration}
                                                 >
+                                                  <option value="0.083">1 Month</option>
                                                   <option value="1">1 Year</option>
                                                   <option value="2">2 Years</option>
                                                   <option value="5">5 Years</option>
