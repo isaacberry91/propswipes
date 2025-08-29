@@ -34,8 +34,20 @@ serve(async (req) => {
       
       console.log('Apple user detected:', { appleId, email, name, hasFullUserData, isFirstLogin })
 
-      if (hasFullUserData && isFirstLogin) {
-        // This is a first-time Apple login with full data - store the mapping
+      // Check if we have any Apple ID mapping already
+      const { data: existingMapping, error: lookupError } = await supabaseAdmin
+        .from('apple_id_mappings')
+        .select('*')
+        .eq('apple_id', appleId)
+        .maybeSingle()
+
+      if (lookupError) {
+        console.error('Error looking up existing Apple ID mapping:', lookupError)
+        throw lookupError
+      }
+
+      if (!existingMapping && (email || name)) {
+        // This is a first-time login with some data - store what we have
         console.log('Storing Apple ID mapping for first login:', { appleId, email, name })
         
         const { error: mappingError } = await supabaseAdmin
@@ -54,20 +66,22 @@ serve(async (req) => {
           throw mappingError
         }
 
-        // Update the profile with the provided information
-        const { error: profileError } = await supabaseAdmin
-          .from('profiles')
-          .update({
-            display_name: name,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id)
+        // Update the profile with any available information
+        if (name) {
+          const { error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .update({
+              display_name: name,
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', user.id)
 
-        if (profileError) {
-          console.error('Error updating profile:', profileError)
-          throw profileError
+          if (profileError) {
+            console.error('Error updating profile:', profileError)
+            throw profileError
+          }
         }
-      } else {
+      } else if (existingMapping) {
         // This is a subsequent Apple login or first login without full data - look up stored data
         console.log('Looking up Apple ID mapping for subsequent login:', appleId)
 
