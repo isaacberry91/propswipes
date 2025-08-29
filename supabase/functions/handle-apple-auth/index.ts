@@ -30,17 +30,41 @@ serve(async (req) => {
       const appleId = user.user_metadata?.sub || user.app_metadata?.provider_id // Apple's subject identifier
       const email = user.email
       
-      // Apple provides names as familyName and givenName
-      const givenName = user.user_metadata?.given_name || user.user_metadata?.givenName
-      const familyName = user.user_metadata?.family_name || user.user_metadata?.familyName
-      const fullName = user.user_metadata?.full_name || user.user_metadata?.name
+      // Apple provides names in various places - check all possible locations
+      const givenName = user.user_metadata?.given_name || 
+                       user.user_metadata?.givenName || 
+                       user.app_metadata?.given_name ||
+                       user.raw_user_meta_data?.given_name ||
+                       user.raw_user_meta_data?.givenName
+                       
+      const familyName = user.user_metadata?.family_name || 
+                        user.user_metadata?.familyName ||
+                        user.app_metadata?.family_name ||
+                        user.raw_user_meta_data?.family_name ||
+                        user.raw_user_meta_data?.familyName
+                        
+      const fullName = user.user_metadata?.full_name || 
+                      user.user_metadata?.name ||
+                      user.app_metadata?.full_name ||
+                      user.app_metadata?.name ||
+                      user.raw_user_meta_data?.full_name ||
+                      user.raw_user_meta_data?.name
       
-      // Construct display name from available data
+      // Also check identities array for Apple-specific data
+      const appleIdentity = user.identities?.find(id => id.provider === 'apple')
+      const identityGivenName = appleIdentity?.identity_data?.given_name || appleIdentity?.identity_data?.givenName
+      const identityFamilyName = appleIdentity?.identity_data?.family_name || appleIdentity?.identity_data?.familyName
+      const identityFullName = appleIdentity?.identity_data?.full_name || appleIdentity?.identity_data?.name
+      
+      // Construct display name from available data (prioritize identity data)
       let displayName = null
-      if (fullName) {
-        displayName = fullName
-      } else if (givenName || familyName) {
-        displayName = [givenName, familyName].filter(Boolean).join(' ')
+      if (identityFullName || fullName) {
+        displayName = identityFullName || fullName
+      } else if (identityGivenName || identityFamilyName || givenName || familyName) {
+        displayName = [
+          identityGivenName || givenName, 
+          identityFamilyName || familyName
+        ].filter(Boolean).join(' ')
       }
       
       const hasUserData = email || displayName
