@@ -81,12 +81,15 @@ const Admin = () => {
       console.log('🔧 Admin Debug: Users loaded:', usersData?.length);
 
       // Load Apple login users
-      const { data: appleUsersData } = await supabase
+      const { data: appleUsersData, error: appleUsersError } = await supabase
         .from('apple_id_mappings')
         .select('*')
         .order('created_at', { ascending: false });
 
       console.log('🔧 Admin Debug: Apple users loaded:', appleUsersData?.length);
+      if (appleUsersError) {
+        console.error('🔧 Admin Debug: Apple users error:', appleUsersError);
+      }
 
       // Load active properties with detailed logging
       const { data: propertiesData, error: propertiesError } = await supabase
