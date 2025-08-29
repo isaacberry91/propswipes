@@ -57,10 +57,13 @@ const Profile = () => {
   const [emailNotificationsDialogOpen, setEmailNotificationsDialogOpen] = useState(false);
   const [pushNotificationsDialogOpen, setPushNotificationsDialogOpen] = useState(false);
   const [privacySettingsDialogOpen, setPrivacySettingsDialogOpen] = useState(false);
+  // Apple Sign-In mapping fallback
+  const [appleMapping, setAppleMapping] = useState<{ display_name?: string | null; email?: string | null } | null>(null);
   
   useEffect(() => {
     if (user) {
       fetchUserProfile();
+      fetchAppleMapping();
     }
   }, [user]);
 
@@ -126,6 +129,21 @@ const Profile = () => {
       console.error('Error fetching profile:', error);
     } finally {
       setProfileLoading(false);
+    }
+  };
+
+  const fetchAppleMapping = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('apple_id_mappings')
+        .select('display_name,email')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (error) throw error;
+      setAppleMapping(data || null);
+    } catch (e) {
+      console.error('Error fetching apple_id_mappings:', e);
     }
   };
 
@@ -582,7 +600,7 @@ const Profile = () => {
                            <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-background shadow-2xl ring-4 ring-primary/10">
                              <AvatarImage src={userProfile?.avatar_url} />
                               <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-bold">
-                                {(userProfile?.display_name || (user?.user_metadata as any)?.display_name || user?.email || (user?.user_metadata as any)?.email || 'U')?.[0]}
+                                {(userProfile?.display_name || appleMapping?.display_name || (user?.user_metadata as any)?.display_name || user?.email || appleMapping?.email || (user?.user_metadata as any)?.email || 'U')?.[0]}
                               </AvatarFallback>
                            </Avatar>
                            {isEditing && (
@@ -614,9 +632,9 @@ const Profile = () => {
                        <div className="text-center space-y-3 w-full">
                          <div>
                            <h3 className="text-xl font-bold text-foreground mb-2">
-                              {userProfile?.display_name || (user?.user_metadata as any)?.display_name || user?.email || (user?.user_metadata as any)?.email || 'User'}
+                              {userProfile?.display_name || appleMapping?.display_name || (user?.user_metadata as any)?.display_name || user?.email || appleMapping?.email || (user?.user_metadata as any)?.email || 'User'}
                             </h3>
-                           <p className="text-muted-foreground font-medium text-sm break-all">{user?.email || (user?.user_metadata as any)?.email || ''}</p>
+                           <p className="text-muted-foreground font-medium text-sm break-all">{user?.email || appleMapping?.email || (user?.user_metadata as any)?.email || ''}</p>
                          </div>
                          
                          <div className="flex flex-wrap justify-center gap-2">
@@ -644,7 +662,7 @@ const Profile = () => {
                              <div className="relative group">
                               <Input
                                 id="displayName"
-                                value={userProfile?.display_name || user?.user_metadata?.display_name || ''}
+                                value={userProfile?.display_name || appleMapping?.display_name || (user?.user_metadata as any)?.display_name || ''}
                                 onChange={(e) => setUserProfile({...userProfile, display_name: e.target.value})}
                                 disabled={!isEditing}
                                 className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
@@ -662,10 +680,10 @@ const Profile = () => {
                               <Input
                                 id="email"
                                 type="email"
-                                value={user?.email || (user?.user_metadata as any)?.email || ''}
+                                value={user?.email || appleMapping?.email || (user?.user_metadata as any)?.email || ''}
                                 disabled={true}
                                 className="rounded-xl bg-muted/60 border-muted-foreground/20 shadow-sm h-11"
-                                title={user?.email || (user?.user_metadata as any)?.email || ''}
+                                title={user?.email || appleMapping?.email || (user?.user_metadata as any)?.email || ''}
                               />
                            </div>
                            
