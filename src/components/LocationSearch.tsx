@@ -66,7 +66,7 @@ const LocationSearch = ({
   const searchLocationsInDatabase = useCallback(async (query: string) => {
     console.log('🔍 SEARCH TRIGGERED with query:', query, 'length:', query.length);
     
-    if (!query || query.length < 2) {
+    if (!query || query.length < 1) {
       console.log('🔍 Query too short, clearing suggestions');
       setDatabaseSuggestions([]);
       return;
