@@ -71,6 +71,64 @@ const ListProperty = () => {
   const { subscription, canListProperties } = useSubscription();
   const [currentPropertyCount, setCurrentPropertyCount] = useState(0);
 
+  // Address autocomplete state for Street Address field
+  const [addrQuery, setAddrQuery] = useState("");
+  const [addrSuggestions, setAddrSuggestions] = useState<any[]>([]);
+  const [addrLoading, setAddrLoading] = useState(false);
+  const [showAddrSuggestions, setShowAddrSuggestions] = useState(false);
+
+  const fetchAddressSuggestions = useState(() => async (q: string) => {
+    try {
+      if (!q || q.length < 1) {
+        setAddrSuggestions([]);
+        return;
+      }
+      setAddrLoading(true);
+      const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+      const token = tokenData?.token;
+      if (!token) {
+        setAddrSuggestions([]);
+        return;
+      }
+      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${token}&country=US&types=address,place,locality,neighborhood&limit=6`);
+      if (!res.ok) throw new Error(`Mapbox error ${res.status}`);
+      const data = await res.json();
+      const items = (data.features || []).map((f: any) => {
+        let city = ""; let state = ""; let postcode = "";
+        f.context?.forEach((c: any) => {
+          if (c.id?.startsWith('place.')) city = c.text;
+          if (c.id?.startsWith('region.')) state = (c.short_code?.replace('us-','') || c.text || '').toUpperCase();
+          if (c.id?.startsWith('postcode.')) postcode = c.text;
+        });
+        const street = f.place_type?.includes('address')
+          ? `${f.address ? f.address + ' ' : ''}${f.text}`
+          : f.text;
+        return {
+          label: f.place_name,
+          street,
+          city,
+          state,
+          postcode,
+          coords: f.geometry?.coordinates,
+        };
+      });
+      setAddrSuggestions(items);
+    } catch (e) {
+      console.error('Address suggestions error', e);
+      setAddrSuggestions([]);
+    } finally {
+      setAddrLoading(false);
+    }
+  })[0];
+
+  // Debounce address query
+  useEffect(() => {
+    const t = setTimeout(() => {
+      fetchAddressSuggestions(addrQuery);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [addrQuery, fetchAddressSuggestions]);
+
   // Fetch current property count for subscription limits
   useEffect(() => {
     const fetchPropertyCount = async () => {
@@ -740,12 +798,61 @@ const ListProperty = () => {
         <div className="space-y-3">
           <div className="space-y-2">
             <Label>Street Address *</Label>
-            <Input
-              placeholder="123 Main Street"
-              value={formData.address}
-              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-              required
-            />
+            <div className="relative">
+              <Input
+                placeholder="123 Main Street"
+                value={formData.address}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setFormData(prev => ({ ...prev, address: v }));
+                  setAddrQuery(v);
+                  setShowAddrSuggestions(true);
+                }}
+                onFocus={() => setShowAddrSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowAddrSuggestions(false), 150)}
+                autoComplete="off"
+                required
+              />
+              {showAddrSuggestions && formData.address && (
+                <div className="absolute z-50 mt-1 w-full rounded-md border bg-background shadow-lg max-h-64 overflow-auto">
+                  <div className="p-2 text-xs text-muted-foreground border-b">
+                    {addrLoading ? 'Searching...' : `Suggestions for "${formData.address}"`}
+                  </div>
+                  {addrSuggestions.length > 0 ? (
+                    addrSuggestions.map((s, idx) => (
+                      <button
+                        type="button"
+                        key={idx}
+                        className="w-full text-left px-3 py-2 hover:bg-accent"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setFormData(prev => ({
+                            ...prev,
+                            address: s.street || s.label,
+                            city: s.city || prev.city,
+                            state: s.state || prev.state,
+                            zipCode: s.postcode || prev.zipCode,
+                          }));
+                          setShowAddrSuggestions(false);
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-muted-foreground" />
+                          <div className="truncate">
+                            <div className="text-sm font-medium truncate">{s.label}</div>
+                            {(s.city || s.state) && (
+                              <div className="text-xs text-muted-foreground truncate">{[s.city, s.state, s.postcode].filter(Boolean).join(', ')}</div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           
           <div className="grid grid-cols-3 gap-3">
