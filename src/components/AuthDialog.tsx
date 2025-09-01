@@ -434,11 +434,13 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                       handleInputChange('address', value);
                       setShowLocationSuggestions(true);
                       updateSuggestPos();
+                      fetchAddressSuggestions(value);
                     }}
                     onFocus={() => {
                       console.log('🏠 Auth: Location input focused');
                       setShowLocationSuggestions(true);
                       updateSuggestPos();
+                      if (locationSearch) fetchAddressSuggestions(locationSearch);
                     }}
                     onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
                     placeholder="123 Main St, Seattle, WA 98101"
