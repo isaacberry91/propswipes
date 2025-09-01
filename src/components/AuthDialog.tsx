@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -422,7 +423,7 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                     required
                   />
                   {showLocationSuggestions && (
-                    <div className="absolute top-full left-0 right-0 bg-popover border border-border rounded-md shadow-lg z-[1000] md:z-[9999] max-h-60 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-[99999] max-h-60 overflow-y-auto">
                       <div className="p-2 text-xs text-muted-foreground border-b">
                         {addrLoading ? 'Searching...' : `Suggestions for "${locationSearch}"`}
                       </div>
