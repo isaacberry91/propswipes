@@ -103,6 +103,13 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
   const [locationSearch, setLocationSearch] = useState('');
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
 
+  // Sync locationSearch with formData.address
+  useEffect(() => {
+    if (formData.address && formData.address !== locationSearch) {
+      setLocationSearch(formData.address);
+    }
+  }, [formData.address, locationSearch]);
+
   // Address autocomplete state
   const [addrSuggestions, setAddrSuggestions] = useState<any[]>([]);
   const [addrLoading, setAddrLoading] = useState(false);
@@ -397,14 +404,18 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
                   <Input
                     id="address"
-                    value={formData.address || locationSearch}
+                    value={locationSearch}
                     onChange={(e) => {
                       const value = e.target.value;
+                      console.log('🏠 Auth: Location input changed to:', value);
                       setLocationSearch(value);
                       handleInputChange('address', value);
                       setShowLocationSuggestions(true);
                     }}
-                    onFocus={() => setShowLocationSuggestions(true)}
+                    onFocus={() => {
+                      console.log('🏠 Auth: Location input focused');
+                      setShowLocationSuggestions(true);
+                    }}
                     onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
                     placeholder="123 Main St, Seattle, WA 98101"
                     className="pl-10"
