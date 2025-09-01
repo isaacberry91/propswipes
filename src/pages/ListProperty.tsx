@@ -63,6 +63,8 @@ const ListProperty = () => {
   
   const [images, setImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [videos, setVideos] = useState<File[]>([]);
+  const [videoUrls, setVideoUrls] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -373,6 +375,31 @@ const ListProperty = () => {
         uploadedImageUrls.push(publicUrl);
       }
 
+      // Upload videos
+      const uploadedVideoUrls: string[] = [];
+      
+      for (let i = 0; i < videos.length; i++) {
+        const file = videos[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { error: uploadError, data } = await supabase.storage
+          .from('property-images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('property-images')
+          .getPublicUrl(filePath);
+        
+        uploadedVideoUrls.push(publicUrl);
+      }
+
       if (isEditing && editingProperty) {
         // Update existing property
         const propertyData = {
@@ -428,6 +455,7 @@ const ListProperty = () => {
           bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
           amenities: [...formData.amenities, ...formData.appliances, ...formData.features],
           images: uploadedImageUrls,
+          videos: uploadedVideoUrls,
           status: 'pending' as const
         };
 
@@ -489,6 +517,8 @@ const ListProperty = () => {
       });
       setImages([]);
       setImageUrls([]);
+      setVideos([]);
+      setVideoUrls([]);
       setCurrentStep(1);
 
       // Navigate back to profile or discover
@@ -673,6 +703,55 @@ const ListProperty = () => {
     setImageUrls(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    if (videos.length + files.length > 3) {
+      toast({
+        title: "Maximum videos reached",
+        description: "You can upload up to 3 videos total.",
+      });
+      return;
+    }
+
+    const newFiles = Array.from(files);
+    
+    // Check file size (20MB limit)
+    for (const file of newFiles) {
+      if (file.size > 20 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: `${file.name} exceeds 20MB limit. Please choose a smaller file.`,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    const newVideoUrls: string[] = [];
+
+    newFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          newVideoUrls.push(e.target.result as string);
+          if (newVideoUrls.length === newFiles.length) {
+            setVideoUrls(prev => [...prev, ...newVideoUrls]);
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    setVideos(prev => [...prev, ...newFiles]);
+  };
+
+  const removeVideo = (index: number) => {
+    setVideos(prev => prev.filter((_, i) => i !== index));
+    setVideoUrls(prev => prev.filter((_, i) => i !== index));
+  };
+
   const toggleArrayField = (field: 'amenities' | 'appliances' | 'features', item: string) => {
     setFormData(prev => ({
       ...prev,
@@ -762,6 +841,59 @@ const ListProperty = () => {
       
       <p className="text-xs text-muted-foreground">
         {imageUrls.length}/10 photos uploaded. First photo will be the main listing image.
+      </p>
+
+      {/* Video Upload Section */}
+      <Separator className="my-6" />
+      
+      <div>
+        <Label className="text-base font-semibold">Property Videos</Label>
+        <p className="text-sm text-muted-foreground">Add videos to showcase your property (Max 20MB each)</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {videoUrls.map((video, index) => (
+          <div key={index} className="relative group">
+            <video 
+              src={video} 
+              className="w-full h-32 object-cover rounded-lg border"
+              controls
+              preload="metadata"
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 p-0"
+              onClick={() => removeVideo(index)}
+            >
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        ))}
+        
+        {videos.length < 3 && (
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              multiple
+              accept="video/*"
+              onChange={handleVideoUpload}
+              className="hidden"
+            />
+            <div className="h-32 border-2 border-dashed border-border hover:border-primary rounded-lg flex flex-col items-center justify-center bg-background hover:bg-accent/20 transition-colors">
+              <Upload className="w-6 h-6 mb-2 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground text-center">
+                📹 Upload Video<br />
+                <span className="text-xs">Max 20MB each</span>
+              </span>
+            </div>
+          </label>
+        )}
+      </div>
+      
+      <p className="text-xs text-muted-foreground">
+        {videoUrls.length}/3 videos uploaded. Videos help showcase your property better.
       </p>
     </div>
   );
