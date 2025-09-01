@@ -411,7 +411,7 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                     required
                   />
                   {showLocationSuggestions && locationSearch && (
-                    <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-20 max-h-40 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 bg-popover border border-border rounded-md shadow-lg z-[1000] md:z-[9999] max-h-60 overflow-y-auto">
                       <div className="p-2 text-xs text-muted-foreground border-b">
                         {addrLoading ? 'Searching...' : `Suggestions for "${locationSearch}"`}
                       </div>
