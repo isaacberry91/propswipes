@@ -177,6 +177,10 @@ const Matches = () => {
     navigate(`/chat/${matchId}`);
   };
 
+  const handleCardClick = (matchId: string) => {
+    navigate(`/match/${matchId}`);
+  };
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-md mx-auto">
@@ -218,7 +222,11 @@ const Matches = () => {
         ) : (
           <div className="space-y-6">
             {matches.map((match) => (
-              <Card key={match.id} className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.01]">
+              <Card 
+                key={match.id} 
+                className="group relative overflow-hidden bg-gradient-to-br from-card to-card/80 backdrop-blur-sm border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.01] cursor-pointer"
+                onClick={() => handleCardClick(match.id)}
+              >
                 <div className="relative p-4">
                   <div className="flex gap-3">
                     {/* Property Image - smaller */}
@@ -264,7 +272,10 @@ const Matches = () => {
                         <Button
                           variant="default"
                           size="sm"
-                          onClick={() => handleChatClick(match.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleChatClick(match.id);
+                          }}
                           className="text-xs px-3 py-1 h-7"
                         >
                           <MessageCircle className="w-3 h-3 mr-1" />
