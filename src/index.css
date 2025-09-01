@@ -173,4 +173,14 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Prevent zoom on iOS when focusing input fields */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Ensure touch-action for better mobile experience */
+  input, textarea, select, button {
+    touch-action: manipulation;
+  }
 }
