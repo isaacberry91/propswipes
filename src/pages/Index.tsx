@@ -2,10 +2,21 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Shield, Home, Users, MessageCircle, ArrowRight, CheckCircle, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import heroImage from "@/assets/propswipes-hero.jpg";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  // Redirect authenticated users to discover page
+  useEffect(() => {
+    if (!loading && user) {
+      console.log('🏠 Index: User is authenticated, redirecting to discover');
+      navigate('/discover');
+    }
+  }, [user, loading, navigate]);
 
   const features = [
     {
