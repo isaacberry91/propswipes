@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, MapPin, ArrowLeft, Bed, Bath, Square } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ interface MatchDetail {
     location: string;
     price: string;
     images: string[];
+    videos: string[];
     description: string;
     bedrooms: number;
     bathrooms: number;
@@ -79,6 +81,7 @@ const MatchDetail = () => {
             state,
             price,
             images,
+            videos,
             description,
             bedrooms,
             bathrooms,
@@ -136,6 +139,7 @@ const MatchDetail = () => {
             minimumFractionDigits: 0,
           }).format(property.price) : '—',
           images: property?.images || ["/lovable-uploads/810531b2-e906-42de-94ea-6dc60d4cd90c.png"],
+          videos: property?.videos || [],
           description: property?.description || '',
           bedrooms: property?.bedrooms || 0,
           bathrooms: property?.bathrooms || 0,
@@ -212,15 +216,55 @@ const MatchDetail = () => {
       </div>
 
       <div className="max-w-md mx-auto p-4 space-y-6">
-        {/* Property Images */}
+        {/* Property Media */}
         <Card className="overflow-hidden">
-          <div className="aspect-video relative">
-            <img 
-              src={match.property.images[0]} 
-              alt={match.property.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
+          {(match.property.images && match.property.images.length > 0) || (match.property.videos && match.property.videos.length > 0) ? (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {match.property.images?.map((image, index) => (
+                  <CarouselItem key={`image-${index}`}>
+                    <div className="aspect-video relative">
+                      <img 
+                        src={image} 
+                        alt={`${match.property.title} - Image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                        Image {index + 1}
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+                {match.property.videos?.map((video, index) => (
+                  <CarouselItem key={`video-${index}`}>
+                    <div className="aspect-video relative">
+                      <video 
+                        src={video}
+                        controls
+                        className="w-full h-full object-cover"
+                        preload="metadata"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                      <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                        Video {index + 1}
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {((match.property.images?.length || 0) + (match.property.videos?.length || 0)) > 1 && (
+                <>
+                  <CarouselPrevious className="left-4" />
+                  <CarouselNext className="right-4" />
+                </>
+              )}
+            </Carousel>
+          ) : (
+            <div className="aspect-video relative bg-muted flex items-center justify-center">
+              <p className="text-muted-foreground">No media available</p>
+            </div>
+          )}
         </Card>
 
         {/* Property Details */}
