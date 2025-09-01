@@ -58,6 +58,7 @@ const Profile = () => {
 
   const fetchProfileLocSuggestions = useCallback(async (q: string) => {
     try {
+      console.log('🔍 ProfileLoc: fetch suggestions for', q);
       if (!q || q.length < 1) {
         setProfileLocSuggestions([]);
         return;
@@ -65,10 +66,12 @@ const Profile = () => {
       setProfileLocLoading(true);
       const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
       const token = tokenData?.token;
+      console.log('🔍 ProfileLoc: token present?', !!token);
       if (!token) {
         setProfileLocSuggestions([]);
         return;
       }
+      console.log('🔍 ProfileLoc: querying Mapbox...');
       const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${token}&country=US&types=address,place,locality,neighborhood&limit=6`);
       if (!res.ok) throw new Error(`Mapbox error ${res.status}`);
       const data = await res.json();
@@ -92,6 +95,7 @@ const Profile = () => {
           fullAddress: f.place_name,
         };
       });
+      console.log('🔍 ProfileLoc: suggestions count', items.length);
       setProfileLocSuggestions(items);
     } catch (e) {
       console.error('Profile location suggestions error', e);
@@ -103,10 +107,18 @@ const Profile = () => {
 
   // Debounce profile location fetching
   useEffect(() => {
+    console.log('⌛ ProfileLoc: debounce start, query =', profileLocQuery);
     const t = setTimeout(() => {
-      if (profileLocQuery) fetchProfileLocSuggestions(profileLocQuery);
+      if (profileLocQuery) {
+        console.log('⌛ ProfileLoc: debounce fired, fetching for', profileLocQuery);
+        fetchProfileLocSuggestions(profileLocQuery);
+      } else {
+        console.log('⌛ ProfileLoc: empty query, skipping fetch');
+      }
     }, 250);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+    };
   }, [profileLocQuery, fetchProfileLocSuggestions]);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -776,14 +788,15 @@ const Profile = () => {
                                <Input
                                  id="location"
                                  value={userProfile?.location || user?.user_metadata?.location || ''}
-                                onChange={(e) => {
-                                  const v = e.target.value;
-                                  setUserProfile({...userProfile, location: v});
-                                  if (isEditing) {
-                                    setProfileLocQuery(v);
-                                    setShowProfileLocSuggestions(true);
-                                  }
-                                }}
+                                 onChange={(e) => {
+                                   const v = e.target.value;
+                                   console.log('🔤 ProfileLoc input change:', v, 'isEditing=', isEditing);
+                                   setUserProfile({...userProfile, location: v});
+                                   if (isEditing) {
+                                     setProfileLocQuery(v);
+                                     setShowProfileLocSuggestions(true);
+                                   }
+                                 }}
                                 onFocus={() => {
                                   if (isEditing) {
                                     setShowProfileLocSuggestions(true);
