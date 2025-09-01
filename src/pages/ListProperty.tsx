@@ -93,17 +93,39 @@ const ListProperty = () => {
       const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${token}&country=US&types=address,place,locality,neighborhood&limit=6`);
       if (!res.ok) throw new Error(`Mapbox error ${res.status}`);
       const data = await res.json();
+      console.log('🏠 Mapbox address response:', data);
       const items = (data.features || []).map((f: any) => {
+        console.log('🏠 Processing feature:', f);
         let city = ""; let state = ""; let postcode = "";
+        
+        // Extract from context array
         f.context?.forEach((c: any) => {
+          console.log('🏠 Context item:', c);
           if (c.id?.startsWith('place.')) city = c.text;
           if (c.id?.startsWith('region.')) state = (c.short_code?.replace('us-','') || c.text || '').toUpperCase();
           if (c.id?.startsWith('postcode.')) postcode = c.text;
         });
+        
+        // For addresses, try to extract components from place_name as fallback
+        if (!city || !state) {
+          const parts = f.place_name?.split(', ') || [];
+          console.log('🏠 Place name parts:', parts);
+          if (parts.length >= 3) {
+            if (!city && parts[1]) city = parts[1];
+            if (!state && parts[2]) {
+              // Extract state from "State ZIP" format
+              const stateZip = parts[2].split(' ');
+              state = stateZip[0];
+              if (!postcode && stateZip[1]) postcode = stateZip[1];
+            }
+          }
+        }
+        
         const street = f.place_type?.includes('address')
           ? `${f.address ? f.address + ' ' : ''}${f.text}`
           : f.text;
-        return {
+          
+        const result = {
           label: f.place_name,
           street,
           city,
@@ -111,6 +133,8 @@ const ListProperty = () => {
           postcode,
           coords: f.geometry?.coordinates,
         };
+        console.log('🏠 Processed result:', result);
+        return result;
       });
       setAddrSuggestions(items);
     } catch (e) {
@@ -826,6 +850,7 @@ const ListProperty = () => {
                         className="w-full text-left px-3 py-2 hover:bg-accent"
                         onMouseDown={(e) => {
                           e.preventDefault();
+                          console.log('🏠 Selected suggestion:', s);
                           setFormData(prev => ({
                             ...prev,
                             address: s.street || s.label,
