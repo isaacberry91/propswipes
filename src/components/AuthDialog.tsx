@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,8 +26,9 @@ import {
   CheckCircle,
   Home,
   TrendingUp
-} from "lucide-react";
+ } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserProfile {
   // Basic Info
@@ -101,6 +102,86 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
 
   const [locationSearch, setLocationSearch] = useState('');
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+
+  // Address autocomplete state
+  const [addrSuggestions, setAddrSuggestions] = useState<any[]>([]);
+  const [addrLoading, setAddrLoading] = useState(false);
+
+  const fetchAddressSuggestions = useCallback(async (q: string) => {
+    try {
+      if (!q || q.length < 1) {
+        setAddrSuggestions([]);
+        return;
+      }
+      setAddrLoading(true);
+      const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+      const token = tokenData?.token;
+      if (!token) {
+        setAddrSuggestions([]);
+        return;
+      }
+      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${token}&country=US&types=address,place,locality,neighborhood&limit=6`);
+      if (!res.ok) throw new Error(`Mapbox error ${res.status}`);
+      const data = await res.json();
+      console.log('🏠 Auth Mapbox response:', data);
+      const items = (data.features || []).map((f: any) => {
+        console.log('🏠 Auth Processing feature:', f);
+        let city = ""; let state = ""; let postcode = "";
+        
+        // Extract from context array
+        f.context?.forEach((c: any) => {
+          if (c.id?.startsWith('place.')) city = c.text;
+          if (c.id?.startsWith('region.')) state = (c.short_code?.replace('us-','') || c.text || '').toUpperCase();
+          if (c.id?.startsWith('postcode.')) postcode = c.text;
+        });
+        
+        // For addresses, try to extract components from place_name as fallback
+        if (!city || !state) {
+          const parts = f.place_name?.split(', ') || [];
+          if (parts.length >= 3) {
+            if (!city && parts[1]) city = parts[1];
+            if (!state && parts[2]) {
+              const stateZip = parts[2].split(' ');
+              state = stateZip[0];
+              if (!postcode && stateZip[1]) postcode = stateZip[1];
+            }
+          }
+        }
+        
+        const street = f.place_type?.includes('address')
+          ? `${f.address ? f.address + ' ' : ''}${f.text}`
+          : f.text;
+          
+        const result = {
+          label: f.place_name,
+          street,
+          city,
+          state,
+          postcode,
+          coords: f.geometry?.coordinates,
+          fullAddress: f.place_name,
+        };
+        console.log('🏠 Auth Processed result:', result);
+        return result;
+      });
+      setAddrSuggestions(items);
+    } catch (e) {
+      console.error('Auth Address suggestions error', e);
+      setAddrSuggestions([]);
+    } finally {
+      setAddrLoading(false);
+    }
+  }, []);
+
+  // Debounce address query
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (locationSearch) {
+        fetchAddressSuggestions(locationSearch);
+      }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [locationSearch, fetchAddressSuggestions]);
 
   const filteredLocations = locationSuggestions.filter(location =>
     location.toLowerCase().includes(locationSearch.toLowerCase())
@@ -324,30 +405,60 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                       setShowLocationSuggestions(true);
                     }}
                     onFocus={() => setShowLocationSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
                     placeholder="123 Main St, Seattle, WA 98101"
                     className="pl-10"
                     required
                   />
                   {showLocationSuggestions && locationSearch && (
                     <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-20 max-h-40 overflow-y-auto">
-                      {filteredLocations.map((location) => (
-                        <div
-                          key={location}
-                          className="p-2 hover:bg-accent cursor-pointer text-sm"
-                          onClick={() => {
-                            handleInputChange('address', location);
-                            setLocationSearch(location);
-                            setShowLocationSuggestions(false);
-                          }}
-                        >
-                          <MapPin className="w-3 h-3 inline mr-2" />
-                          {location}
-                        </div>
-                      ))}
-                      {filteredLocations.length === 0 && (
-                        <div className="p-2 text-sm text-muted-foreground">
-                          No suggestions found. You can enter any address.
-                        </div>
+                      <div className="p-2 text-xs text-muted-foreground border-b">
+                        {addrLoading ? 'Searching...' : `Suggestions for "${locationSearch}"`}
+                      </div>
+                      {addrSuggestions.length > 0 ? (
+                        addrSuggestions.map((s, idx) => (
+                          <button
+                            type="button"
+                            key={idx}
+                            className="w-full text-left px-3 py-2 hover:bg-accent"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              console.log('🏠 Auth Selected suggestion:', s);
+                              handleInputChange('address', s.fullAddress);
+                              setLocationSearch(s.fullAddress);
+                              setShowLocationSuggestions(false);
+                            }}
+                          >
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-muted-foreground" />
+                              <div className="truncate">
+                                <div className="text-sm font-medium truncate">{s.label}</div>
+                                {(s.city || s.state) && (
+                                  <div className="text-xs text-muted-foreground truncate">{[s.city, s.state, s.postcode].filter(Boolean).join(', ')}</div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        filteredLocations.length > 0 ? (
+                          filteredLocations.map((location) => (
+                            <div
+                              key={location}
+                              className="p-2 hover:bg-accent cursor-pointer text-sm"
+                              onClick={() => {
+                                handleInputChange('address', location);
+                                setLocationSearch(location);
+                                setShowLocationSuggestions(false);
+                              }}
+                            >
+                              <MapPin className="w-3 h-3 inline mr-2" />
+                              {location}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                        )
                       )}
                     </div>
                   )}
