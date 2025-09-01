@@ -115,6 +115,26 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
   const [addrSuggestions, setAddrSuggestions] = useState<any[]>([]);
   const [addrLoading, setAddrLoading] = useState(false);
 
+  // Portal positioning for suggestions
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [suggestPos, setSuggestPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const updateSuggestPos = useCallback(() => {
+    const r = inputRef.current?.getBoundingClientRect();
+    if (r) setSuggestPos({ top: r.bottom + 4, left: r.left, width: r.width });
+  }, []);
+  useEffect(() => {
+    if (!showLocationSuggestions) return;
+    updateSuggestPos();
+    const onScroll = () => updateSuggestPos();
+    const onResize = () => updateSuggestPos();
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [showLocationSuggestions, updateSuggestPos]);
+
   const fetchAddressSuggestions = useCallback(async (q: string) => {
     try {
       if (!q || q.length < 1) {
@@ -405,6 +425,7 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                   <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
                   <Input
                     id="address"
+                    ref={inputRef}
                     value={locationSearch}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -412,18 +433,23 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                       setLocationSearch(value);
                       handleInputChange('address', value);
                       setShowLocationSuggestions(true);
+                      updateSuggestPos();
                     }}
                     onFocus={() => {
                       console.log('🏠 Auth: Location input focused');
                       setShowLocationSuggestions(true);
+                      updateSuggestPos();
                     }}
                     onBlur={() => setTimeout(() => setShowLocationSuggestions(false), 150)}
                     placeholder="123 Main St, Seattle, WA 98101"
                     className="pl-10"
                     required
                   />
-                  {showLocationSuggestions && (
-                    <div className="absolute top-full left-0 right-0 bg-background border border-border rounded-md shadow-lg z-[99999] max-h-60 overflow-y-auto">
+                  {showLocationSuggestions && createPortal(
+                    <div
+                      style={{ position: 'fixed', top: (suggestPos?.top ?? 0), left: (suggestPos?.left ?? 0), width: (suggestPos?.width ?? 320) }}
+                      className="bg-popover border border-border rounded-md shadow-lg z-[99999] max-h-60 overflow-y-auto"
+                    >
                       <div className="p-2 text-xs text-muted-foreground border-b">
                         {addrLoading ? 'Searching...' : `Suggestions for "${locationSearch}"`}
                       </div>
@@ -458,7 +484,8 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                             <div
                               key={location}
                               className="p-2 hover:bg-accent cursor-pointer text-sm"
-                              onClick={() => {
+                              onMouseDown={(e) => {
+                                e.preventDefault();
                                 handleInputChange('address', location);
                                 setLocationSearch(location);
                                 setShowLocationSuggestions(false);
@@ -472,7 +499,8 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
                           <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
                         )
                       )}
-                    </div>
+                    </div>,
+                    document.body
                   )}
                 </div>
               </div>
