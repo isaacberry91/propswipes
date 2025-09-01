@@ -842,18 +842,34 @@ const Admin = () => {
                     <TableRow key={property.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          {property.images && property.images.length > 0 && (
+                          {property.images && property.images.length > 0 ? (
                             <img 
                               src={property.images[0]} 
                               alt={property.title}
                               className="w-16 h-12 object-cover rounded"
                             />
+                          ) : property.videos && property.videos.length > 0 ? (
+                            <video 
+                              src={property.videos[0]}
+                              className="w-16 h-12 object-cover rounded"
+                              muted
+                              preload="metadata"
+                            />
+                          ) : (
+                            <div className="w-16 h-12 bg-muted flex items-center justify-center rounded">
+                              <Home className="w-6 h-6 text-muted-foreground" />
+                            </div>
                           )}
                           <div>
                             <p className="font-medium">{property.title}</p>
                             <p className="text-sm text-muted-foreground">
                               {property.city}, {property.state}
                             </p>
+                            {((property.images?.length || 0) + (property.videos?.length || 0)) > 0 && (
+                              <p className="text-xs text-muted-foreground">
+                                {property.images?.length || 0} image(s), {property.videos?.length || 0} video(s)
+                              </p>
+                            )}
                           </div>
                         </div>
                       </TableCell>

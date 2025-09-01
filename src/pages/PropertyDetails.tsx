@@ -45,6 +45,7 @@ interface Property {
   bathrooms: number;
   square_feet: number;
   images: string[];
+  videos: string[];
   amenities: string[];
   status: string;
   created_at: string;
@@ -179,27 +180,44 @@ const PropertyDetails = () => {
           </div>
         </div>
 
-        {/* Property Images */}
+        {/* Property Media */}
         <div className="relative">
-          {property.images && property.images.length > 0 ? (
+          {(property.images && property.images.length > 0) || (property.videos && property.videos.length > 0) ? (
             <Carousel className="w-full">
               <CarouselContent>
-                {property.images.map((image, index) => (
-                  <CarouselItem key={index}>
+                {property.images?.map((image, index) => (
+                  <CarouselItem key={`image-${index}`}>
                     <div className="relative">
                       <img 
                         src={image} 
-                        alt={`${property.title} - ${index + 1}`}
+                        alt={`${property.title} - Image ${index + 1}`}
                         className="w-full h-80 object-cover"
                       />
                       <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                        {index + 1} / {property.images.length}
+                        Image {index + 1}
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+                {property.videos?.map((video, index) => (
+                  <CarouselItem key={`video-${index}`}>
+                    <div className="relative">
+                      <video 
+                        src={video}
+                        controls
+                        className="w-full h-80 object-cover"
+                        preload="metadata"
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                      <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                        Video {index + 1}
                       </div>
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              {property.images.length > 1 && (
+              {((property.images?.length || 0) + (property.videos?.length || 0)) > 1 && (
                 <>
                   <CarouselPrevious className="left-4" />
                   <CarouselNext className="right-4" />
