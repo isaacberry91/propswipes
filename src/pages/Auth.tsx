@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,66 @@ const Auth = () => {
   const [userType, setUserType] = useState("");
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+  // Signup location autocomplete state
+  const [locQuery, setLocQuery] = useState("");
+  const [locSuggestions, setLocSuggestions] = useState<any[]>([]);
+  const [locLoading, setLocLoading] = useState(false);
+  const [showLocSuggestions, setShowLocSuggestions] = useState(false);
+
+  const fetchLocSuggestions = useCallback(async (q: string) => {
+    try {
+      if (!q || q.length < 1) {
+        setLocSuggestions([]);
+        return;
+      }
+      setLocLoading(true);
+      const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+      const token = tokenData?.token;
+      if (!token) {
+        setLocSuggestions([]);
+        return;
+      }
+      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${token}&country=US&types=address,place,locality,neighborhood&limit=6`);
+      if (!res.ok) throw new Error(`Mapbox error ${res.status}`);
+      const data = await res.json();
+      const items = (data.features || []).map((f: any) => {
+        let city = ""; let state = ""; let postcode = "";
+        f.context?.forEach((c: any) => {
+          if (c.id?.startsWith('place.')) city = c.text;
+          if (c.id?.startsWith('region.')) state = (c.short_code?.replace('us-','') || c.text || '').toUpperCase();
+          if (c.id?.startsWith('postcode.')) postcode = c.text;
+        });
+        const street = f.place_type?.includes('address')
+          ? `${f.address ? f.address + ' ' : ''}${f.text}`
+          : f.text;
+        return {
+          label: f.place_name,
+          street,
+          city,
+          state,
+          postcode,
+          coords: f.geometry?.coordinates,
+          fullAddress: f.place_name,
+        };
+      });
+      setLocSuggestions(items);
+    } catch (e) {
+      console.error('Signup location suggestions error', e);
+      setLocSuggestions([]);
+    } finally {
+      setLocLoading(false);
+    }
+  }, []);
+
+  // Debounce fetching suggestions
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (locQuery) fetchLocSuggestions(locQuery);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [locQuery, fetchLocSuggestions]);
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -652,19 +712,60 @@ const Auth = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-location" className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Location
-                    </Label>
+                  <div className="relative">
                     <Input
                       id="signup-location"
                       type="text"
                       placeholder="New York, NY"
                       value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setLocation(v);
+                        setLocQuery(v);
+                        setShowLocSuggestions(true);
+                      }}
+                      onFocus={() => {
+                        setShowLocSuggestions(true);
+                        if (location) setLocQuery(location);
+                      }}
+                      onBlur={() => setTimeout(() => setShowLocSuggestions(false), 150)}
                       className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
+
+                    {showLocSuggestions && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-lg z-[9999] max-h-64 overflow-y-auto">
+                        <div className="p-2 text-xs text-muted-foreground border-b">
+                          {locLoading ? 'Searching...' : (locQuery ? `Suggestions for "${locQuery}"` : 'Start typing a city or address')}
+                        </div>
+                        {locSuggestions.length > 0 ? (
+                          locSuggestions.map((s, idx) => (
+                            <button
+                              type="button"
+                              key={idx}
+                              className="w-full text-left px-3 py-2 hover:bg-accent"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                setLocation(s.fullAddress);
+                                setLocQuery(s.fullAddress);
+                                setShowLocSuggestions(false);
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-muted-foreground" />
+                                <div className="truncate">
+                                  <div className="text-sm font-medium truncate">{s.label}</div>
+                                  {(s.city || s.state) && (
+                                    <div className="text-xs text-muted-foreground truncate">{[s.city, s.state, s.postcode].filter(Boolean).join(', ')}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2">
