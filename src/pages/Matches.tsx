@@ -263,16 +263,11 @@ const Matches = () => {
                         </div>
                       </div>
                       
-                      {/* User name and type */}
+                      {/* User name only */}
                       <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-medium text-foreground">
-                            {match.matchedUser.name}
-                          </span>
-                          <span className="text-xs bg-accent/20 text-accent-foreground px-2 py-1 rounded-full">
-                            {match.matchedUser.type}
-                          </span>
-                        </div>
+                        <span className="text-xs font-medium text-foreground">
+                          {match.matchedUser.name}
+                        </span>
                         
                         <Button
                           variant="default"
