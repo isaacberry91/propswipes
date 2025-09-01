@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,8 @@ import {
   TrendingUp,
   LogOut,
   Home,
-  Trash2
+  Trash2,
+  MapPin
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,6 +49,65 @@ const Profile = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [changingPassword, setChangingPassword] = useState(false);
+
+  // Profile location autocomplete state
+  const [profileLocQuery, setProfileLocQuery] = useState("");
+  const [profileLocSuggestions, setProfileLocSuggestions] = useState<any[]>([]);
+  const [profileLocLoading, setProfileLocLoading] = useState(false);
+  const [showProfileLocSuggestions, setShowProfileLocSuggestions] = useState(false);
+
+  const fetchProfileLocSuggestions = useCallback(async (q: string) => {
+    try {
+      if (!q || q.length < 1) {
+        setProfileLocSuggestions([]);
+        return;
+      }
+      setProfileLocLoading(true);
+      const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+      const token = tokenData?.token;
+      if (!token) {
+        setProfileLocSuggestions([]);
+        return;
+      }
+      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${token}&country=US&types=address,place,locality,neighborhood&limit=6`);
+      if (!res.ok) throw new Error(`Mapbox error ${res.status}`);
+      const data = await res.json();
+      const items = (data.features || []).map((f: any) => {
+        let city = ""; let state = ""; let postcode = "";
+        f.context?.forEach((c: any) => {
+          if (c.id?.startsWith('place.')) city = c.text;
+          if (c.id?.startsWith('region.')) state = (c.short_code?.replace('us-','') || c.text || '').toUpperCase();
+          if (c.id?.startsWith('postcode.')) postcode = c.text;
+        });
+        const street = f.place_type?.includes('address')
+          ? `${f.address ? f.address + ' ' : ''}${f.text}`
+          : f.text;
+        return {
+          label: f.place_name,
+          street,
+          city,
+          state,
+          postcode,
+          coords: f.geometry?.coordinates,
+          fullAddress: f.place_name,
+        };
+      });
+      setProfileLocSuggestions(items);
+    } catch (e) {
+      console.error('Profile location suggestions error', e);
+      setProfileLocSuggestions([]);
+    } finally {
+      setProfileLocLoading(false);
+    }
+  }, []);
+
+  // Debounce profile location fetching
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (profileLocQuery) fetchProfileLocSuggestions(profileLocQuery);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [profileLocQuery, fetchProfileLocSuggestions]);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -706,25 +766,76 @@ const Profile = () => {
                            </div>
                         </div>
                         
-                         {/* Location - Full width */}
-                         <div className="space-y-2">
-                           <Label htmlFor="location" className="text-sm font-semibold text-foreground flex items-center gap-2">
-                             <Home className="w-4 h-4 text-primary" />
-                             Location
-                           </Label>
-                           <div className="relative group">
-                              <Input
-                                id="location"
-                                value={userProfile?.location || user?.user_metadata?.location || ''}
-                               onChange={(e) => setUserProfile({...userProfile, location: e.target.value})}
-                               disabled={!isEditing}
-                               placeholder="Your location"
-                               className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
-                              maxLength={100}
-                            />
-                            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                          </div>
-                        </div>
+                          {/* Location - Full width */}
+                          <div className="space-y-2">
+                            <Label htmlFor="location" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                              <Home className="w-4 h-4 text-primary" />
+                              Location
+                            </Label>
+                            <div className="relative group">
+                               <Input
+                                 id="location"
+                                 value={userProfile?.location || user?.user_metadata?.location || ''}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  setUserProfile({...userProfile, location: v});
+                                  if (isEditing) {
+                                    setProfileLocQuery(v);
+                                    setShowProfileLocSuggestions(true);
+                                  }
+                                }}
+                                onFocus={() => {
+                                  if (isEditing) {
+                                    setShowProfileLocSuggestions(true);
+                                    const currentLoc = userProfile?.location || user?.user_metadata?.location || '';
+                                    if (currentLoc) setProfileLocQuery(currentLoc);
+                                  }
+                                }}
+                                onBlur={() => setTimeout(() => setShowProfileLocSuggestions(false), 150)}
+                                disabled={!isEditing}
+                                placeholder="Your location"
+                                className="rounded-xl border-2 border-primary/20 bg-background/80 backdrop-blur-sm focus:border-primary/40 focus:bg-background transition-all duration-300 shadow-sm h-11"
+                               maxLength={100}
+                             />
+                             
+                             {isEditing && showProfileLocSuggestions && (
+                               <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border rounded-md shadow-lg z-[9999] max-h-64 overflow-y-auto">
+                                 <div className="p-2 text-xs text-muted-foreground border-b">
+                                   {profileLocLoading ? 'Searching...' : (profileLocQuery ? `Suggestions for "${profileLocQuery}"` : 'Start typing a city or address')}
+                                 </div>
+                                 {profileLocSuggestions.length > 0 ? (
+                                   profileLocSuggestions.map((s, idx) => (
+                                     <button
+                                       type="button"
+                                       key={idx}
+                                       className="w-full text-left px-3 py-2 hover:bg-accent"
+                                       onMouseDown={(e) => {
+                                         e.preventDefault();
+                                         setUserProfile({...userProfile, location: s.fullAddress});
+                                         setProfileLocQuery(s.fullAddress);
+                                         setShowProfileLocSuggestions(false);
+                                       }}
+                                     >
+                                       <div className="flex items-center gap-2">
+                                         <MapPin className="w-4 h-4 text-muted-foreground" />
+                                         <div className="truncate">
+                                           <div className="text-sm font-medium truncate">{s.label}</div>
+                                           {(s.city || s.state) && (
+                                             <div className="text-xs text-muted-foreground truncate">{[s.city, s.state, s.postcode].filter(Boolean).join(', ')}</div>
+                                           )}
+                                         </div>
+                                       </div>
+                                     </button>
+                                   ))
+                                 ) : (
+                                   <div className="px-3 py-2 text-sm text-muted-foreground">No matches</div>
+                                 )}
+                               </div>
+                             )}
+                             
+                             <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                           </div>
+                         </div>
                         
                         {/* Bio - Full width */}
                         <div className="space-y-2 lg:space-y-3">
