@@ -44,7 +44,7 @@ const Chat = () => {
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
-
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -323,6 +323,19 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Cleanup any playing audio element on unmount
+  useEffect(() => {
+    return () => {
+      try {
+        if (currentAudioRef.current) {
+          currentAudioRef.current.pause();
+          currentAudioRef.current.src = '';
+          currentAudioRef.current = null;
+        }
+      } catch (_) {}
+    };
+  }, []);
+
   const uploadFile = async (file: File) => {
     if (!user) return null;
 
@@ -591,44 +604,42 @@ const Chat = () => {
   };
 
   const playAudio = (audioUrl: string, messageId: string) => {
-    // If the same audio is playing, stop it
-    if (playingAudio === messageId) {
-      setPlayingAudio(null);
-      return;
+    // Always stop any currently playing audio before starting a new one
+    try {
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current.currentTime = 0;
+        // Clearing src helps some browsers fully stop loading/playing
+        currentAudioRef.current.src = '';
+        currentAudioRef.current = null;
+      }
+    } catch (e) {
+      console.warn('Failed stopping previous audio', e);
     }
 
-    // Stop any currently playing audio first
-    if (playingAudio) {
-      setPlayingAudio(null);
-      // Give a small delay to ensure previous audio stops
-      setTimeout(() => {
-        startNewAudio(audioUrl, messageId);
-      }, 100);
-    } else {
-      startNewAudio(audioUrl, messageId);
-    }
-  };
-
-  const startNewAudio = (audioUrl: string, messageId: string) => {
     const audio = new Audio(audioUrl);
+    currentAudioRef.current = audio;
     setPlayingAudio(messageId);
-    
+
     audio.onended = () => {
       setPlayingAudio(null);
+      currentAudioRef.current = null;
     };
-    
+
     audio.onerror = () => {
       setPlayingAudio(null);
+      currentAudioRef.current = null;
       toast({
         title: "Playback Error",
         description: "Could not play voice note.",
         variant: "destructive",
       });
     };
-    
+
     audio.play().catch((error) => {
       console.error('Audio playback error:', error);
       setPlayingAudio(null);
+      currentAudioRef.current = null;
     });
   };
 
