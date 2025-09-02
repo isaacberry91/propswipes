@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Bell, Check, Heart, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -210,16 +211,23 @@ export const NotificationsList = () => {
               </Button>
             )}
             {notifications.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setClearConfirmOpen(true)}
-                className="flex items-center gap-2 text-destructive hover:text-destructive w-full sm:w-auto"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Clear all</span>
-                <span className="sm:hidden">Clear</span>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setClearConfirmOpen(true)}
+                    className="text-destructive hover:text-destructive"
+                    aria-label="Clear all notifications"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Clear all</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Clear all
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         </div>
