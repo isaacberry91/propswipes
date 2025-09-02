@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2, Mic, Square, Play, Pause } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,10 +34,16 @@ const Chat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportType, setReportType] = useState("");
   const [reportDescription, setReportDescription] = useState("");
   const [recipientPrivacySettings, setRecipientPrivacySettings] = useState<any>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   useEffect(() => {
     if (user && matchId) {
@@ -466,6 +472,112 @@ const Chat = () => {
     await sendMessageWithAttachment(message.trim());
   };
 
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      
+      setAudioChunks([]);
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      setRecordingDuration(0);
+
+      // Start recording timer
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setAudioChunks(prev => [...prev, event.data]);
+        }
+      };
+
+      recorder.onstop = () => {
+        stream.getTracks().forEach(track => track.stop());
+        if (recordingTimerRef.current) {
+          clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+      };
+
+      recorder.start();
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast({
+        title: "Recording Error",
+        description: "Unable to access microphone.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const sendVoiceNote = async () => {
+    if (audioChunks.length === 0) return;
+
+    try {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      const audioFile = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: 'audio/webm' });
+      
+      const attachment = await uploadFile(audioFile);
+      if (attachment) {
+        await sendMessageWithAttachment("", { ...attachment, isVoiceNote: true, duration: recordingDuration });
+      }
+      
+      setAudioChunks([]);
+      setRecordingDuration(0);
+    } catch (error) {
+      console.error('Error sending voice note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send voice note.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const playAudio = (audioUrl: string, messageId: string) => {
+    if (playingAudio === messageId) {
+      // Stop playing
+      setPlayingAudio(null);
+      return;
+    }
+
+    const audio = new Audio(audioUrl);
+    setPlayingAudio(messageId);
+    
+    audio.onended = () => {
+      setPlayingAudio(null);
+    };
+    
+    audio.onerror = () => {
+      setPlayingAudio(null);
+      toast({
+        title: "Playback Error",
+        description: "Could not play voice note.",
+        variant: "destructive",
+      });
+    };
+    
+    audio.play().catch((error) => {
+      console.error('Audio playback error:', error);
+      setPlayingAudio(null);
+    });
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   const handleDeleteMatch = async () => {
     if (!match) return;
 
@@ -765,6 +877,37 @@ const Chat = () => {
                         className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => window.open(msg.attachment.url, '_blank')}
                       />
+                    ) : msg.attachment.type.startsWith('audio/') || msg.attachment.isVoiceNote ? (
+                      <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-auto p-1"
+                          onClick={() => playAudio(msg.attachment.url, msg.id)}
+                        >
+                          {playingAudio === msg.id ? (
+                            <Pause className="w-4 h-4" />
+                          ) : (
+                            <Play className="w-4 h-4" />
+                          )}
+                        </Button>
+                        <div className="flex flex-col flex-1">
+                          <span className="text-sm">Voice Note</span>
+                          {msg.attachment.duration && (
+                            <span className="text-xs text-muted-foreground">
+                              {formatDuration(msg.attachment.duration)}
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-auto p-1"
+                          onClick={() => window.open(msg.attachment.url, '_blank')}
+                        >
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      </div>
                     ) : (
                       <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
                         <Paperclip className="w-4 h-4" />
@@ -817,65 +960,118 @@ const Chat = () => {
             </Card>
           </div>
         ) : (
-          <form onSubmit={handleSendMessage} className="max-w-md mx-auto">
-            <div className="flex gap-2">
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleFileSelect(file);
-                }}
-                accept="*/*"
-              />
-              <input
-                type="file"
-                ref={imageInputRef}
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleFileSelect(file);
-                }}
-                accept="image/*"
-              />
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon"
-                className="shrink-0"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-              >
-                <Paperclip className="w-4 h-4" />
-              </Button>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                size="icon"
-                className="shrink-0"
-                onClick={() => imageInputRef.current?.click()}
-                disabled={uploading}
-              >
-                <Image className="w-4 h-4" />
-              </Button>
-              <Input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={uploading ? "Uploading..." : messages.length === 0 ? "Start the conversation..." : "Type a message..."}
-                className="flex-1"
-                disabled={uploading}
-              />
-              <Button 
-                type="submit" 
-                variant="default" 
-                size="icon"
-                disabled={uploading || (!message.trim())}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </form>
+          <div className="max-w-md mx-auto space-y-3">
+            {isRecording && (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-destructive rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium">Recording...</span>
+                  <span className="text-sm text-muted-foreground ml-auto">
+                    {formatDuration(recordingDuration)}
+                  </span>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={stopRecording}
+                    className="flex-1"
+                  >
+                    <Square className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="default" 
+                    size="sm"
+                    onClick={() => {
+                      stopRecording();
+                      sendVoiceNote();
+                    }}
+                    className="flex-1"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Send
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            <form onSubmit={handleSendMessage}>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileSelect(file);
+                  }}
+                  accept="*/*"
+                />
+                <input
+                  type="file"
+                  ref={imageInputRef}
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileSelect(file);
+                  }}
+                  accept="image/*"
+                />
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || isRecording}
+                >
+                  <Paperclip className="w-4 h-4" />
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon"
+                  className="shrink-0"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={uploading || isRecording}
+                >
+                  <Image className="w-4 h-4" />
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon"
+                  className="shrink-0"
+                  onClick={isRecording ? stopRecording : startRecording}
+                  disabled={uploading}
+                >
+                  {isRecording ? (
+                    <Square className="w-4 h-4 text-destructive" />
+                  ) : (
+                    <Mic className="w-4 h-4" />
+                  )}
+                </Button>
+                <Input
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder={uploading ? "Uploading..." : isRecording ? "Recording voice note..." : messages.length === 0 ? "Start the conversation..." : "Type a message..."}
+                  className="flex-1"
+                  disabled={uploading || isRecording}
+                />
+                <Button 
+                  type="submit" 
+                  variant="default" 
+                  size="icon"
+                  disabled={uploading || isRecording || (!message.trim())}
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            </form>
+          </div>
         )}
       </div>
 
