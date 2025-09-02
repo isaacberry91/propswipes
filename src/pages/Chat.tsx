@@ -946,14 +946,6 @@ const Chat = () => {
                             </span>
                           )}
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-auto p-1"
-                          onClick={() => window.open(msg.attachment.url, '_blank')}
-                        >
-                          <Download className="w-3 h-3" />
-                        </Button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
