@@ -52,8 +52,7 @@ const Chat = () => {
   const [audioDuration, setAudioDuration] = useState(0);
   
   // Context menu state for message actions
-  const [contextMenu, setContextMenu] = useState<{ show: boolean; messageId: string | null; x: number; y: number }>({ show: false, messageId: null, x: 0, y: 0 });
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ show: boolean; messageId: string | null; x: number; y: number; isOwnMessage: boolean }>({ show: false, messageId: null, x: 0, y: 0, isOwnMessage: false });
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -753,34 +752,20 @@ const Chat = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Long press handlers for context menu
-  const handleLongPressStart = (messageId: string, event: React.TouchEvent | React.MouseEvent) => {
+  // Three-dot menu handlers
+  const handleThreeDotClick = (messageId: string, event: React.MouseEvent, isOwnMessage: boolean) => {
     event.preventDefault();
     event.stopPropagation();
     
-    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
     
-    longPressTimer.current = setTimeout(() => {
-      setContextMenu({
-        show: true,
-        messageId,
-        x: clientX,
-        y: clientY
-      });
-    }, 500); // 500ms long press
-  };
-
-  const handleLongPressEnd = (event?: React.TouchEvent | React.MouseEvent) => {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
+    setContextMenu({
+      show: true,
+      messageId,
+      x: rect.left,
+      y: rect.bottom + 5,
+      isOwnMessage
+    });
   };
 
   // Context menu actions
@@ -801,7 +786,7 @@ const Chat = () => {
         });
       }
     }
-    setContextMenu({ show: false, messageId: null, x: 0, y: 0 });
+    setContextMenu({ show: false, messageId: null, x: 0, y: 0, isOwnMessage: false });
   };
 
   const deleteMessage = async (messageId: string) => {
@@ -828,7 +813,7 @@ const Chat = () => {
         variant: "destructive",
       });
     }
-    setContextMenu({ show: false, messageId: null, x: 0, y: 0 });
+      setContextMenu({ show: false, messageId: null, x: 0, y: 0, isOwnMessage: false });
   };
 
   // Close context menu when clicking outside
@@ -838,7 +823,7 @@ const Chat = () => {
         // Check if the click is on the context menu itself
         const target = event.target as Element;
         if (target && !target.closest('.context-menu')) {
-          setContextMenu({ show: false, messageId: null, x: 0, y: 0 });
+          setContextMenu({ show: false, messageId: null, x: 0, y: 0, isOwnMessage: false });
         }
       }
     };
@@ -1145,15 +1130,34 @@ const Chat = () => {
                     ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-md'
                     : 'bg-card text-card-foreground border border-border/50 rounded-bl-md backdrop-blur-sm'
                 }`}
-                onTouchStart={msg.text ? (e) => handleLongPressStart(msg.id, e) : undefined}
-                onTouchEnd={msg.text ? (e) => handleLongPressEnd(e) : undefined}
-                onMouseDown={msg.text ? (e) => handleLongPressStart(msg.id, e) : undefined}
-                onMouseUp={msg.text ? (e) => handleLongPressEnd(e) : undefined}
-                onMouseLeave={msg.text ? (e) => handleLongPressEnd(e) : undefined}
-                onContextMenu={msg.text ? (e) => e.preventDefault() : undefined}
-                style={{ userSelect: 'none' }}
               >
-                {msg.text && <p className="text-sm">{msg.text}</p>}
+                {msg.text && (
+                  <div className="flex items-start gap-2">
+                    <p className="text-sm flex-1">{msg.text}</p>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-auto p-1 opacity-60 hover:opacity-100"
+                      onClick={(e) => handleThreeDotClick(msg.id, e, msg.senderId === 'me')}
+                    >
+                      <MoreVertical className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+                
+                {!msg.text && msg.attachment && (
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1"></div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-auto p-1 opacity-60 hover:opacity-100"
+                      onClick={(e) => handleThreeDotClick(msg.id, e, msg.senderId === 'me')}
+                    >
+                      <MoreVertical className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
                 
                 {msg.attachment && (
                   <div className="mt-2">
@@ -1246,13 +1250,15 @@ const Chat = () => {
             <Copy className="w-4 h-4" />
             Copy Message
           </button>
-          <button
-            className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 text-destructive"
-            onClick={() => deleteMessage(contextMenu.messageId!)}
-          >
-            <Trash2 className="w-4 h-4" />
-            Delete Message
-          </button>
+          {contextMenu.isOwnMessage && (
+            <button
+              className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 text-destructive"
+              onClick={() => deleteMessage(contextMenu.messageId!)}
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Message
+            </button>
+          )}
         </div>
       )}
 
