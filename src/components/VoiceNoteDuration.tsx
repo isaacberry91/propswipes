@@ -121,12 +121,8 @@ const VoiceNoteDuration = ({ audioUrl, initialDuration }: VoiceNoteDurationProps
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (loading) {
-    return <span>Loading...</span>;
-  }
-
-  if (duration === null) {
-    return <span>Duration: N/A</span>;
+  if (loading || duration === null) {
+    return <span>0:00</span>;
   }
 
   return <span>{formatDuration(duration)}</span>;
