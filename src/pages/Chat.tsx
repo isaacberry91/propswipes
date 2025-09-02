@@ -90,10 +90,11 @@ const Chat = () => {
               id: newMessage.id,
               senderId: newMessage.sender_id,
               text: newMessage.content,
-              attachment: newMessage.attachment_url ? {
+               attachment: newMessage.attachment_url ? {
                 url: newMessage.attachment_url,
                 type: newMessage.attachment_type,
-                name: newMessage.attachment_name
+                name: newMessage.attachment_name,
+                isVoiceNote: newMessage.attachment_type?.startsWith('audio/') && newMessage.content === 'Sent a voice note'
               } : null,
               timestamp: new Date(newMessage.created_at).toLocaleTimeString([], { 
                 hour: '2-digit', 
@@ -257,7 +258,8 @@ const Chat = () => {
         attachment: msg.attachment_url ? {
           url: msg.attachment_url,
           type: msg.attachment_type,
-          name: msg.attachment_name
+          name: msg.attachment_name,
+          isVoiceNote: msg.attachment_type?.startsWith('audio/') && msg.content === 'Sent a voice note'
         } : null,
         timestamp: new Date(msg.created_at).toLocaleTimeString([], { 
           hour: '2-digit', 
@@ -408,7 +410,10 @@ const Chat = () => {
         .insert({
           match_id: matchId,
           sender_id: senderProfile.id,
-          content: messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''),
+           content: messageText || (attachment ? 
+             attachment.isVoiceNote ? 'Sent a voice note' :
+             attachment.type.startsWith('image/') ? 'Sent an image' : 'Sent a file'
+           : ''),
           attachment_url: attachment?.url || null,
           attachment_type: attachment?.type || null,
           attachment_name: attachment?.name || null
@@ -430,7 +435,10 @@ const Chat = () => {
       const newMessage = {
         id: messageData.id,
         senderId: "me",
-        text: messageText || (attachment ? `Sent ${attachment.type.startsWith('image/') ? 'an image' : 'a file'}` : ''),
+        text: messageText || (attachment ? 
+          attachment.isVoiceNote ? 'Sent a voice note' :
+          attachment.type.startsWith('image/') ? 'Sent an image' : 'Sent a file'
+        : ''),
         attachment: attachment || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
