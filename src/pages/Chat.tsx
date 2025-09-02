@@ -478,10 +478,26 @@ const Chat = () => {
       setMessages(prev => [...prev, newMessage]);
       setMessage("");
 
-      // Send push notification to recipient
+      // Create in-app notification for recipient
       try {
         const recipientId = match.buyerId === senderProfile.id ? match.sellerId : match.buyerId;
+        const senderName = senderProfile.display_name || 'Someone';
         
+        await supabase
+          .from('notifications')
+          .insert({
+            recipient_id: recipientId,
+            sender_id: senderProfile.id,
+            title: `New message from ${senderName}`,
+            message: messageText || (attachment ? 
+              attachment.isVoiceNote ? 'Sent you a voice note' :
+              attachment.type.startsWith('image/') ? 'Sent you an image' : 'Sent you a file'
+            : ''),
+            notification_type: 'message',
+            property_id: match.property_id
+          });
+        
+        // Also send push notification to recipient
         await supabase.functions.invoke('send-push-notification', {
           body: {
             recipientUserId: recipientId,
@@ -491,7 +507,7 @@ const Chat = () => {
           }
         });
       } catch (notificationError) {
-        console.error('Failed to send push notification:', notificationError);
+        console.error('Failed to send notification:', notificationError);
         // Don't show error to user as the message was sent successfully
       }
 
