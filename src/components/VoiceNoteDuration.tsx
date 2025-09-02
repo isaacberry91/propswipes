@@ -6,24 +6,37 @@ interface VoiceNoteDurationProps {
 }
 
 const VoiceNoteDuration = ({ audioUrl, initialDuration }: VoiceNoteDurationProps) => {
-  const [duration, setDuration] = useState<number | null>(initialDuration || null);
-  const [loading, setLoading] = useState(!initialDuration);
+  const [duration, setDuration] = useState<number | null>(typeof initialDuration === 'number' ? Math.max(0, Math.round(initialDuration)) : null);
+  const [loading, setLoading] = useState(!(typeof initialDuration === 'number'));
 
   useEffect(() => {
-    if (initialDuration) {
-      setDuration(initialDuration);
+    if (typeof initialDuration === 'number') {
+      setDuration(Math.max(0, Math.round(initialDuration)));
       setLoading(false);
       return;
     }
 
     const audio = new Audio();
     audio.preload = 'metadata';
-    
-    const handleLoadedMetadata = () => {
-      if (audio.duration && Number.isFinite(audio.duration)) {
-        setDuration(Math.round(audio.duration));
+    audio.crossOrigin = 'anonymous';
+
+    const trySetDuration = () => {
+      if (Number.isFinite(audio.duration) && audio.duration >= 0) {
+        setDuration(Math.max(0, Math.round(audio.duration)));
+        setLoading(false);
       }
-      setLoading(false);
+    };
+
+    const handleLoadedMetadata = () => {
+      trySetDuration();
+    };
+
+    const handleDurationChange = () => {
+      trySetDuration();
+    };
+
+    const handleCanPlayThrough = () => {
+      trySetDuration();
     };
 
     const handleError = () => {
@@ -31,12 +44,17 @@ const VoiceNoteDuration = ({ audioUrl, initialDuration }: VoiceNoteDurationProps
     };
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('durationchange', handleDurationChange);
+    audio.addEventListener('canplaythrough', handleCanPlayThrough);
     audio.addEventListener('error', handleError);
     
     audio.src = audioUrl;
+    audio.load();
 
     return () => {
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('durationchange', handleDurationChange);
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
       audio.removeEventListener('error', handleError);
       audio.src = '';
     };
