@@ -167,12 +167,13 @@ const ChatManagement = () => {
             .limit(1)
             .maybeSingle();
 
-          // Count unread messages
+          // Count unread messages (excluding deleted)
           const { count: unreadCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('match_id', match.id)
-            .neq('sender_id', userProfile.id);
+            .neq('sender_id', userProfile.id)
+            .is('deleted_at', null);
 
           // Calculate analytics
           const totalMessages = allMessages?.length || 0;

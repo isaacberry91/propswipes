@@ -250,6 +250,7 @@ const Chat = () => {
         .from('messages')
         .select('*')
         .eq('match_id', matchId)
+        .is('deleted_at', null)
         .order('created_at', { ascending: true });
 
       if (error) {
