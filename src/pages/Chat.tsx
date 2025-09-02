@@ -253,21 +253,28 @@ const Chat = () => {
         .eq('user_id', user?.id)
         .single();
 
-      const formattedMessages = messagesData?.map(msg => ({
-        id: msg.id,
-        senderId: msg.sender_id === userProfile?.id ? "me" : msg.sender_id,
-        text: msg.content,
-        attachment: msg.attachment_url ? {
+      const formattedMessages = messagesData?.map(msg => {
+        const attachment = msg.attachment_url ? {
           url: msg.attachment_url,
           type: msg.attachment_type,
           name: msg.attachment_name,
           isVoiceNote: msg.attachment_type?.startsWith('audio/') && msg.content === 'Sent a voice note'
-        } : null,
-        timestamp: new Date(msg.created_at).toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        })
-      })) || [];
+        } : null;
+        
+        console.log('Message attachment from DB:', attachment);
+        console.log('Message raw data:', msg);
+        
+        return {
+          id: msg.id,
+          senderId: msg.sender_id === userProfile?.id ? "me" : msg.sender_id,
+          text: msg.content,
+          attachment,
+          timestamp: new Date(msg.created_at).toLocaleTimeString([], { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          })
+        };
+      }) || [];
 
       setMessages(formattedMessages);
     } catch (error) {
@@ -613,7 +620,10 @@ const Chat = () => {
       const audioFile = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: 'audio/webm' });
       const attachment = await uploadFile(audioFile);
       if (attachment) {
-        await sendMessageWithAttachment("", { ...attachment, isVoiceNote: true, duration: recordingDuration });
+        console.log('Voice note duration being sent:', recordingDuration);
+        const voiceAttachment = { ...attachment, isVoiceNote: true, duration: recordingDuration };
+        console.log('Complete voice attachment:', voiceAttachment);
+        await sendMessageWithAttachment("", voiceAttachment);
       }
 
       setAudioChunks([]);
@@ -1016,30 +1026,35 @@ const Chat = () => {
                         className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => window.open(msg.attachment.url, '_blank')}
                       />
-                     ) : msg.attachment.type.startsWith('audio/') || msg.attachment.isVoiceNote ? (
-                      <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-auto p-1"
-                          onClick={() => playAudio(msg.attachment.url, msg.id)}
-                        >
-                          {playingAudio === msg.id ? (
-                            <Pause className="w-4 h-4" />
-                          ) : (
-                            <Play className="w-4 h-4" />
-                          )}
-                        </Button>
-                        <div className="flex flex-col flex-1">
-                          <span className="text-sm">Voice Note</span>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            {msg.attachment.duration && (
-                              <span>
-                                {formatDuration(msg.attachment.duration)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                       ) : msg.attachment.type.startsWith('audio/') || msg.attachment.isVoiceNote ? (
+                         <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
+                           <Button
+                             size="sm"
+                             variant="ghost"
+                             className="h-auto p-1"
+                             onClick={() => {
+                               console.log('Playing audio, attachment:', msg.attachment);
+                               playAudio(msg.attachment.url, msg.id);
+                             }}
+                           >
+                             {playingAudio === msg.id ? (
+                               <Pause className="w-4 h-4" />
+                             ) : (
+                               <Play className="w-4 h-4" />
+                             )}
+                           </Button>
+                           <div className="flex flex-col flex-1">
+                             <span className="text-sm">Voice Note</span>
+                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                               {msg.attachment.duration ? (
+                                 <span>
+                                   {formatDuration(msg.attachment.duration)}
+                                 </span>
+                               ) : (
+                                 <span>Duration: N/A</span>
+                               )}
+                             </div>
+                           </div>
                          <Button
                           size="sm"
                           variant="ghost"
