@@ -196,16 +196,17 @@ export const NotificationsList = () => {
               </Badge>
             )}
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             {unreadCount > 0 && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={markAllAsRead}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 w-full sm:w-auto"
               >
                 <Check className="h-4 w-4" />
-                Mark all read
+                <span className="hidden sm:inline">Mark all read</span>
+                <span className="sm:hidden">Mark read</span>
               </Button>
             )}
             {notifications.length > 0 && (
@@ -213,10 +214,11 @@ export const NotificationsList = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setClearConfirmOpen(true)}
-                className="flex items-center gap-2 text-destructive hover:text-destructive"
+                className="flex items-center gap-2 text-destructive hover:text-destructive w-full sm:w-auto"
               >
                 <Trash2 className="h-4 w-4" />
-                Clear all
+                <span className="hidden sm:inline">Clear all</span>
+                <span className="sm:hidden">Clear</span>
               </Button>
             )}
           </div>
