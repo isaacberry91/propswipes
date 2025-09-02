@@ -755,6 +755,9 @@ const Chat = () => {
 
   // Long press handlers for context menu
   const handleLongPressStart = (messageId: string, event: React.TouchEvent | React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
     const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
     const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
     
@@ -768,7 +771,12 @@ const Chat = () => {
     }, 500); // 500ms long press
   };
 
-  const handleLongPressEnd = () => {
+  const handleLongPressEnd = (event?: React.TouchEvent | React.MouseEvent) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
@@ -825,15 +833,22 @@ const Chat = () => {
 
   // Close context menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (contextMenu.show) {
-        setContextMenu({ show: false, messageId: null, x: 0, y: 0 });
+        // Check if the click is on the context menu itself
+        const target = event.target as Element;
+        if (target && !target.closest('.context-menu')) {
+          setContextMenu({ show: false, messageId: null, x: 0, y: 0 });
+        }
       }
     };
 
     if (contextMenu.show) {
-      document.addEventListener('click', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
+      // Add a small delay to prevent immediate dismissal
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside);
+      }, 100);
     }
 
     return () => {
@@ -1131,10 +1146,11 @@ const Chat = () => {
                     : 'bg-card text-card-foreground border border-border/50 rounded-bl-md backdrop-blur-sm'
                 }`}
                 onTouchStart={msg.text ? (e) => handleLongPressStart(msg.id, e) : undefined}
-                onTouchEnd={msg.text ? handleLongPressEnd : undefined}
+                onTouchEnd={msg.text ? (e) => handleLongPressEnd(e) : undefined}
                 onMouseDown={msg.text ? (e) => handleLongPressStart(msg.id, e) : undefined}
-                onMouseUp={msg.text ? handleLongPressEnd : undefined}
-                onMouseLeave={msg.text ? handleLongPressEnd : undefined}
+                onMouseUp={msg.text ? (e) => handleLongPressEnd(e) : undefined}
+                onMouseLeave={msg.text ? (e) => handleLongPressEnd(e) : undefined}
+                onContextMenu={msg.text ? (e) => e.preventDefault() : undefined}
                 style={{ userSelect: 'none' }}
               >
                 {msg.text && <p className="text-sm">{msg.text}</p>}
@@ -1216,7 +1232,7 @@ const Chat = () => {
       {/* Context Menu */}
       {contextMenu.show && (
         <div
-          className="fixed bg-card border border-border rounded-lg shadow-lg z-50 py-1"
+          className="fixed bg-card border border-border rounded-lg shadow-lg z-50 py-1 context-menu"
           style={{
             left: Math.min(contextMenu.x, window.innerWidth - 160),
             top: Math.min(contextMenu.y, window.innerHeight - 80),
