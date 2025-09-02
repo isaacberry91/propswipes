@@ -45,6 +45,7 @@ const Chat = () => {
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioSpeed, setAudioSpeed] = useState<number>(1);
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -651,6 +652,7 @@ const Chat = () => {
 
     audio.src = audioUrl;
     audio.currentTime = 0;
+    audio.playbackRate = audioSpeed;
     currentAudioRef.current = audio;
 
     const playPromise = audio.play();
@@ -663,6 +665,18 @@ const Chat = () => {
         });
     } else {
       setPlayingAudio(messageId);
+    }
+  };
+
+  const togglePlaybackSpeed = () => {
+    const speeds = [1, 1.5, 2];
+    const currentIndex = speeds.indexOf(audioSpeed);
+    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+    setAudioSpeed(nextSpeed);
+    
+    // Update current audio speed if playing
+    if (currentAudioRef.current) {
+      currentAudioRef.current.playbackRate = nextSpeed;
     }
   };
 
@@ -971,7 +985,7 @@ const Chat = () => {
                         className="max-w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                         onClick={() => window.open(msg.attachment.url, '_blank')}
                       />
-                    ) : msg.attachment.type.startsWith('audio/') || msg.attachment.isVoiceNote ? (
+                     ) : msg.attachment.type.startsWith('audio/') || msg.attachment.isVoiceNote ? (
                       <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
                         <Button
                           size="sm"
@@ -993,6 +1007,14 @@ const Chat = () => {
                             </span>
                           )}
                         </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-auto p-1 text-xs"
+                          onClick={togglePlaybackSpeed}
+                        >
+                          {audioSpeed}x
+                        </Button>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
