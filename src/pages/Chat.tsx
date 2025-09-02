@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2, Mic, Square, Play, Pause, Copy } from "lucide-react";
+import { ArrowLeft, Send, Heart, Home, MapPin, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2, Mic, Square, Play, Pause, Copy } from "lucide-react";
 import VoiceNoteDuration from "@/components/VoiceNoteDuration";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +34,6 @@ const Chat = () => {
   const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportType, setReportType] = useState("");
@@ -1224,7 +1223,7 @@ const Chat = () => {
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 p-2 rounded bg-background/20 border border-border/50">
-                        <Paperclip className="w-4 h-4" />
+                        <Image className="w-4 h-4" />
                         <span className="text-sm truncate flex-1">{msg.attachment.name}</span>
                         <Button
                           size="sm"
@@ -1377,32 +1376,12 @@ const Chat = () => {
                   }}
                   accept="*/*"
                 />
-                <input
-                  type="file"
-                  ref={imageInputRef}
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileSelect(file);
-                  }}
-                  accept="image/*"
-                />
                 <Button 
                   type="button" 
                   variant="ghost" 
                   size="icon"
                   className="shrink-0"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading || isRecording}
-                >
-                  <Paperclip className="w-4 h-4" />
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon"
-                  className="shrink-0"
-                  onClick={() => imageInputRef.current?.click()}
                   disabled={uploading || isRecording}
                 >
                   <Image className="w-4 h-4" />
