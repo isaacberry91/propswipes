@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2, Mic, Square, Play, Pause } from "lucide-react";
+import VoiceNoteDuration from "@/components/VoiceNoteDuration";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -47,7 +48,6 @@ const Chat = () => {
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const [messagePlaybackSpeeds, setMessagePlaybackSpeeds] = useState<{[key: string]: number}>({});
-  const [voiceNoteDurations, setVoiceNoteDurations] = useState<{[key: string]: number}>({});
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -345,24 +345,6 @@ const Chat = () => {
       } catch (_) {}
     };
   }, []);
-
-  // Compute durations for voice notes when missing
-  useEffect(() => {
-    const pending = (messages as any[]).filter((m: any) => m.attachment && (m.attachment.type?.startsWith('audio/') || m.attachment.isVoiceNote) && !m.attachment.duration && !voiceNoteDurations[m.id]);
-    pending.forEach((m: any) => {
-      const a = new Audio();
-      a.preload = 'metadata';
-      a.src = m.attachment.url;
-      a.onloadedmetadata = () => {
-        const secs = Math.round(a.duration || 0);
-        if (secs > 0 && Number.isFinite(secs)) {
-          setVoiceNoteDurations(prev => ({ ...prev, [m.id]: secs }));
-        }
-        a.src = '';
-      };
-      a.onerror = () => { a.src = ''; };
-    });
-  }, [messages, voiceNoteDurations]);
 
   const uploadFile = async (file: File) => {
     if (!user) return null;
@@ -1064,15 +1046,12 @@ const Chat = () => {
                            </Button>
                            <div className="flex flex-col flex-1">
                              <span className="text-sm">Voice Note</span>
-                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                               {msg.attachment.duration ? (
-                                 <span>
-                                   {formatDuration(msg.attachment.duration)}
-                                 </span>
-                               ) : (
-                                 <span>Duration: N/A</span>
-                               )}
-                             </div>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <VoiceNoteDuration 
+                                  audioUrl={msg.attachment.url} 
+                                  initialDuration={msg.attachment.duration}
+                                />
+                              </div>
                            </div>
                          <Button
                           size="sm"
