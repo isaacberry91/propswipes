@@ -528,17 +528,56 @@ const Chat = () => {
   };
 
   const sendVoiceNote = async () => {
-    if (audioChunks.length === 0) return;
-
     try {
-      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      // If recording is still active, stop and wait for the final data chunk
+      let chunks: Blob[] = audioChunks;
+
+      if (mediaRecorder && isRecording) {
+        chunks = await new Promise<Blob[]>((resolve) => {
+          const localChunks: Blob[] = [];
+          const handleData = (event: any) => {
+            if (event.data && event.data.size > 0) localChunks.push(event.data);
+          };
+          const handleStop = () => {
+            mediaRecorder.removeEventListener('dataavailable', handleData as any);
+            resolve(localChunks.length > 0 ? localChunks : audioChunks);
+          };
+          mediaRecorder.addEventListener('dataavailable', handleData);
+          mediaRecorder.addEventListener('stop', handleStop as any, { once: true } as any);
+          try { mediaRecorder.stop(); } catch (e) { /* noop */ }
+        });
+        setIsRecording(false);
+        if (recordingTimerRef.current) {
+          clearInterval(recordingTimerRef.current);
+          recordingTimerRef.current = null;
+        }
+      }
+
+      if (!chunks || chunks.length === 0) {
+        toast({
+          title: "Recording Error",
+          description: "No audio captured. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+      if (audioBlob.size === 0) {
+        toast({
+          title: "Recording Error",
+          description: "Empty audio. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const audioFile = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: 'audio/webm' });
-      
       const attachment = await uploadFile(audioFile);
       if (attachment) {
         await sendMessageWithAttachment("", { ...attachment, isVoiceNote: true, duration: recordingDuration });
       }
-      
+
       setAudioChunks([]);
       setRecordingDuration(0);
     } catch (error) {
@@ -994,7 +1033,6 @@ const Chat = () => {
                     variant="default" 
                     size="sm"
                     onClick={() => {
-                      stopRecording();
                       sendVoiceNote();
                     }}
                     className="flex-1"
