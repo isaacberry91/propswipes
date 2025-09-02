@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2, Mic, Square, Play, Pause } from "lucide-react";
+import { ArrowLeft, Send, Heart, Home, MapPin, Paperclip, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2, Mic, Square, Play, Pause, Copy } from "lucide-react";
 import VoiceNoteDuration from "@/components/VoiceNoteDuration";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,6 +50,10 @@ const Chat = () => {
   const [messagePlaybackSpeeds, setMessagePlaybackSpeeds] = useState<{[key: string]: number}>({});
   const [currentTime, setCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
+  
+  // Context menu state for message actions
+  const [contextMenu, setContextMenu] = useState<{ show: boolean; messageId: string | null; x: number; y: number }>({ show: false, messageId: null, x: 0, y: 0 });
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -749,6 +753,95 @@ const Chat = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Long press handlers for context menu
+  const handleLongPressStart = (messageId: string, event: React.TouchEvent | React.MouseEvent) => {
+    const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
+    
+    longPressTimer.current = setTimeout(() => {
+      setContextMenu({
+        show: true,
+        messageId,
+        x: clientX,
+        y: clientY
+      });
+    }, 500); // 500ms long press
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  // Context menu actions
+  const copyMessage = async (messageId: string) => {
+    const message = messages.find(msg => msg.id === messageId);
+    if (message?.text) {
+      try {
+        await navigator.clipboard.writeText(message.text);
+        toast({
+          title: "Copied",
+          description: "Message copied to clipboard.",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to copy message.",
+          variant: "destructive",
+        });
+      }
+    }
+    setContextMenu({ show: false, messageId: null, x: 0, y: 0 });
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setMessages(prev => prev.filter(msg => msg.id !== messageId));
+      
+      toast({
+        title: "Message Deleted",
+        description: "Message has been deleted.",
+      });
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete message.",
+        variant: "destructive",
+      });
+    }
+    setContextMenu({ show: false, messageId: null, x: 0, y: 0 });
+  };
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (contextMenu.show) {
+        setContextMenu({ show: false, messageId: null, x: 0, y: 0 });
+      }
+    };
+
+    if (contextMenu.show) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [contextMenu.show]);
+
 
   const handleDeleteMatch = async () => {
     if (!match) return;
@@ -1037,6 +1130,12 @@ const Chat = () => {
                     ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground rounded-br-md'
                     : 'bg-card text-card-foreground border border-border/50 rounded-bl-md backdrop-blur-sm'
                 }`}
+                onTouchStart={msg.text ? (e) => handleLongPressStart(msg.id, e) : undefined}
+                onTouchEnd={msg.text ? handleLongPressEnd : undefined}
+                onMouseDown={msg.text ? (e) => handleLongPressStart(msg.id, e) : undefined}
+                onMouseUp={msg.text ? handleLongPressEnd : undefined}
+                onMouseLeave={msg.text ? handleLongPressEnd : undefined}
+                style={{ userSelect: 'none' }}
               >
                 {msg.text && <p className="text-sm">{msg.text}</p>}
                 
@@ -1113,6 +1212,33 @@ const Chat = () => {
           <div ref={messagesEndRef} />
         </div>
       </div>
+
+      {/* Context Menu */}
+      {contextMenu.show && (
+        <div
+          className="fixed bg-card border border-border rounded-lg shadow-lg z-50 py-1"
+          style={{
+            left: Math.min(contextMenu.x, window.innerWidth - 160),
+            top: Math.min(contextMenu.y, window.innerHeight - 80),
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+            onClick={() => copyMessage(contextMenu.messageId!)}
+          >
+            <Copy className="w-4 h-4" />
+            Copy Message
+          </button>
+          <button
+            className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 text-destructive"
+            onClick={() => deleteMessage(contextMenu.messageId!)}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete Message
+          </button>
+        </div>
+      )}
 
       {/* Message Input */}
       <div className="border-t border-border/50 bg-card/90 backdrop-blur-sm p-4 sticky bottom-0">
