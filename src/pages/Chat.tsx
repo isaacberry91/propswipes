@@ -99,6 +99,7 @@ const Chat = () => {
                 name: newMessage.attachment_name,
                 isVoiceNote: newMessage.attachment_type?.startsWith('audio/') && newMessage.content === 'Sent a voice note'
               } : null,
+              duration_seconds: newMessage.duration_seconds ?? null,
               timestamp: new Date(newMessage.created_at).toLocaleTimeString([], { 
                 hour: '2-digit', 
                 minute: '2-digit' 
@@ -270,6 +271,7 @@ const Chat = () => {
           senderId: msg.sender_id === userProfile?.id ? "me" : msg.sender_id,
           text: msg.content,
           attachment,
+          duration_seconds: msg.duration_seconds ?? null,
           timestamp: new Date(msg.created_at).toLocaleTimeString([], { 
             hour: '2-digit', 
             minute: '2-digit' 
@@ -440,7 +442,7 @@ const Chat = () => {
           attachment_url: attachment?.url || null,
           attachment_type: attachment?.type || null,
           attachment_name: attachment?.name || null,
-          duration_seconds: attachment?.isVoiceNote && attachment?.duration ? Math.round(attachment.duration / 1000) : null
+          duration_seconds: attachment?.isVoiceNote && attachment?.duration ? Math.round(attachment.duration) : null
         })
         .select()
         .single();
@@ -464,6 +466,7 @@ const Chat = () => {
           attachment.type.startsWith('image/') ? 'Sent an image' : 'Sent a file'
         : ''),
         attachment: attachment || null,
+        duration_seconds: messageData.duration_seconds ?? (attachment?.isVoiceNote ? Math.round(attachment.duration) : null),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -1048,11 +1051,11 @@ const Chat = () => {
                            <div className="flex flex-col flex-1">
                              <span className="text-sm">Voice Note</span>
                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                 {msg.duration_seconds ? (
-                                   <span>{formatDuration(msg.duration_seconds)}</span>
-                                 ) : (
-                                   <VoiceNoteDuration audioUrl={msg.attachment_url} />
-                                 )}
+                                  {msg.duration_seconds ? (
+                                    <span>{formatDuration(msg.duration_seconds)}</span>
+                                  ) : (
+                                    <VoiceNoteDuration audioUrl={msg.attachment.url} />
+                                  )}
                                </div>
                            </div>
                          <Button
