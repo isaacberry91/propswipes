@@ -45,7 +45,7 @@ const Chat = () => {
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [audioSpeed, setAudioSpeed] = useState<number>(1);
+  const [messagePlaybackSpeeds, setMessagePlaybackSpeeds] = useState<{[key: string]: number}>({});
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -652,7 +652,9 @@ const Chat = () => {
 
     audio.src = audioUrl;
     audio.currentTime = 0;
-    audio.playbackRate = audioSpeed;
+    // Get individual speed for this message (default to 1x)
+    const messageSpeed = messagePlaybackSpeeds[messageId] || 1;
+    audio.playbackRate = messageSpeed;
     currentAudioRef.current = audio;
 
     const playPromise = audio.play();
@@ -668,14 +670,19 @@ const Chat = () => {
     }
   };
 
-  const togglePlaybackSpeed = () => {
+  const togglePlaybackSpeed = (messageId: string) => {
     const speeds = [1, 1.5, 2];
-    const currentIndex = speeds.indexOf(audioSpeed);
+    const currentSpeed = messagePlaybackSpeeds[messageId] || 1;
+    const currentIndex = speeds.indexOf(currentSpeed);
     const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
-    setAudioSpeed(nextSpeed);
     
-    // Update current audio speed if playing
-    if (currentAudioRef.current) {
+    setMessagePlaybackSpeeds(prev => ({
+      ...prev,
+      [messageId]: nextSpeed
+    }));
+    
+    // Update current audio speed if this message is playing
+    if (currentAudioRef.current && playingAudio === messageId) {
       currentAudioRef.current.playbackRate = nextSpeed;
     }
   };
@@ -1007,13 +1014,13 @@ const Chat = () => {
                             </span>
                           )}
                         </div>
-                        <Button
+                         <Button
                           size="sm"
                           variant="ghost"
                           className="h-auto p-1 text-xs"
-                          onClick={togglePlaybackSpeed}
+                          onClick={() => togglePlaybackSpeed(msg.id)}
                         >
-                          {audioSpeed}x
+                          {messagePlaybackSpeeds[msg.id] || 1}x
                         </Button>
                       </div>
                     ) : (
