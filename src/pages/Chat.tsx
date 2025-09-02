@@ -603,32 +603,45 @@ const Chat = () => {
     }
   };
 
-  const playAudio = (audioUrl: string, messageId: string) => {
-    // Always stop any currently playing audio before starting a new one
+  const stopCurrentAudio = () => {
+    const a = currentAudioRef.current;
+    if (!a) return;
     try {
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-        currentAudioRef.current.currentTime = 0;
-        // Clearing src helps some browsers fully stop loading/playing
-        currentAudioRef.current.src = '';
-        currentAudioRef.current = null;
-      }
+      a.pause();
+      a.currentTime = 0;
+      a.src = '';
+      a.load();
     } catch (e) {
-      console.warn('Failed stopping previous audio', e);
+      console.warn('Error stopping audio', e);
+    } finally {
+      setPlayingAudio(null);
+      currentAudioRef.current = null;
+    }
+  };
+
+  const playAudio = (audioUrl: string, messageId: string) => {
+    const existing = currentAudioRef.current;
+
+    // If the same message is playing, toggle stop
+    if (existing && playingAudio === messageId && !existing.paused) {
+      stopCurrentAudio();
+      return;
     }
 
-    const audio = new Audio(audioUrl);
-    currentAudioRef.current = audio;
-    setPlayingAudio(messageId);
+    // Stop anything else first
+    if (existing) {
+      stopCurrentAudio();
+    }
+
+    const audio = existing || new Audio();
+    audio.preload = 'auto';
 
     audio.onended = () => {
       setPlayingAudio(null);
-      currentAudioRef.current = null;
     };
 
     audio.onerror = () => {
       setPlayingAudio(null);
-      currentAudioRef.current = null;
       toast({
         title: "Playback Error",
         description: "Could not play voice note.",
@@ -636,11 +649,21 @@ const Chat = () => {
       });
     };
 
-    audio.play().catch((error) => {
-      console.error('Audio playback error:', error);
-      setPlayingAudio(null);
-      currentAudioRef.current = null;
-    });
+    audio.src = audioUrl;
+    audio.currentTime = 0;
+    currentAudioRef.current = audio;
+
+    const playPromise = audio.play();
+    if (playPromise && typeof (playPromise as Promise<void>).then === 'function') {
+      (playPromise as Promise<void>)
+        .then(() => setPlayingAudio(messageId))
+        .catch((error) => {
+          console.error('Audio playback error:', error);
+          setPlayingAudio(null);
+        });
+    } else {
+      setPlayingAudio(messageId);
+    }
   };
 
   const formatDuration = (seconds: number) => {
