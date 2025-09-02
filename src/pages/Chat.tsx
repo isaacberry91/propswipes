@@ -47,6 +47,7 @@ const Chat = () => {
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const [messagePlaybackSpeeds, setMessagePlaybackSpeeds] = useState<{[key: string]: number}>({});
+  const [voiceNoteDurations, setVoiceNoteDurations] = useState<{[key: string]: number}>({});
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -344,6 +345,24 @@ const Chat = () => {
       } catch (_) {}
     };
   }, []);
+
+  // Compute durations for voice notes when missing
+  useEffect(() => {
+    const pending = (messages as any[]).filter((m: any) => m.attachment && (m.attachment.type?.startsWith('audio/') || m.attachment.isVoiceNote) && !m.attachment.duration && !voiceNoteDurations[m.id]);
+    pending.forEach((m: any) => {
+      const a = new Audio();
+      a.preload = 'metadata';
+      a.src = m.attachment.url;
+      a.onloadedmetadata = () => {
+        const secs = Math.round(a.duration || 0);
+        if (secs > 0 && Number.isFinite(secs)) {
+          setVoiceNoteDurations(prev => ({ ...prev, [m.id]: secs }));
+        }
+        a.src = '';
+      };
+      a.onerror = () => { a.src = ''; };
+    });
+  }, [messages, voiceNoteDurations]);
 
   const uploadFile = async (file: File) => {
     if (!user) return null;
