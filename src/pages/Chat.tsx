@@ -40,6 +40,7 @@ const Chat = () => {
   const [reportDescription, setReportDescription] = useState("");
   const [recipientPrivacySettings, setRecipientPrivacySettings] = useState<any>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isRecordingPaused, setIsRecordingPaused] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
@@ -534,10 +535,33 @@ const Chat = () => {
     }
   };
 
+  const pauseRecording = () => {
+    if (mediaRecorder && isRecording && !isRecordingPaused) {
+      mediaRecorder.pause();
+      setIsRecordingPaused(true);
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
+      }
+    }
+  };
+
+  const resumeRecording = () => {
+    if (mediaRecorder && isRecording && isRecordingPaused) {
+      mediaRecorder.resume();
+      setIsRecordingPaused(false);
+      // Resume the timer
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+    }
+  };
+
   const stopRecording = () => {
     if (mediaRecorder && isRecording) {
       mediaRecorder.stop();
       setIsRecording(false);
+      setIsRecordingPaused(false);
     }
   };
 
@@ -1076,41 +1100,66 @@ const Chat = () => {
           </div>
         ) : (
           <div className="max-w-md mx-auto space-y-3">
-            {isRecording && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-destructive rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">Recording...</span>
-                  <span className="text-sm text-muted-foreground ml-auto">
-                    {formatDuration(recordingDuration)}
-                  </span>
-                </div>
-                <div className="flex gap-2 mt-3">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm"
-                    onClick={stopRecording}
-                    className="flex-1"
-                  >
-                    <Square className="w-4 h-4 mr-2" />
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="default" 
-                    size="sm"
-                    onClick={() => {
-                      sendVoiceNote();
-                    }}
-                    className="flex-1"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    Send
-                  </Button>
-                </div>
-              </div>
-            )}
+             {isRecording && (
+               <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                 <div className="flex items-center gap-3">
+                   <div className={`w-3 h-3 rounded-full ${isRecordingPaused ? 'bg-yellow-500' : 'bg-destructive animate-pulse'}`}></div>
+                   <span className="text-sm font-medium">
+                     {isRecordingPaused ? 'Recording Paused' : 'Recording...'}
+                   </span>
+                   <span className="text-sm text-muted-foreground ml-auto">
+                     {formatDuration(recordingDuration)}
+                   </span>
+                 </div>
+                 <div className="flex gap-2 mt-3">
+                   <Button 
+                     type="button" 
+                     variant="outline" 
+                     size="sm"
+                     onClick={stopRecording}
+                     className="flex-1"
+                   >
+                     <Square className="w-4 h-4 mr-2" />
+                     Cancel
+                   </Button>
+                   {isRecordingPaused ? (
+                     <Button 
+                       type="button" 
+                       variant="secondary" 
+                       size="sm"
+                       onClick={resumeRecording}
+                       className="flex-1"
+                     >
+                       <Play className="w-4 h-4 mr-2" />
+                       Resume
+                     </Button>
+                   ) : (
+                     <Button 
+                       type="button" 
+                       variant="secondary" 
+                       size="sm"
+                       onClick={pauseRecording}
+                       className="flex-1"
+                     >
+                       <Pause className="w-4 h-4 mr-2" />
+                       Pause
+                     </Button>
+                   )}
+                   <Button 
+                     type="button" 
+                     variant="default" 
+                     size="sm"
+                     onClick={() => {
+                       sendVoiceNote();
+                     }}
+                     className="flex-1"
+                   >
+                     <Send className="w-4 h-4 mr-2" />
+                     Send
+                   </Button>
+                 </div>
+               </div>
+             )}
             
             <form onSubmit={handleSendMessage}>
               <div className="flex gap-2">
