@@ -591,12 +591,25 @@ const Chat = () => {
   };
 
   const playAudio = (audioUrl: string, messageId: string) => {
+    // If the same audio is playing, stop it
     if (playingAudio === messageId) {
-      // Stop playing
       setPlayingAudio(null);
       return;
     }
 
+    // Stop any currently playing audio first
+    if (playingAudio) {
+      setPlayingAudio(null);
+      // Give a small delay to ensure previous audio stops
+      setTimeout(() => {
+        startNewAudio(audioUrl, messageId);
+      }, 100);
+    } else {
+      startNewAudio(audioUrl, messageId);
+    }
+  };
+
+  const startNewAudio = (audioUrl: string, messageId: string) => {
     const audio = new Audio(audioUrl);
     setPlayingAudio(messageId);
     
