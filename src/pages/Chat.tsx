@@ -48,6 +48,8 @@ const Chat = () => {
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const [messagePlaybackSpeeds, setMessagePlaybackSpeeds] = useState<{[key: string]: number}>({});
+  const [currentTime, setCurrentTime] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -655,6 +657,8 @@ const Chat = () => {
       console.warn('Error stopping audio', e);
     } finally {
       setPlayingAudio(null);
+      setCurrentTime(0);
+      setAudioDuration(0);
       currentAudioRef.current = null;
     }
   };
@@ -678,15 +682,27 @@ const Chat = () => {
 
     audio.onended = () => {
       setPlayingAudio(null);
+      setCurrentTime(0);
+      setAudioDuration(0);
     };
 
     audio.onerror = () => {
       setPlayingAudio(null);
+      setCurrentTime(0);
+      setAudioDuration(0);
       toast({
         title: "Playback Error",
         description: "Could not play voice note.",
         variant: "destructive",
       });
+    };
+
+    audio.ontimeupdate = () => {
+      setCurrentTime(audio.currentTime);
+    };
+
+    audio.onloadedmetadata = () => {
+      setAudioDuration(audio.duration);
     };
 
     audio.src = audioUrl;
@@ -731,6 +747,7 @@ const Chat = () => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
 
   const handleDeleteMatch = async () => {
     if (!match) return;
@@ -1050,13 +1067,15 @@ const Chat = () => {
                            </Button>
                            <div className="flex flex-col flex-1">
                              <span className="text-sm">Voice Note</span>
-                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  {msg.duration_seconds ? (
-                                    <span>{formatDuration(msg.duration_seconds)}</span>
-                                  ) : (
-                                    <VoiceNoteDuration audioUrl={msg.attachment.url} />
-                                  )}
-                               </div>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                   {playingAudio === msg.id ? (
+                                     <span>{formatDuration(Math.max(0, (msg.duration_seconds || audioDuration) - currentTime))}</span>
+                                   ) : msg.duration_seconds ? (
+                                     <span>{formatDuration(msg.duration_seconds)}</span>
+                                   ) : (
+                                     <VoiceNoteDuration audioUrl={msg.attachment.url} />
+                                   )}
+                                </div>
                            </div>
                          <Button
                           size="sm"
