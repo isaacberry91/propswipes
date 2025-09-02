@@ -1032,11 +1032,13 @@ const Chat = () => {
                         </Button>
                         <div className="flex flex-col flex-1">
                           <span className="text-sm">Voice Note</span>
-                          {msg.attachment.duration && (
-                            <span className="text-xs text-muted-foreground">
-                              {formatDuration(msg.attachment.duration)}
-                            </span>
-                          )}
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            {msg.attachment.duration && (
+                              <span>
+                                {formatDuration(msg.attachment.duration)}
+                              </span>
+                            )}
+                          </div>
                         </div>
                          <Button
                           size="sm"
