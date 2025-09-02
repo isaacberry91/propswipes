@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+
 import { ArrowLeft, Send, Heart, Home, MapPin, Image, User, Building, Mail, Phone, X, Download, MoreVertical, Flag, Shield, Trash2, Mic, Square, Play, Pause, Copy } from "lucide-react";
 import VoiceNoteDuration from "@/components/VoiceNoteDuration";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,6 +53,10 @@ const Chat = () => {
   
   // Context menu state for message actions
   const [contextMenu, setContextMenu] = useState<{ show: boolean; messageId: string | null; x: number; y: number; isOwnMessage: boolean }>({ show: false, messageId: null, x: 0, y: 0, isOwnMessage: false });
+  
+  // Delete confirmation dialog state
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
   useEffect(() => {
     if (user && matchId) {
       fetchMatchData();
@@ -804,17 +809,25 @@ const Chat = () => {
     setContextMenu({ show: false, messageId: null, x: 0, y: 0, isOwnMessage: false });
   };
 
-  const deleteMessage = async (messageId: string) => {
+  const confirmDelete = (messageId: string) => {
+    setMessageToDelete(messageId);
+    setDeleteConfirmOpen(true);
+    setContextMenu({ show: false, messageId: null, x: 0, y: 0, isOwnMessage: false });
+  };
+
+  const deleteMessage = async () => {
+    if (!messageToDelete) return;
+    
     try {
       const { error } = await supabase
         .from('messages')
         .update({ deleted_at: new Date().toISOString() })
-        .eq('id', messageId);
+        .eq('id', messageToDelete);
 
       if (error) throw error;
 
       // Remove from local state
-      setMessages(prev => prev.filter(msg => msg.id !== messageId));
+      setMessages(prev => prev.filter(msg => msg.id !== messageToDelete));
       
       toast({
         title: "Message Deleted",
@@ -828,7 +841,9 @@ const Chat = () => {
         variant: "destructive",
       });
     }
-      setContextMenu({ show: false, messageId: null, x: 0, y: 0, isOwnMessage: false });
+    
+    setDeleteConfirmOpen(false);
+    setMessageToDelete(null);
   };
 
   // Close context menu when clicking outside
@@ -1268,7 +1283,7 @@ const Chat = () => {
           {contextMenu.isOwnMessage && (
             <button
               className="w-full px-4 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground flex items-center gap-2 text-destructive"
-              onClick={() => deleteMessage(contextMenu.messageId!)}
+              onClick={() => confirmDelete(contextMenu.messageId!)}
             >
               <Trash2 className="w-4 h-4" />
               Delete Message
@@ -1597,6 +1612,29 @@ const Chat = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Message</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this message? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={deleteMessage}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
