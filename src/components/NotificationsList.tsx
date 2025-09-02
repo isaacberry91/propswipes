@@ -210,7 +210,7 @@ export const NotificationsList = () => {
                 <span className="sm:hidden">Mark read</span>
               </Button>
             )}
-            {notifications.length > 0 && (
+            {notifications.length > 0 && unreadCount === 0 && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
