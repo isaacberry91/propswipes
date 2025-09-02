@@ -125,6 +125,7 @@ export type Database = {
           content: string
           created_at: string
           deleted_at: string | null
+          duration_seconds: number | null
           id: string
           match_id: string
           sender_id: string
@@ -136,6 +137,7 @@ export type Database = {
           content: string
           created_at?: string
           deleted_at?: string | null
+          duration_seconds?: number | null
           id?: string
           match_id: string
           sender_id: string
@@ -147,6 +149,7 @@ export type Database = {
           content?: string
           created_at?: string
           deleted_at?: string | null
+          duration_seconds?: number | null
           id?: string
           match_id?: string
           sender_id?: string

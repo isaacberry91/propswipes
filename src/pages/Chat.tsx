@@ -439,7 +439,8 @@ const Chat = () => {
            : ''),
           attachment_url: attachment?.url || null,
           attachment_type: attachment?.type || null,
-          attachment_name: attachment?.name || null
+          attachment_name: attachment?.name || null,
+          duration_seconds: attachment?.isVoiceNote && attachment?.duration ? Math.round(attachment.duration / 1000) : null
         })
         .select()
         .single();
@@ -1046,12 +1047,13 @@ const Chat = () => {
                            </Button>
                            <div className="flex flex-col flex-1">
                              <span className="text-sm">Voice Note</span>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <VoiceNoteDuration 
-                                  audioUrl={msg.attachment.url} 
-                                  initialDuration={msg.attachment.duration}
-                                />
-                              </div>
+                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                 {msg.duration_seconds ? (
+                                   <span>{formatDuration(msg.duration_seconds)}</span>
+                                 ) : (
+                                   <VoiceNoteDuration audioUrl={msg.attachment_url} />
+                                 )}
+                               </div>
                            </div>
                          <Button
                           size="sm"
