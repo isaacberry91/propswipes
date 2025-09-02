@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Bell, Check, Heart, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,6 +26,7 @@ export const NotificationsList = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const { toast } = useToast();
 
   const fetchNotifications = async () => {
@@ -114,6 +116,38 @@ export const NotificationsList = () => {
     }
   };
 
+  const clearAllNotifications = async () => {
+    if (!profileId) return;
+    try {
+      const notificationIds = notifications.map(n => n.id);
+      
+      if (notificationIds.length === 0) return;
+
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .in('id', notificationIds)
+        .eq('recipient_id', profileId);
+
+      if (error) throw error;
+
+      setNotifications([]);
+      setClearConfirmOpen(false);
+
+      toast({
+        title: "Success",
+        description: "All notifications cleared",
+      });
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear notifications",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (!user) { setProfileId(null); return; }
     supabase.rpc('get_user_profile_id_for_auth_user')
@@ -162,17 +196,30 @@ export const NotificationsList = () => {
               </Badge>
             )}
           </CardTitle>
-          {unreadCount > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={markAllAsRead}
-              className="flex items-center gap-2"
-            >
-              <Check className="h-4 w-4" />
-              Mark all read
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={markAllAsRead}
+                className="flex items-center gap-2"
+              >
+                <Check className="h-4 w-4" />
+                Mark all read
+              </Button>
+            )}
+            {notifications.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setClearConfirmOpen(true)}
+                className="flex items-center gap-2 text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+                Clear all
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -233,6 +280,29 @@ export const NotificationsList = () => {
           )}
         </ScrollArea>
       </CardContent>
+
+      {/* Clear All Notifications Confirmation Dialog */}
+      <AlertDialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear All Notifications</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to clear all notifications? This action cannot be undone and all notifications will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setClearConfirmOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={clearAllNotifications}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Clear All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
