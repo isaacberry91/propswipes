@@ -32,18 +32,6 @@ interface Property {
   property_type: string;
   created_at: string;
   updated_at: string;
-  // Additional fields from ListProperty form
-  parking_spaces?: number;
-  year_built?: number;
-  lot_size?: number;
-  hoa_fees?: number;
-  gross_income?: number;
-  expenses?: number;
-  cap_rate?: number;
-  monthly_rent?: number;
-  lease_term?: string;
-  security_deposit?: number;
-  available_date?: string;
   owner?: {
     id: string;
     display_name: string;
@@ -304,17 +292,6 @@ const Discover = () => {
           description,
           created_at,
           updated_at,
-          parking_spaces,
-          year_built,
-          lot_size,
-          hoa_fees,
-          gross_income,
-          expenses,
-          cap_rate,
-          monthly_rent,
-          lease_term,
-          security_deposit,
-          available_date,
           profiles!owner_id (
             id,
             display_name,
@@ -1162,99 +1139,6 @@ const Discover = () => {
                     {selectedProperty.description || 'No description available.'}
                   </p>
                 </div>
-
-                {/* Additional Property Details */}
-                {(selectedProperty.listing_type === 'for-rent' || selectedProperty.parking_spaces || selectedProperty.year_built || selectedProperty.lot_size || selectedProperty.hoa_fees) && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Additional Details</h4>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      {selectedProperty.parking_spaces && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Parking Spaces</span>
-                          <span className="font-medium">{selectedProperty.parking_spaces}</span>
-                        </div>
-                      )}
-                      {selectedProperty.year_built && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Year Built</span>
-                          <span className="font-medium">{selectedProperty.year_built}</span>
-                        </div>
-                      )}
-                      {selectedProperty.lot_size && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Lot Size</span>
-                          <span className="font-medium">{selectedProperty.lot_size.toLocaleString()} sq ft</span>
-                        </div>
-                      )}
-                      {selectedProperty.hoa_fees && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">HOA Fees</span>
-                          <span className="font-medium">${selectedProperty.hoa_fees.toLocaleString()}/month</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Rental Specific Information */}
-                {selectedProperty.listing_type === 'for-rent' && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Rental Information</h4>
-                    <div className="grid grid-cols-1 gap-3 text-sm">
-                      {selectedProperty.monthly_rent && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Monthly Rent</span>
-                          <span className="font-medium">${selectedProperty.monthly_rent.toLocaleString()}</span>
-                        </div>
-                      )}
-                      {selectedProperty.lease_term && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Lease Term</span>
-                          <span className="font-medium">{selectedProperty.lease_term}</span>
-                        </div>
-                      )}
-                      {selectedProperty.security_deposit && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Security Deposit</span>
-                          <span className="font-medium">${selectedProperty.security_deposit.toLocaleString()}</span>
-                        </div>
-                      )}
-                      {selectedProperty.available_date && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Available Date</span>
-                          <span className="font-medium">{new Date(selectedProperty.available_date).toLocaleDateString()}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Investment/Commercial Information */}
-                {(selectedProperty.gross_income || selectedProperty.expenses || selectedProperty.cap_rate) && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Investment Information</h4>
-                    <div className="grid grid-cols-1 gap-3 text-sm">
-                      {selectedProperty.gross_income && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Gross Income</span>
-                          <span className="font-medium">${selectedProperty.gross_income.toLocaleString()}/year</span>
-                        </div>
-                      )}
-                      {selectedProperty.expenses && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Annual Expenses</span>
-                          <span className="font-medium">${selectedProperty.expenses.toLocaleString()}</span>
-                        </div>
-                      )}
-                      {selectedProperty.cap_rate && (
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Cap Rate</span>
-                          <span className="font-medium">{selectedProperty.cap_rate}%</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
 
                 {/* Amenities */}
                 {selectedProperty.amenities && selectedProperty.amenities.length > 0 && (
