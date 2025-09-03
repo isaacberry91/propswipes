@@ -123,49 +123,6 @@ const Discover = () => {
     }
   }, [user, userProfile, selectedLocation, selectedRadius, searchFilters]);
 
-  // Function to create a match when someone likes a property
-  const createMatch = async (userId: string, property: Property) => {
-    if (!property.owner) return;
-
-    console.log('🔗 Creating match between user:', userId, 'and property owner:', property.owner.id);
-
-    try {
-      // Check if a match already exists to avoid duplicates
-      const { data: existingMatch } = await supabase
-        .from('matches')
-        .select('*')
-        .or(`and(buyer_id.eq.${userId},seller_id.eq.${property.owner.id}),and(buyer_id.eq.${property.owner.id},seller_id.eq.${userId})`)
-        .single();
-
-      if (!existingMatch) {
-        // Create the match - the person liking is the buyer, property owner is the seller
-        const { data: newMatch, error: matchError } = await supabase
-          .from('matches')
-          .insert({
-            buyer_id: userId,
-            seller_id: property.owner.id,
-            property_id: property.id
-          });
-
-        if (matchError) {
-          console.error('Error creating match:', matchError);
-        } else {
-          console.log('🎉 Match created successfully!', newMatch);
-          
-          // Show success toast with match notification
-          toast({
-            title: "It's a Match! 🎉",
-            description: `You can now chat with ${property.owner.display_name || 'the property owner'} about this property!`,
-            duration: 8000
-          });
-        }
-      } else {
-        console.log('🔗 Match already exists');
-      }
-    } catch (error) {
-      console.error('Error in createMatch:', error);
-    }
-  };
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -632,8 +589,6 @@ const Discover = () => {
           console.log('💕 LIKE: Database update result:', updateResult);
         }
         
-        // Create a match when user likes a property
-        await createMatch(userProfile.id, property);
         
         toast({
           title: "Property Saved! 📋",
