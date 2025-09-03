@@ -204,7 +204,7 @@ const ListProperty = () => {
       setFormData({
         title: editingProperty.title || "",
         propertyType: editingProperty.property_type || "",
-        listingType: "for-sale",
+        listingType: editingProperty.listing_type || "for-sale",
         address: editingProperty.address || "",
         city: editingProperty.city || "",
         state: editingProperty.state || "",
