@@ -254,20 +254,8 @@ const Discover = () => {
         return;
       }
 
-      // Get only properties the user has LIKED to exclude them (disliked properties can show again)
-      const { data: swipes, error: swipesError } = await supabase
-        .from('property_swipes')
-        .select('property_id')
-        .eq('user_id', currentUserProfile.id)
-        .eq('is_liked', true); // Only exclude liked properties, allow disliked ones to show again
-
-      if (swipesError) {
-        console.error('Error fetching user liked properties:', swipesError);
-        setLoading(false);
-        return;
-      }
-
-      const likedPropertyIds = (swipes || []).map((s: any) => s.property_id);
+      // Don't exclude any properties - show all available properties
+      const likedPropertyIds: string[] = [];
       // Build optimized query with better field selection for performance
       let query = supabase
         .from('properties')
@@ -339,10 +327,7 @@ const Discover = () => {
         query = query.gte('square_feet', searchFilters.sqftRange[0]).lte('square_feet', searchFilters.sqftRange[1]);
       }
 
-      // Exclude liked properties and user's own properties
-      if (likedPropertyIds.length > 0) {
-        query = query.not('id', 'in', `(${likedPropertyIds.join(',')})`);
-      }
+      // Only exclude user's own properties
       query = query.not('owner_id', 'eq', currentUserProfile.id);
 
       // Apply sorting and pagination
