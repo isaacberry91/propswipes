@@ -466,8 +466,8 @@ const Discover = () => {
               
               return false;
             });
-          } else {
-            // More generous text-based search if geocoding fails
+          } else if (!selectedLocation.includes('Current Location')) {
+            // More generous text-based search if geocoding fails for regular locations
             filteredData = filteredData.filter((property: any) => {
               const searchTerm = selectedLocation.toLowerCase();
               const searchParts = searchTerm.split(',').map(part => part.trim());
@@ -480,6 +480,9 @@ const Discover = () => {
               
               return addressMatch || cityMatch || stateMatch;
             });
+          } else {
+            // For Current Location without coordinates, show all properties
+            console.log('🔍 No coordinates for Current Location - showing all properties');
           }
           console.log('🔍 After location filtering:', filteredData.length);
         }
