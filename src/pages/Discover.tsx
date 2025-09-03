@@ -236,19 +236,20 @@ const Discover = () => {
         return;
       }
 
-      // 1) Get all property IDs the user has already swiped (liked or disliked)
+      // 1) Get only properties the user has LIKED (not passed on) to exclude them
       const { data: swipes, error: swipesError } = await supabase
         .from('property_swipes')
         .select('property_id')
-        .eq('user_id', userProfile.id);
+        .eq('user_id', userProfile.id)
+        .eq('is_liked', true); // Only get liked properties, not passed ones
 
       if (swipesError) {
-        console.error('Error fetching user swipes:', swipesError);
+        console.error('Error fetching user liked properties:', swipesError);
         setLoading(false);
         return;
       }
 
-      const swipedIds = (swipes || []).map((s: any) => s.property_id);
+      const likedPropertyIds = (swipes || []).map((s: any) => s.property_id);
 
       // 2) Build query with location and filters - include owner information
       let query = supabase
@@ -308,13 +309,13 @@ const Discover = () => {
         query = query.gte('square_feet', searchFilters.sqftRange[0]).lte('square_feet', searchFilters.sqftRange[1]);
       }
 
-      // Exclude properties the user has already swiped
-      if (swipedIds.length > 0) {
-        query = query.not('id', 'in', `(${swipedIds.join(',')})`);
+      // Exclude properties the user has already LIKED (but allow passed properties to show again)
+      if (likedPropertyIds.length > 0) {
+        query = query.not('id', 'in', `(${likedPropertyIds.join(',')})`);
       }
 
-      // Temporarily disable excluding user's own properties for testing
-      // query = query.not('owner_id', 'eq', userProfile.id);
+      // Exclude user's own properties
+      query = query.not('owner_id', 'eq', userProfile.id);
 
 
       // Sorting
