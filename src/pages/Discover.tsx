@@ -1177,11 +1177,6 @@ const Discover = () => {
                         <div className="text-sm text-muted-foreground capitalize">
                           {selectedProperty.owner.user_type}
                         </div>
-                        {selectedProperty.owner.phone && (
-                          <div className="text-sm text-muted-foreground">
-                            {selectedProperty.owner.phone}
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
