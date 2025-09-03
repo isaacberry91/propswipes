@@ -123,6 +123,75 @@ const Discover = () => {
     }
   }, [user, userProfile, selectedLocation, selectedRadius, searchFilters]);
 
+  // Function to check for mutual likes and create matches
+  const checkForMutualLike = async (userId: string, property: Property) => {
+    if (!property.owner) return;
+
+    console.log('🔗 Checking for mutual like between user:', userId, 'and property owner:', property.owner.id);
+
+    try {
+      // Check if the property owner has also liked any of the current user's properties
+      const { data: mutualLikes, error } = await supabase
+        .from('property_swipes')
+        .select(`
+          *,
+          property:properties!inner(owner_id)
+        `)
+        .eq('user_id', property.owner.id)
+        .eq('is_liked', true)
+        .eq('property.owner_id', userId);
+
+      if (error) {
+        console.error('Error checking for mutual likes:', error);
+        return;
+      }
+
+      console.log('🔗 Found mutual likes:', mutualLikes?.length || 0);
+
+      if (mutualLikes && mutualLikes.length > 0) {
+        // There's a mutual like! Create a match
+        console.log('🎉 Creating match!');
+        
+        // Check if a match already exists to avoid duplicates
+        const { data: existingMatch } = await supabase
+          .from('matches')
+          .select('*')
+          .or(`and(buyer_id.eq.${userId},seller_id.eq.${property.owner.id}),and(buyer_id.eq.${property.owner.id},seller_id.eq.${userId})`)
+          .single();
+
+        if (!existingMatch) {
+          // Create the match - determine who is buyer vs seller based on context
+          // The person liking is interested in buying/renting (buyer)
+          // The property owner is selling/renting (seller)
+          const { data: newMatch, error: matchError } = await supabase
+            .from('matches')
+            .insert({
+              buyer_id: userId,
+              seller_id: property.owner.id,
+              property_id: property.id
+            });
+
+          if (matchError) {
+            console.error('Error creating match:', matchError);
+          } else {
+            console.log('🎉 Match created successfully!', newMatch);
+            
+            // Show success toast with match notification
+            toast({
+              title: "It's a Match! 🎉",
+              description: `You and ${property.owner.display_name || 'the property owner'} are both interested in each other's properties!`,
+              duration: 8000
+            });
+          }
+        } else {
+          console.log('🔗 Match already exists');
+        }
+      }
+    } catch (error) {
+      console.error('Error in checkForMutualLike:', error);
+    }
+  };
+
   const fetchUserProfile = async () => {
     if (!user) return;
     
@@ -588,16 +657,14 @@ const Discover = () => {
           console.log('💕 LIKE: Database update result:', updateResult);
         }
         
-        
+        // Check for mutual likes and create match
+        await checkForMutualLike(userProfile.id, property);
         
         toast({
           title: "Property Saved! 📋",
           description: `${property.title} has been added to your saved properties.`,
           duration: 5000
         });
-        
-        // Check for potential matches
-        // This would be expanded to check if the property owner also liked the user
       } else {
         toast({
           title: "Property Skipped",
