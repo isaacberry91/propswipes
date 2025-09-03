@@ -376,9 +376,16 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                   </div>
                   
                   {/* Price */}
-                  <div className="flex items-center gap-2 text-xl font-bold text-green-600">
-                    <DollarSign className="w-5 h-5" />
-                    <span>{property.price.toLocaleString()}</span>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xl font-bold text-green-600">
+                      <DollarSign className="w-5 h-5" />
+                      <span>{property.price.toLocaleString()}</span>
+                    </div>
+                    {property.square_feet && (
+                      <div className="text-sm text-muted-foreground pl-7">
+                        ${Math.round(property.price / property.square_feet).toLocaleString()}/sq ft
+                      </div>
+                    )}
                   </div>
                   
                   {/* Features */}

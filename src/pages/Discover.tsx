@@ -1092,6 +1092,11 @@ const Discover = () => {
                   <div className="text-2xl font-bold text-green-600">
                     ${selectedProperty.price.toLocaleString()}
                   </div>
+                  {selectedProperty.square_feet && (
+                    <div className="text-sm text-muted-foreground">
+                      ${Math.round(selectedProperty.price / selectedProperty.square_feet).toLocaleString()}/sq ft
+                    </div>
+                  )}
                   <div className="flex items-start gap-1 text-muted-foreground">
                     <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{selectedProperty.address}, {selectedProperty.city}</span>
