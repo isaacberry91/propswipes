@@ -33,6 +33,8 @@ const ListProperty = () => {
     state: "",
     zipCode: "",
     price: "",
+    pricePerSqft: "",
+    isPricePerSqft: false,
     squareFeet: "",
     description: "",
     
@@ -208,6 +210,8 @@ const ListProperty = () => {
         state: editingProperty.state || "",
         zipCode: editingProperty.zip_code || "",
         price: editingProperty.price?.toString() || "",
+        pricePerSqft: "",
+        isPricePerSqft: false,
         squareFeet: editingProperty.square_feet?.toString() || "",
         description: editingProperty.description || "",
         bedrooms: editingProperty.bedrooms ? (editingProperty.bedrooms >= 5 ? "5+" : editingProperty.bedrooms.toString()) : "",
@@ -304,7 +308,12 @@ const ListProperty = () => {
     if (isRental) {
       if (!formData.monthlyRent) missingFields.push("Monthly Rent");
     } else {
-      if (!formData.price) missingFields.push("Price");
+      if (!formData.isPricePerSqft) {
+        if (!formData.price) missingFields.push("Price");
+      } else {
+        if (!formData.pricePerSqft) missingFields.push("Price per Sq Ft");
+        if (!formData.squareFeet) missingFields.push("Square Feet (required for price calculation)");
+      }
     }
     
     if (!formData.squareFeet) missingFields.push("Square Feet");
@@ -412,7 +421,9 @@ const ListProperty = () => {
           zip_code: formData.zipCode,
           price: isRental 
             ? parseFloat(formData.monthlyRent.replace(/,/g, '')) 
-            : parseFloat(formData.price.replace(/,/g, '')),
+            : formData.isPricePerSqft 
+              ? parseFloat(formData.pricePerSqft.replace(/,/g, '')) * parseInt(formData.squareFeet.replace(/,/g, ''))
+              : parseFloat(formData.price.replace(/,/g, '')),
           square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
           description: formData.description,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
@@ -450,7 +461,9 @@ const ListProperty = () => {
           zip_code: formData.zipCode,
           price: isRental 
             ? parseFloat(formData.monthlyRent.replace(/,/g, '')) 
-            : parseFloat(formData.price.replace(/,/g, '')),
+            : formData.isPricePerSqft 
+              ? parseFloat(formData.pricePerSqft.replace(/,/g, '')) * parseInt(formData.squareFeet.replace(/,/g, ''))
+              : parseFloat(formData.price.replace(/,/g, '')),
           square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
           description: formData.description,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
@@ -498,6 +511,8 @@ const ListProperty = () => {
         state: "",
         zipCode: "",
         price: "",
+        pricePerSqft: "",
+        isPricePerSqft: false,
         squareFeet: "",
         description: "",
         bedrooms: "",
@@ -1050,19 +1065,65 @@ const ListProperty = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>{isRental ? "Monthly Rent *" : "Price *"}</Label>
+          {!isRental && (
+            <div className="flex items-center space-x-2 mb-2">
+              <input
+                type="checkbox"
+                id="isPricePerSqft"
+                checked={formData.isPricePerSqft}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  isPricePerSqft: e.target.checked,
+                  price: "", // Clear price when switching
+                  pricePerSqft: "" // Clear price per sqft when switching
+                }))}
+                className="rounded border border-input"
+              />
+              <Label htmlFor="isPricePerSqft" className="text-sm font-normal">
+                Price per square foot instead of total price
+              </Label>
+            </div>
+          )}
           <div className="relative">
             <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={isRental ? "2,500" : "850,000"}
-              value={isRental ? formData.monthlyRent : formData.price}
+              placeholder={
+                isRental 
+                  ? "2,500" 
+                  : formData.isPricePerSqft 
+                    ? "350" 
+                    : "850,000"
+              }
+              value={
+                isRental 
+                  ? formData.monthlyRent 
+                  : formData.isPricePerSqft 
+                    ? formData.pricePerSqft 
+                    : formData.price
+              }
               onChange={(e) => setFormData(prev => ({ 
                 ...prev, 
-                [isRental ? 'monthlyRent' : 'price']: e.target.value 
+                [isRental 
+                  ? 'monthlyRent' 
+                  : formData.isPricePerSqft 
+                    ? 'pricePerSqft' 
+                    : 'price'
+                ]: e.target.value 
               }))}
               className="pl-10"
               required
             />
+            {!isRental && formData.isPricePerSqft && (
+              <div className="absolute right-3 top-3 text-sm text-muted-foreground">
+                per sq ft
+              </div>
+            )}
           </div>
+          {!isRental && formData.isPricePerSqft && formData.pricePerSqft && formData.squareFeet && (
+            <div className="text-sm text-muted-foreground">
+              Total: ${(parseFloat(formData.pricePerSqft.replace(/,/g, '') || '0') * parseInt(formData.squareFeet.replace(/,/g, '') || '0')).toLocaleString()}
+            </div>
+          )}
         </div>
         
         <div className="space-y-2">
