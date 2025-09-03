@@ -31,7 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PropertyManager from "@/components/PropertyManager";
 import { TwoFactorSetupDialog } from "@/components/TwoFactorSetupDialog";
 import { ActiveSessionsDialog } from "@/components/ActiveSessionsDialog";
@@ -43,11 +43,13 @@ import { NotificationsList } from "@/components/NotificationsList";
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { userId } = useParams(); // For viewing other users' profiles
   const { user, signOut } = useAuth();
   const { subscription, loading, hasUnlimitedLikes, canListProperties, hasAdvancedFilters, hasAnalytics } = useSubscription();
   const [isEditing, setIsEditing] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [isViewingOtherUser, setIsViewingOtherUser] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
 
   // Profile location autocomplete state
@@ -133,11 +135,60 @@ const Profile = () => {
   const [appleMapping, setAppleMapping] = useState<{ display_name?: string | null; email?: string | null } | null>(null);
   
   useEffect(() => {
-    if (user) {
+    if (userId && userId !== user?.id) {
+      // Viewing another user's profile
+      setIsViewingOtherUser(true);
+      fetchOtherUserProfile(userId);
+    } else if (user) {
+      // Viewing own profile
+      setIsViewingOtherUser(false);
       fetchUserProfile();
       fetchAppleMapping();
     }
-  }, [user]);
+  }, [user, userId]);
+
+  const fetchOtherUserProfile = async (targetUserId: string) => {
+    try {
+      // Fetch basic profile info for other users (limited access)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url, user_type, bio, location, created_at')
+        .eq('id', targetUserId)
+        .is('deleted_at', null)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching other user profile:', error);
+        toast({
+          title: "Error",
+          description: "Could not load user profile",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!data) {
+        toast({
+          title: "User not found",
+          description: "This user profile does not exist or has been deleted",
+          variant: "destructive"
+        });
+        navigate('/admin-dashboard');
+        return;
+      }
+
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile",
+        variant: "destructive"
+      });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -600,39 +651,55 @@ const Profile = () => {
         {/* Professional Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 lg:mb-12">
           <div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Account Dashboard</h1>
-            <p className="text-base sm:text-lg text-muted-foreground mt-2">Manage your professional real estate profile</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+              {isViewingOtherUser ? "User Profile" : "Account Dashboard"}
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground mt-2">
+              {isViewingOtherUser 
+                ? `Viewing ${userProfile?.display_name || 'user'}'s profile` 
+                : "Manage your professional real estate profile"}
+            </p>
           </div>
-          <Button
-            onClick={() => setIsEditing(!isEditing)}
-            variant="outline"
-            className="flex items-center gap-2 self-start sm:self-center"
-          >
-            <Edit2 className="w-4 h-4" />
-            {isEditing ? "Cancel" : "Edit Profile"}
-          </Button>
+          {!isViewingOtherUser && (
+            <Button
+              onClick={() => setIsEditing(!isEditing)}
+              variant="outline"
+              className="flex items-center gap-2 self-start sm:self-center"
+            >
+              <Edit2 className="w-4 h-4" />
+              {isEditing ? "Cancel" : "Edit Profile"}
+            </Button>
+          )}
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6 lg:space-y-8">
-          <TabsList className="grid w-full grid-cols-3 grid-rows-2 bg-card border border-border rounded-lg overflow-hidden h-24 lg:h-28 gap-0">
+          <TabsList className={`grid w-full bg-card border border-border rounded-lg overflow-hidden gap-0 ${
+            isViewingOtherUser 
+              ? 'grid-cols-1 h-12' 
+              : 'grid-cols-3 grid-rows-2 h-24 lg:h-28'
+          }`}>
             <TabsTrigger value="profile" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
               <span>Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="properties" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
-              <span>Properties</span>
-            </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
-              <span>Subscription</span>
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
-              <span>Notifications</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
-              <span>Settings</span>
-            </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
-              <span>Security</span>
-            </TabsTrigger>
+            {!isViewingOtherUser && (
+              <>
+                <TabsTrigger value="properties" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
+                  <span>Properties</span>
+                </TabsTrigger>
+                <TabsTrigger value="subscription" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
+                  <span>Subscription</span>
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
+                  <span>Notifications</span>
+                </TabsTrigger>
+                <TabsTrigger value="settings" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
+                  <span>Settings</span>
+                </TabsTrigger>
+                <TabsTrigger value="security" className="flex items-center justify-center px-1 sm:px-2 lg:px-4 py-2 text-[10px] sm:text-xs lg:text-sm">
+                  <span>Security</span>
+                </TabsTrigger>
+              </>
+            )}
           </TabsList>
 
           {/* Professional Profile Tab */}
@@ -905,13 +972,16 @@ const Profile = () => {
               </div>
             </div>
           </TabsContent>
-          {/* Properties Tab */}
-          <TabsContent value="properties">
-            <PropertyManager />
-          </TabsContent>
+          {/* Properties Tab - Only show for own profile */}
+          {!isViewingOtherUser && (
+            <TabsContent value="properties">
+              <PropertyManager />
+            </TabsContent>
+          )}
 
-          {/* Subscription Tab */}
-           <TabsContent value="subscription">
+          {/* Subscription Tab - Only show for own profile */}
+          {!isViewingOtherUser && (
+            <TabsContent value="subscription">
              <div className="space-y-6">
                {/* Current Plan */}
                <Card className="p-6">
@@ -1093,15 +1163,19 @@ const Profile = () => {
                  )}
                </Card>
              </div>
+             </TabsContent>
+          )}
+
+          {/* Notifications Tab - Only show for own profile */}
+          {!isViewingOtherUser && (
+            <TabsContent value="notifications">
+              <NotificationsList />
             </TabsContent>
+          )}
 
-          {/* Notifications Tab */}
-          <TabsContent value="notifications">
-            <NotificationsList />
-          </TabsContent>
-
-          {/* Settings Tab */}
-          <TabsContent value="settings">
+          {/* Settings Tab - Only show for own profile */}
+          {!isViewingOtherUser && (
+            <TabsContent value="settings">
             <Card className="p-6">
               <h3 className="text-xl font-semibold text-foreground mb-6">Preferences</h3>
               <div className="space-y-6">
@@ -1152,9 +1226,11 @@ const Profile = () => {
               </div>
             </Card>
           </TabsContent>
+          )}
 
-          {/* Security Tab */}
-          <TabsContent value="security">
+          {/* Security Tab - Only show for own profile */}
+          {!isViewingOtherUser && (
+            <TabsContent value="security">
             <Card className="p-6">
               <h3 className="text-xl font-semibold text-foreground mb-6">Security</h3>
               <div className="space-y-6">
@@ -1340,6 +1416,7 @@ const Profile = () => {
               </div>
             </Card>
           </TabsContent>
+          )}
         </Tabs>
         
         <TwoFactorSetupDialog
