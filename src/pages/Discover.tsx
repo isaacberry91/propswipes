@@ -1051,11 +1051,6 @@ const Discover = () => {
               </Button>
             </div>
             
-            <div className="mt-4 text-center">
-              <p className="text-muted-foreground text-sm">
-                {properties.length - currentIndex - 1} more in {selectedLocation}
-              </p>
-            </div>
           </div>
         )}
 
