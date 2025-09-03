@@ -50,8 +50,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const hasUserData = session.user.email && (session.user.user_metadata?.full_name || session.user.user_metadata?.name);
             const appleId = session.user.user_metadata?.sub || session.user.app_metadata?.provider_id;
             
-            if (!hasUserData && appleId) {
-              console.log('🔐 PropSwipes Auth: Apple user missing data, checking mapping...', { appleId });
+            // Only check mapping for subsequent sign-ins (when user data is missing AND it's not a first login)
+            if (!hasUserData && appleId && event !== 'SIGNED_IN') {
+              console.log('🔐 PropSwipes Auth: Apple user missing data on subsequent login, checking mapping...', { appleId });
               
               // Check if Apple ID exists in mapping table
               try {
