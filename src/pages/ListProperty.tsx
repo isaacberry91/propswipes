@@ -1162,37 +1162,29 @@ const ListProperty = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label>Bedrooms *</Label>
-              <Select value={formData.bedrooms} onValueChange={(value) => setFormData(prev => ({ ...prev, bedrooms: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Beds" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="studio">Studio</SelectItem>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                  <SelectItem value="5+">5+</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                type="number"
+                min="0"
+                max="20"
+                placeholder="0"
+                value={formData.bedrooms}
+                onChange={(e) => setFormData(prev => ({ ...prev, bedrooms: e.target.value }))}
+                required
+              />
             </div>
             
             <div className="space-y-2">
               <Label>Bathrooms *</Label>
-              <Select value={formData.bathrooms} onValueChange={(value) => setFormData(prev => ({ ...prev, bathrooms: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Baths" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="1.5">1.5</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="2.5">2.5</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="3.5">3.5</SelectItem>
-                  <SelectItem value="4+">4+</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                type="number"
+                min="0"
+                max="20"
+                step="0.5"
+                placeholder="0"
+                value={formData.bathrooms}
+                onChange={(e) => setFormData(prev => ({ ...prev, bathrooms: e.target.value }))}
+                required
+              />
             </div>
             
             <div className="space-y-2">
