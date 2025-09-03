@@ -241,15 +241,15 @@ const Discover = () => {
     try {
       console.log('🔍 Starting discovery fetch for user:', user.id);
 
-      // Get user profile first
-      const { data: userProfile, error: profileError } = await supabase
+      // Get user profile first (or use existing userProfile)
+      const currentUserProfile = userProfile || (await supabase
         .from('profiles')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle()).data;
 
-      if (profileError) {
-        console.error('Error fetching user profile:', profileError);
+      if (!currentUserProfile) {
+        console.error('Error: No user profile found');
         setLoading(false);
         return;
       }
@@ -258,7 +258,7 @@ const Discover = () => {
       const { data: swipes, error: swipesError } = await supabase
         .from('property_swipes')
         .select('property_id')
-        .eq('user_id', userProfile.id)
+        .eq('user_id', currentUserProfile.id)
         .eq('is_liked', true); // Only exclude liked properties, allow disliked ones to show again
 
       if (swipesError) {
@@ -343,7 +343,7 @@ const Discover = () => {
       if (likedPropertyIds.length > 0) {
         query = query.not('id', 'in', `(${likedPropertyIds.join(',')})`);
       }
-      query = query.not('owner_id', 'eq', userProfile.id);
+      query = query.not('owner_id', 'eq', currentUserProfile.id);
 
       // Apply sorting and pagination
       switch (searchFilters.sortBy) {
@@ -366,26 +366,6 @@ const Discover = () => {
           query = query.order('created_at', { ascending: false });
       }
 
-      // Apply sorting - keep only one sorting block
-      switch (searchFilters.sortBy) {
-        case 'price-low':
-          query = query.order('price', { ascending: true });
-          break;
-        case 'price-high':
-          query = query.order('price', { ascending: false });
-          break;
-        case 'newest':
-          query = query.order('created_at', { ascending: false });
-          break;
-        case 'sqft-large':
-          query = query.order('square_feet', { ascending: false });
-          break;
-        case 'sqft-small':
-          query = query.order('square_feet', { ascending: true });
-          break;
-        default:
-          query = query.order('created_at', { ascending: false });
-      }
 
       // Limit results for performance - use pagination instead of loading 500 at once
       query = query.limit(50);
