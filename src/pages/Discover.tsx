@@ -247,12 +247,12 @@ const Discover = () => {
         return;
       }
 
-      // Get only properties the user has LIKED (not passed on) to exclude them
+      // Get only properties the user has LIKED to exclude them (disliked properties can show again)
       const { data: swipes, error: swipesError } = await supabase
         .from('property_swipes')
         .select('property_id')
         .eq('user_id', userProfile.id)
-        .eq('is_liked', true); // Only get liked properties, not passed ones
+        .eq('is_liked', true); // Only exclude liked properties, allow disliked ones to show again
 
       if (swipesError) {
         console.error('Error fetching user liked properties:', swipesError);
