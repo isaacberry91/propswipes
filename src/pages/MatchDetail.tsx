@@ -304,7 +304,7 @@ const MatchDetail = () => {
           {match.property.property_type && (
             <div className="text-sm">
               <span className="bg-accent/20 text-accent-foreground px-2 py-1 rounded-full">
-                {match.property.property_type}
+                {match.property.property_type === 'mixed_use' ? 'Mixed-Use' : match.property.property_type.replace('_', ' ')}
               </span>
             </div>
           )}

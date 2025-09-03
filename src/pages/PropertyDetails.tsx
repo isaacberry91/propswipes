@@ -281,7 +281,7 @@ const PropertyDetails = () => {
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Home className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <p className="text-xl font-bold capitalize">{property.property_type}</p>
+                <p className="text-xl font-bold capitalize">{property.property_type === 'mixed_use' ? 'Mixed-Use' : property.property_type.replace('_', ' ')}</p>
                 <p className="text-xs text-muted-foreground">Type</p>
               </div>
             </div>

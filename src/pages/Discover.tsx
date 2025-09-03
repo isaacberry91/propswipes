@@ -945,7 +945,7 @@ const Discover = () => {
                 
                 {/* Property Type Badge */}
                 <div className="absolute bottom-4 right-4 bg-primary/90 backdrop-blur-sm rounded-xl px-3 py-1.5">
-                  <span className="text-white text-sm font-medium">{properties[currentIndex].property_type}</span>
+                  <span className="text-white text-sm font-medium">{properties[currentIndex].property_type === 'mixed_use' ? 'Mixed-Use' : properties[currentIndex].property_type.replace('_', ' ')}</span>
                 </div>
                 
                 {/* Dating App Style Swipe Indicators */}
@@ -1136,7 +1136,7 @@ const Discover = () => {
                     <div className="text-xs text-muted-foreground">Sq Ft</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold capitalize">{selectedProperty.property_type}</div>
+                    <div className="text-lg font-bold capitalize">{selectedProperty.property_type === 'mixed_use' ? 'Mixed-Use' : selectedProperty.property_type.replace('_', ' ')}</div>
                     <div className="text-xs text-muted-foreground">Type</div>
                   </div>
                 </div>

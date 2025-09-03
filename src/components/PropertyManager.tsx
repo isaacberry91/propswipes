@@ -452,7 +452,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                       {property.title}
                     </h4>
                     <div className="text-sm text-primary font-medium capitalize mt-1">
-                      {property.property_type}
+                      {property.property_type === 'mixed_use' ? 'Mixed-Use' : property.property_type.replace('_', ' ')}
                     </div>
                   </div>
                   

@@ -897,7 +897,7 @@ const Admin = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground">{property.property_type}</span>
+                          <span className="text-xs text-muted-foreground">{property.property_type === 'mixed_use' ? 'Mixed-Use' : property.property_type.replace('_', ' ')}</span>
                           <Badge variant={property.listing_type === 'for-sale' ? 'default' : 'secondary'} className="w-fit text-xs">
                             {property.listing_type === 'for-sale' ? 'For Sale' : 'For Rent'}
                           </Badge>
