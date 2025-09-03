@@ -906,6 +906,13 @@ const Discover = () => {
                   }}
                 />
                 
+                {/* Listing Type Badge */}
+                <div className="absolute top-4 right-4 z-10">
+                  <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium shadow-lg">
+                    {properties[currentIndex].listing_type === 'sale' ? 'For Sale' : 'For Rent'}
+                  </span>
+                </div>
+
                 {/* Gradient Overlay for Better Text Readability */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                 
