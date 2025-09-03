@@ -44,22 +44,22 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
 
   const propertyTypes = [
     { value: 'any', label: 'Any Type' },
-    { value: 'house', label: '🏠 House' },
-    { value: 'condo', label: '🏢 Condo' },
-    { value: 'townhouse', label: '🏘️ Townhouse' },
-    { value: 'apartment', label: '🏬 Apartment' },
-    { value: 'office', label: '🏢 Office' },
-    { value: 'retail', label: '🏪 Retail' },
-    { value: 'warehouse', label: '🏭 Warehouse' },
-    { value: 'industrial', label: '🏗️ Industrial' },
-    { value: 'mixed-use', label: '🏘️ Mixed Use' },
-    { value: 'land', label: '🌿 Land' }
+    { value: 'house', label: 'House' },
+    { value: 'condo', label: 'Condo' },
+    { value: 'townhouse', label: 'Townhouse' },
+    { value: 'apartment', label: 'Apartment' },
+    { value: 'office', label: 'Office' },
+    { value: 'retail', label: 'Retail' },
+    { value: 'warehouse', label: 'Warehouse' },
+    { value: 'industrial', label: 'Industrial' },
+    { value: 'mixed-use', label: 'Mixed Use' },
+    { value: 'land', label: 'Land' }
   ];
 
   const listingTypes = [
     { value: 'any', label: 'Any Listing Type' },
-    { value: 'for-sale', label: '💰 For Sale' },
-    { value: 'for-rent', label: '🏠 For Rent' }
+    { value: 'for-sale', label: 'For Sale' },
+    { value: 'for-rent', label: 'For Rent' }
   ];
 
   const bedroomOptions = [
@@ -182,7 +182,7 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
                 className="h-12 text-base font-medium"
                 onClick={() => setLocalFilters(prev => ({ ...prev, listingType: 'for-sale' }))}
               >
-                💰 For Sale
+                For Sale
               </Button>
               <Button
                 type="button"
@@ -190,7 +190,7 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
                 className="h-12 text-base font-medium"
                 onClick={() => setLocalFilters(prev => ({ ...prev, listingType: 'for-rent' }))}
               >
-                🏠 For Rent
+                For Rent
               </Button>
             </div>
             <div className="flex justify-center">
