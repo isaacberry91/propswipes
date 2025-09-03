@@ -279,9 +279,9 @@ const Discover = () => {
       }
 
       // Listing type filtering (for-sale vs for-rent)
-      // Note: We assume properties are for-rent if they have special rental pricing logic,
-      // otherwise they're for-sale. For now, we'll treat all properties as for-sale
-      // until we add a dedicated listing_type field to the database.
+      if (searchFilters.listingType !== 'any') {
+        query = query.eq('listing_type', searchFilters.listingType);
+      }
 
       // Bedrooms filtering
       if (searchFilters.bedrooms !== 'any') {

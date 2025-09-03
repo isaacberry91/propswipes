@@ -405,6 +405,7 @@ const ListProperty = () => {
         const propertyData = {
           title: formData.title,
           property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio",
+          listing_type: formData.listingType,
           address: formData.address,
           city: formData.city,
           state: formData.state,
@@ -442,6 +443,7 @@ const ListProperty = () => {
           owner_id: profile.id,
           title: formData.title,
           property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio",
+          listing_type: formData.listingType,
           address: formData.address,
           city: formData.city,
           state: formData.state,
