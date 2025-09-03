@@ -169,6 +169,28 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Listing Type - Prominent at top */}
+          <div className="space-y-3">
+            <Label className="flex items-center justify-center gap-2 text-base font-semibold">
+              <DollarSign className="w-5 h-5" />
+              Listing Type
+            </Label>
+            <div className="flex justify-center">
+              <Select value={localFilters.listingType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, listingType: value }))}>
+                <SelectTrigger className="w-full max-w-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {listingTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* Price Range */}
           <div className="space-y-3">
             <Label className="flex items-center gap-2">
@@ -209,45 +231,24 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
             </div>
           </div>
 
-          {/* Listing Type & Property Type */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4" />
-                Listing Type
-              </Label>
-              <Select value={localFilters.listingType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, listingType: value }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {listingTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Home className="w-4 h-4" />
-                Property Type
-              </Label>
-              <Select value={localFilters.propertyType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, propertyType: value }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {propertyTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Property Type */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Home className="w-4 h-4" />
+              Property Type
+            </Label>
+            <Select value={localFilters.propertyType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, propertyType: value }))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {propertyTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Bedrooms & Bathrooms */}
