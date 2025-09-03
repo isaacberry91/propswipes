@@ -533,19 +533,39 @@ const Discover = () => {
     console.log('🚀 Current property:', property?.id, property?.title);
     
     try {
-      console.log('🚀 About to upsert swipe to database');
-      // Record the swipe (upsert to handle re-swiping)
-      const { data, error } = await supabase
-        .from('property_swipes')
-        .upsert({
-          user_id: userProfile.id,
-          property_id: property.id,
-          is_liked: direction === 'right'
-        }, {
-          onConflict: 'user_id,property_id'
-        });
+      console.log('🚀 About to record swipe to database');
       
-      console.log('🚀 Swipe insert result:', { data, error });
+      // First check if this user has already swiped on this property
+      const { data: existingSwipe } = await supabase
+        .from('property_swipes')
+        .select('*')
+        .eq('user_id', userProfile.id)
+        .eq('property_id', property.id)
+        .single();
+
+      if (existingSwipe) {
+        // Update existing swipe
+        const { data, error } = await supabase
+          .from('property_swipes')
+          .update({
+            is_liked: direction === 'right'
+          })
+          .eq('user_id', userProfile.id)
+          .eq('property_id', property.id);
+        
+        console.log('🚀 Swipe update result:', { data, error });
+      } else {
+        // Insert new swipe (this will trigger the match creation function)
+        const { data, error } = await supabase
+          .from('property_swipes')
+          .insert({
+            user_id: userProfile.id,
+            property_id: property.id,
+            is_liked: direction === 'right'
+          });
+        
+        console.log('🚀 Swipe insert result:', { data, error });
+      }
 
       if (direction === 'right') {
         // Update daily likes counter for non-subscribers
