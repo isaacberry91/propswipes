@@ -367,6 +367,8 @@ const Discover = () => {
       }
 
 
+      // Limit results for performance - use pagination instead of loading 500 at once
+      query = query.limit(50);
 
       console.log('🔍 About to execute property query with filters:', {
         selectedLocation,
@@ -466,8 +468,8 @@ const Discover = () => {
               
               return false;
             });
-          } else if (!selectedLocation.includes('Current Location')) {
-            // More generous text-based search if geocoding fails for regular locations
+          } else {
+            // More generous text-based search if geocoding fails
             filteredData = filteredData.filter((property: any) => {
               const searchTerm = selectedLocation.toLowerCase();
               const searchParts = searchTerm.split(',').map(part => part.trim());
@@ -480,9 +482,6 @@ const Discover = () => {
               
               return addressMatch || cityMatch || stateMatch;
             });
-          } else {
-            // For Current Location without coordinates, show all properties
-            console.log('🔍 No coordinates for Current Location - showing all properties');
           }
           console.log('🔍 After location filtering:', filteredData.length);
         }
