@@ -39,6 +39,7 @@ interface SearchFiltersType {
   bedrooms: string;
   bathrooms: string;
   propertyType: string;
+  listingType: string;
   sqftRange: [number, number];
   yearBuilt: [number, number];
   features: string[];
@@ -63,6 +64,7 @@ const Discover = () => {
     bedrooms: 'any',
     bathrooms: 'any',
     propertyType: 'any',
+    listingType: 'any',
     sqftRange: [500, 15000],
     yearBuilt: [1950, 2024],
     features: [],
@@ -277,6 +279,11 @@ const Discover = () => {
       if (searchFilters.propertyType !== 'any') {
         query = query.eq('property_type', searchFilters.propertyType as any);
       }
+
+      // Listing type filtering (for-sale vs for-rent)
+      // Note: We assume properties are for-rent if they have special rental pricing logic,
+      // otherwise they're for-sale. For now, we'll treat all properties as for-sale
+      // until we add a dedicated listing_type field to the database.
 
       // Bedrooms filtering
       if (searchFilters.bedrooms !== 'any') {

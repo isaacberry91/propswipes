@@ -27,6 +27,7 @@ interface SearchFilters {
   bedrooms: string;
   bathrooms: string;
   propertyType: string;
+  listingType: string;
   sqftRange: [number, number];
   yearBuilt: [number, number];
   features: string[];
@@ -54,6 +55,12 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
     { value: 'industrial', label: '🏗️ Industrial' },
     { value: 'mixed-use', label: '🏘️ Mixed Use' },
     { value: 'land', label: '🌿 Land' }
+  ];
+
+  const listingTypes = [
+    { value: 'any', label: 'Any Listing Type' },
+    { value: 'for-sale', label: '💰 For Sale' },
+    { value: 'for-rent', label: '🏠 For Rent' }
   ];
 
   const bedroomOptions = [
@@ -134,6 +141,7 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
       bedrooms: 'any',
       bathrooms: 'any',
       propertyType: 'any',
+      listingType: 'any',
       sqftRange: [500, 15000] as [number, number],
       yearBuilt: [1950, 2024] as [number, number],
       features: [],
@@ -153,6 +161,7 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
     if (localFilters.bedrooms !== 'any') count++;
     if (localFilters.bathrooms !== 'any') count++;
     if (localFilters.propertyType !== 'any') count++;
+    if (localFilters.listingType !== 'any') count++;
     if (localFilters.features.length > 0) count++;
     if (localFilters.priceRange[0] !== 200000 || localFilters.priceRange[1] !== 2000000) count++;
     if (localFilters.sqftRange[0] !== 500 || localFilters.sqftRange[1] !== 15000) count++;
@@ -231,6 +240,47 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
             </div>
           </div>
 
+          {/* Listing Type & Property Type */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                Listing Type
+              </Label>
+              <Select value={localFilters.listingType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, listingType: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {listingTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Home className="w-4 h-4" />
+                Property Type
+              </Label>
+              <Select value={localFilters.propertyType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, propertyType: value }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {propertyTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* Bedrooms & Bathrooms */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -270,26 +320,6 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          {/* Property Type */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Home className="w-4 h-4" />
-              Property Type
-            </Label>
-            <Select value={localFilters.propertyType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, propertyType: value }))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {propertyTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Square Footage */}
