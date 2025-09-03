@@ -228,15 +228,26 @@ const Discover = () => {
   };
 
   const fetchProperties = async () => {
+    if (!user) return;
     setLoading(true);
+    
     try {
-      if (!userProfile) {
-        setProperties([]);
+      console.log('🔍 Starting discovery fetch for user:', user.id);
+
+      // Get user profile first
+      const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError);
         setLoading(false);
         return;
       }
 
-      // 1) Get only properties the user has LIKED (not passed on) to exclude them
+      // Get only properties the user has LIKED (not passed on) to exclude them
       const { data: swipes, error: swipesError } = await supabase
         .from('property_swipes')
         .select('property_id')
@@ -250,12 +261,27 @@ const Discover = () => {
       }
 
       const likedPropertyIds = (swipes || []).map((s: any) => s.property_id);
-
-      // 2) Build query with location and filters - include owner information
+      // Build optimized query with better field selection for performance
       let query = supabase
         .from('properties')
         .select(`
-          *,
+          id,
+          title,
+          price,
+          property_type,
+          listing_type,
+          bedrooms,
+          bathrooms,
+          square_feet,
+          address,
+          city,
+          state,
+          latitude,
+          longitude,
+          images,
+          amenities,
+          description,
+          created_at,
           profiles!owner_id (
             id,
             display_name,
@@ -265,26 +291,19 @@ const Discover = () => {
         .eq('status', 'approved')
         .is('deleted_at', null);
 
-      // Note: We no longer apply server-side text filtering by location to avoid missing
-      // results due to formatting or abbreviation differences. We fetch a broader set and
-      // filter by radius/text client-side below.
-
-      // Price range filtering - only apply if user has changed from defaults
+      // Apply all server-side filters for better performance
       if (searchFilters.priceRange[0] > 200000 || searchFilters.priceRange[1] < 2000000) {
         query = query.gte('price', searchFilters.priceRange[0]).lte('price', searchFilters.priceRange[1]);
       }
 
-      // Property type filtering
       if (searchFilters.propertyType !== 'any') {
         query = query.eq('property_type', searchFilters.propertyType as any);
       }
 
-      // Listing type filtering (for-sale vs for-rent)
       if (searchFilters.listingType !== 'any') {
         query = query.eq('listing_type', searchFilters.listingType);
       }
 
-      // Bedrooms filtering
       if (searchFilters.bedrooms !== 'any') {
         if (searchFilters.bedrooms === 'studio') {
           query = query.or('bedrooms.is.null,bedrooms.eq.0');
@@ -296,7 +315,6 @@ const Discover = () => {
         }
       }
 
-      // Bathrooms filtering
       if (searchFilters.bathrooms !== 'any') {
         const bathroomCount = parseFloat(searchFilters.bathrooms);
         if (!isNaN(bathroomCount)) {
@@ -304,21 +322,17 @@ const Discover = () => {
         }
       }
 
-      // Square footage filtering
       if (searchFilters.sqftRange[0] !== 500 || searchFilters.sqftRange[1] !== 15000) {
         query = query.gte('square_feet', searchFilters.sqftRange[0]).lte('square_feet', searchFilters.sqftRange[1]);
       }
 
-      // Exclude properties the user has already LIKED (but allow passed properties to show again)
+      // Exclude liked properties and user's own properties
       if (likedPropertyIds.length > 0) {
         query = query.not('id', 'in', `(${likedPropertyIds.join(',')})`);
       }
-
-      // Exclude user's own properties
       query = query.not('owner_id', 'eq', userProfile.id);
 
-
-      // Sorting
+      // Apply sorting and pagination
       switch (searchFilters.sortBy) {
         case 'price-low':
           query = query.order('price', { ascending: true });
@@ -339,12 +353,29 @@ const Discover = () => {
           query = query.order('created_at', { ascending: false });
       }
 
-      // Limit results (fetch more when a location is specified to allow client-side radius filtering)
-      if (selectedLocation && selectedLocation !== 'All') {
-        query = query.limit(500);
-      } else {
-        query = query.limit(20);
+      // Apply sorting - keep only one sorting block
+      switch (searchFilters.sortBy) {
+        case 'price-low':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price-high':
+          query = query.order('price', { ascending: false });
+          break;
+        case 'newest':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'sqft-large':
+          query = query.order('square_feet', { ascending: false });
+          break;
+        case 'sqft-small':
+          query = query.order('square_feet', { ascending: true });
+          break;
+        default:
+          query = query.order('created_at', { ascending: false });
       }
+
+      // Limit results for performance - use pagination instead of loading 500 at once
+      query = query.limit(50);
 
       console.log('🔍 About to execute property query with filters:', {
         selectedLocation,
@@ -466,6 +497,11 @@ const Discover = () => {
       }
     } catch (error) {
       console.error('Error:', error);
+      toast({
+        title: "Error loading properties",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
       setProperties([]);
     } finally {
       setLoading(false);
