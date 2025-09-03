@@ -313,6 +313,7 @@ const Discover = () => {
       }
 
       if (searchFilters.listingType !== 'any') {
+        console.log('🔍 Applying listing type filter:', searchFilters.listingType);
         query = query.eq('listing_type', searchFilters.listingType);
       }
 
@@ -909,7 +910,7 @@ const Discover = () => {
                 {/* Listing Type Badge */}
                 <div className="absolute top-4 right-4 z-10">
                   <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-                    {properties[currentIndex].listing_type === 'sale' ? 'For Sale' : 'For Rent'}
+                    {properties[currentIndex].listing_type === 'for-sale' ? 'For Sale' : 'For Rent'}
                   </span>
                 </div>
 
