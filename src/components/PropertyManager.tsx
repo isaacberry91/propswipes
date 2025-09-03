@@ -149,9 +149,78 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
     console.log('🔧 Navigation initiated to /list with editing data');
   };
 
-  const handleView = (property: Property) => {
-    // Navigate to PropertyDetails page
-    navigate(`/property/${property.id}`);
+  const handleArchive = async (property: Property) => {
+    try {
+      // Get user profile first (reactivate/create if needed)
+      let { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user?.id as string)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      let profileId = profile?.id as string | undefined;
+      if (!profileId && user?.id) {
+        await supabase.from('profiles').update({ deleted_at: null }).eq('user_id', user.id);
+        const { data: reFetched } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        profileId = reFetched?.id;
+      }
+
+      if (!profileId && user?.id) {
+        const { data: created, error: insertError } = await supabase
+          .from('profiles')
+          .insert({ user_id: user.id })
+          .select('id')
+          .single();
+        if (insertError) {
+          const { data: fetchAgain } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          profileId = fetchAgain?.id;
+        } else {
+          profileId = created!.id;
+        }
+      }
+
+      // Archive the property by setting deleted_at timestamp
+      const { error } = isAdmin 
+        ? await adminSupabase
+            .from('properties')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', property.id)
+        : await supabase
+            .from('properties')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', property.id)
+            .eq('owner_id', profileId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Property archived",
+        description: "The property has been archived and removed from active listings.",
+        duration: 5000
+      });
+
+      // Refresh the properties list
+      fetchUserProperties();
+      onPropertyUpdate?.();
+    } catch (error) {
+      console.error('Error archiving property:', error);
+      toast({
+        title: "Error archiving property",
+        description: "Could not archive the property. Please try again.",
+        variant: "destructive",
+        duration: 5000
+      });
+    }
   };
 
   const handleDelete = async (property: Property) => {
@@ -292,15 +361,35 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
               {/* Row 2: Buttons */}
               <div className="p-4 border-b border-border">
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleView(property)}
-                    className="px-3 py-2 min-w-[80px]"
-                  >
-                    <Eye className="w-4 h-4 mr-1" />
-                    View
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="px-3 py-2 min-w-[80px]"
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        Archive
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Archive Property</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will archive "{property.title}" and remove it from active listings. Related activity remains for audit.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleArchive(property)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Archive
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                   
                   {!property.deleted_at ? (
                     <>
