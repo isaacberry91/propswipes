@@ -30,7 +30,6 @@ interface SearchFilters {
   listingType: string;
   sqftRange: [number, number];
   yearBuilt: [number, number];
-  features: string[];
   sortBy: string;
 }
 
@@ -86,26 +85,6 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
     { value: '5', label: '5+' }
   ];
 
-  const features = [
-    { name: 'Pool', icon: '🏊' },
-    { name: 'Garage', icon: '🚗' },
-    { name: 'Fireplace', icon: '🔥' },
-    { name: 'Garden', icon: '🌸' },
-    { name: 'Balcony', icon: '🏞️' },
-    { name: 'Gym/Fitness', icon: '💪' },
-    { name: 'Pet-Friendly', icon: '🐕' },
-    { name: 'Updated Kitchen', icon: '👨‍🍳' },
-    { name: 'Hardwood Floors', icon: '🪵' },
-    { name: 'AC/Heating', icon: '❄️' },
-    { name: 'In-Unit Laundry', icon: '👕' },
-    { name: 'Parking', icon: '🅿️' },
-    { name: 'Walk-in Closet', icon: '👔' },
-    { name: 'Stainless Steel Appliances', icon: '🔧' },
-    { name: 'High Ceilings', icon: '📏' },
-    { name: 'Open Floor Plan', icon: '🏗️' },
-    { name: 'Master Suite', icon: '🛏️' },
-    { name: 'Rooftop Access', icon: '🏢' }
-  ];
 
   const sortOptions = [
     { value: 'relevant', label: 'Most Relevant' },
@@ -126,14 +105,6 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
     return `${sqft.toLocaleString()} sqft`;
   };
 
-  const toggleFeature = (feature: string) => {
-    setLocalFilters(prev => ({
-      ...prev,
-      features: prev.features.includes(feature)
-        ? prev.features.filter(f => f !== feature)
-        : [...prev.features, feature]
-    }));
-  };
 
   const resetFilters = () => {
     const defaultFilters = {
@@ -144,7 +115,6 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
       listingType: 'any',
       sqftRange: [500, 15000] as [number, number],
       yearBuilt: [1950, 2024] as [number, number],
-      features: [],
       sortBy: 'relevant'
     };
     setLocalFilters(defaultFilters);
@@ -162,7 +132,6 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
     if (localFilters.bathrooms !== 'any') count++;
     if (localFilters.propertyType !== 'any') count++;
     if (localFilters.listingType !== 'any') count++;
-    if (localFilters.features.length > 0) count++;
     if (localFilters.priceRange[0] !== 200000 || localFilters.priceRange[1] !== 2000000) count++;
     if (localFilters.sqftRange[0] !== 500 || localFilters.sqftRange[1] !== 15000) count++;
     if (localFilters.yearBuilt[0] !== 1950 || localFilters.yearBuilt[1] !== 2024) count++;
@@ -402,26 +371,6 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
             </div>
           </div>
 
-          {/* Features */}
-          <div className="space-y-3">
-            <Label>Features & Amenities</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {features.map((feature) => (
-                <Card
-                  key={feature.name}
-                  className={`p-3 cursor-pointer transition-all hover:shadow-md hover-scale text-center ${
-                    localFilters.features.includes(feature.name)
-                      ? 'ring-2 ring-primary bg-primary/5 scale-105' 
-                      : 'hover:bg-accent/50'
-                  }`}
-                  onClick={() => toggleFeature(feature.name)}
-                >
-                  <div className="text-lg mb-1">{feature.icon}</div>
-                  <div className="text-xs font-medium">{feature.name}</div>
-                </Card>
-              ))}
-            </div>
-          </div>
 
           {/* Sort By */}
           <div className="space-y-2">

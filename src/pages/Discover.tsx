@@ -42,7 +42,6 @@ interface SearchFiltersType {
   listingType: string;
   sqftRange: [number, number];
   yearBuilt: [number, number];
-  features: string[];
   sortBy: string;
 }
 
@@ -67,7 +66,6 @@ const Discover = () => {
     listingType: 'any',
     sqftRange: [500, 15000],
     yearBuilt: [1950, 2024],
-    features: [],
     sortBy: 'relevant'
   });
   const [loading, setLoading] = useState(true);
@@ -460,19 +458,6 @@ const Discover = () => {
           console.log('🔍 After location filtering:', filteredData.length);
         }
 
-        // Features/amenities filtering (client-side) - only apply if features are selected
-        if (searchFilters.features.length > 0) {
-          console.log('🔍 Before features filtering:', filteredData.length);
-          filteredData = filteredData.filter((property: any) => {
-            const propertyFeatures = property.amenities || [];
-            return searchFilters.features.some(feature => 
-              propertyFeatures.some((amenity: string) => 
-                amenity.toLowerCase().includes(feature.toLowerCase())
-              )
-            );
-          });
-          console.log('🔍 After features filtering:', filteredData.length);
-        }
 
         console.log('🔍 Final filtered data count:', filteredData.length);
         setProperties(filteredData);
