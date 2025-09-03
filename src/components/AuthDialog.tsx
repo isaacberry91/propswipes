@@ -55,23 +55,6 @@ const AuthDialog = ({ children }: { children: React.ReactNode }) => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const { toast } = useToast();
 
-  // Listen for Apple auth errors
-  useEffect(() => {
-    const handleAppleAuthError = (event: CustomEvent) => {
-      toast({
-        title: "Apple Sign In Error",
-        description: event.detail.message,
-        variant: "destructive",
-        duration: 10000,
-      });
-    };
-
-    window.addEventListener('apple-auth-error', handleAppleAuthError as EventListener);
-    
-    return () => {
-      window.removeEventListener('apple-auth-error', handleAppleAuthError as EventListener);
-    };
-  }, [toast]);
 
   const [formData, setFormData] = useState<UserProfile>({
     firstName: '',

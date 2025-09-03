@@ -69,14 +69,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                   // Sign out the user and show error
                   await supabase.auth.signOut();
                   
-                  // Show error toast
+                  // Show error toast using the global toast function
+                  const { toast } = await import('@/hooks/use-toast');
                   setTimeout(() => {
-                    const event = new CustomEvent('apple-auth-error', {
-                      detail: {
-                        message: "Please follow these steps: Open Settings → Tap your name → Go to Password & Security → Apps using your Apple ID → Select the app → Tap Stop Using Apple ID."
-                      }
+                    toast({
+                      title: "Apple Sign In Error",
+                      description: "Please follow these steps: Open Settings → Tap your name → Go to Password & Security → Apps using your Apple ID → Select the app → Tap Stop Using Apple ID.",
+                      variant: "destructive",
+                      duration: 10000,
                     });
-                    window.dispatchEvent(event);
                   }, 100);
                   
                   return;
