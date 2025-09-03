@@ -1067,25 +1067,25 @@ const ListProperty = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>{isRental ? "Monthly Rent *" : "Price *"}</Label>
-          {!isRental && (
-            <div className="flex items-center space-x-2 mb-2">
-              <input
-                type="checkbox"
-                id="isPricePerSqft"
-                checked={formData.isPricePerSqft}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  isPricePerSqft: e.target.checked,
-                  price: "", // Clear price when switching
-                  pricePerSqft: "" // Clear price per sqft when switching
-                }))}
-                className="rounded border border-input"
-              />
-              <Label htmlFor="isPricePerSqft" className="text-sm font-normal">
-                Price per square foot instead of total price
-              </Label>
-            </div>
-          )}
+          {/* Price per square foot toggle - available for both sale and rental */}
+          <div className="flex items-center space-x-2 mb-2">
+            <input
+              type="checkbox"
+              id="isPricePerSqft"
+              checked={formData.isPricePerSqft}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                isPricePerSqft: e.target.checked,
+                price: "", // Clear price when switching
+                monthlyRent: "", // Clear monthly rent when switching
+                pricePerSqft: "" // Clear price per sqft when switching
+              }))}
+              className="rounded border border-input"
+            />
+            <Label htmlFor="isPricePerSqft" className="text-sm font-normal">
+              {isRental ? 'Rent per square foot instead of total monthly rent' : 'Price per square foot instead of total price'}
+            </Label>
+          </div>
           <div className="relative">
             <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -1115,15 +1115,15 @@ const ListProperty = () => {
               className="pl-10"
               required
             />
-            {!isRental && formData.isPricePerSqft && (
+            {formData.isPricePerSqft && (
               <div className="absolute right-3 top-3 text-sm text-muted-foreground">
                 per sq ft
               </div>
             )}
           </div>
-          {!isRental && formData.isPricePerSqft && formData.pricePerSqft && formData.squareFeet && (
+          {formData.isPricePerSqft && formData.pricePerSqft && formData.squareFeet && (
             <div className="text-sm text-muted-foreground">
-              Total: ${(parseFloat(formData.pricePerSqft.replace(/,/g, '') || '0') * parseInt(formData.squareFeet.replace(/,/g, '') || '0')).toLocaleString()}
+              {isRental ? 'Total Monthly Rent' : 'Total'}: ${(parseFloat(formData.pricePerSqft.replace(/,/g, '') || '0') * parseInt(formData.squareFeet.replace(/,/g, '') || '0')).toLocaleString()}
             </div>
           )}
         </div>
