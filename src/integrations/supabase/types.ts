@@ -720,6 +720,7 @@ export type Database = {
         | "warehouse"
         | "industrial"
         | "land"
+        | "mixed_use"
       subscription_status: "active" | "expired" | "cancelled" | "pending"
       subscription_tier:
         | "buyer_pro"
@@ -866,6 +867,7 @@ export const Constants = {
         "warehouse",
         "industrial",
         "land",
+        "mixed_use",
       ],
       subscription_status: ["active", "expired", "cancelled", "pending"],
       subscription_tier: [

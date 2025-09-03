@@ -413,7 +413,7 @@ const ListProperty = () => {
         // Update existing property
         const propertyData = {
           title: formData.title,
-          property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio",
+          property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio" | "office" | "retail" | "warehouse" | "industrial" | "land" | "mixed_use",
           listing_type: formData.listingType,
           address: formData.address,
           city: formData.city,
@@ -453,7 +453,7 @@ const ListProperty = () => {
         const propertyData = {
           owner_id: profile.id,
           title: formData.title,
-          property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio",
+          property_type: formData.propertyType as "house" | "apartment" | "condo" | "townhouse" | "studio" | "office" | "retail" | "warehouse" | "industrial" | "land" | "mixed_use",
           listing_type: formData.listingType,
           address: formData.address,
           city: formData.city,
@@ -947,7 +947,7 @@ const ListProperty = () => {
               <SelectItem value="condo">Condo</SelectItem>
               <SelectItem value="townhouse">Townhouse</SelectItem>
               <SelectItem value="apartment">Apartment</SelectItem>
-              <SelectItem value="mixed-use">Mixed Use</SelectItem>
+              <SelectItem value="mixed_use">Mixed Use</SelectItem>
               <SelectItem value="office">Office</SelectItem>
               <SelectItem value="retail">Retail</SelectItem>
               <SelectItem value="warehouse">Warehouse</SelectItem>
