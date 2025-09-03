@@ -46,54 +46,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               appMetadata: session.user.app_metadata
             });
             
-            // Check if name and email are missing (subsequent sign-ins)
-            const hasUserData = session.user.email && (session.user.user_metadata?.full_name || session.user.user_metadata?.name);
-            const appleId = session.user.user_metadata?.sub || session.user.app_metadata?.provider_id;
-            
-            // Only check mapping for subsequent sign-ins (when user data is missing AND it's not a first login)
-            if (!hasUserData && appleId && event !== 'SIGNED_IN') {
-              console.log('🔐 PropSwipes Auth: Apple user missing data on subsequent login, checking mapping...', { appleId });
-              
-              // Check if Apple ID exists in mapping table
-              try {
-                const { data: mapping, error: mappingError } = await supabase
-                  .from('apple_id_mappings')
-                  .select('*')
-                  .eq('apple_id', appleId)
-                  .maybeSingle();
-                
-                if (mappingError) {
-                  console.error('🔐 PropSwipes Auth: Error checking Apple mapping:', mappingError);
-                } else if (!mapping) {
-                  console.error('🔐 PropSwipes Auth: Apple ID not found in mapping table');
-                  
-                  // Sign out the user and show error
-                  await supabase.auth.signOut();
-                  
-                  // Show error toast using the global toast function
-                  const { toast } = await import('@/hooks/use-toast');
-                  setTimeout(() => {
-                    toast({
-                      title: "Apple Sign In Error",
-                      description: "Please follow these steps: Open Settings → Tap your name → Go to Password & Security → Apps using your Apple ID → Select the app → Tap Stop Using Apple ID.",
-                      variant: "destructive",
-                      duration: 10000,
-                    });
-                  }, 100);
-                  
-                  return;
-                } else {
-                  console.log('🔐 PropSwipes Auth: Found Apple mapping, proceeding with auth');
-                }
-              } catch (error) {
-                console.error('🔐 PropSwipes Auth: Exception checking Apple mapping:', error);
-                // Sign out on error
-                await supabase.auth.signOut();
-                return;
-              }
-            }
-            
             // Determine if this is the first login by checking available data
+            const hasUserData = session.user.email && (session.user.user_metadata?.full_name || session.user.user_metadata?.name);
             const isFirstLogin = event === 'SIGNED_IN' && hasUserData;
             
             try {

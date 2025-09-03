@@ -295,6 +295,44 @@ const Auth = () => {
             nonce: 'nonce'
           });
 
+          // Check if user data is missing (subsequent login) and validate against mapping
+          const hasUserData = result.response?.email && (result.response?.givenName || result.response?.familyName);
+          const appleId = result.response?.user;
+          
+          if (!hasUserData && appleId) {
+            console.log('🔐 PropSwipes Auth: Apple user missing data, checking mapping...', { appleId });
+            
+            // Check if Apple ID exists in mapping table
+            try {
+              const { data: mapping, error: mappingError } = await supabase
+                .from('apple_id_mappings')
+                .select('*')
+                .eq('apple_id', appleId)
+                .maybeSingle();
+              
+              if (mappingError) {
+                console.error('🔐 PropSwipes Auth: Error checking Apple mapping:', mappingError);
+                throw new Error('Failed to check Apple ID mapping');
+              } else if (!mapping) {
+                console.error('🔐 PropSwipes Auth: Apple ID not found in mapping table');
+                toast({
+                  title: "Apple Sign In Error",
+                  description: "Please follow these steps: Open Settings → Tap your name → Go to Password & Security → Apps using your Apple ID → Select the app → Tap Stop Using Apple ID.",
+                  variant: "destructive",
+                  duration: 10000,
+                });
+                setLoading(false);
+                return;
+              } else {
+                console.log('🔐 PropSwipes Auth: Found Apple mapping, proceeding with auth');
+              }
+            } catch (error) {
+              console.error('🔐 PropSwipes Auth: Exception checking Apple mapping:', error);
+              setLoading(false);
+              return;
+            }
+          }
+
           console.log('🔐 PropSwipes Auth: Apple authorization result:', result);
 
           // Store user data if available (only provided on first sign-in)
