@@ -474,8 +474,6 @@ const ListProperty = () => {
           status: 'pending' as const
         };
 
-        console.log('🏠 Creating property with listing type:', formData.listingType);
-        console.log('🏠 Property data:', propertyData);
 
         const { error: insertError } = await supabase
           .from('properties')
