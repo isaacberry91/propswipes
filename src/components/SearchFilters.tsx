@@ -48,6 +48,10 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
     { value: 'condo', label: '🏢 Condo' },
     { value: 'townhouse', label: '🏘️ Townhouse' },
     { value: 'apartment', label: '🏬 Apartment' },
+    { value: 'office', label: '🏢 Office' },
+    { value: 'retail', label: '🏪 Retail' },
+    { value: 'warehouse', label: '🏭 Warehouse' },
+    { value: 'industrial', label: '🏗️ Industrial' },
     { value: 'land', label: '🌿 Land' }
   ];
 
