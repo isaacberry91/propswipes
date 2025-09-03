@@ -23,14 +23,19 @@ interface Property {
   address: string;
   city: string;
   state: string;
+  zip_code: string;
   images: string[];
   amenities: string[];
   description: string;
   property_type: string;
+  created_at: string;
+  updated_at: string;
   owner?: {
     id: string;
     display_name: string;
     avatar_url: string;
+    user_type: string;
+    phone: string;
   };
 }
 
@@ -276,16 +281,20 @@ const Discover = () => {
           address,
           city,
           state,
+          zip_code,
           latitude,
           longitude,
           images,
           amenities,
           description,
           created_at,
+          updated_at,
           profiles!owner_id (
             id,
             display_name,
-            avatar_url
+            avatar_url,
+            user_type,
+            phone
           )
         `)
         .eq('status', 'approved')
@@ -409,7 +418,9 @@ const Discover = () => {
           owner: property.profiles ? {
             id: property.profiles.id,
             display_name: property.profiles.display_name,
-            avatar_url: property.profiles.avatar_url
+            avatar_url: property.profiles.avatar_url,
+            user_type: property.profiles.user_type,
+            phone: property.profiles.phone
           } : undefined
         })) || [];
         console.log('🔍 Before location filtering:', filteredData.length);
@@ -1078,53 +1089,26 @@ const Discover = () => {
 
         {/* Property Details Modal */}
         <Dialog open={!!selectedProperty} onOpenChange={() => setSelectedProperty(null)}>
-          <DialogContent className="max-w-md mx-auto max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-lg mx-auto max-h-[90vh] overflow-y-auto">
             {selectedProperty && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <DialogHeader>
                   <DialogTitle className="text-xl font-bold">{selectedProperty.title}</DialogTitle>
                 </DialogHeader>
                 
-                {/* Property Images */}
-                <div className="relative">
-                  {selectedProperty.images && selectedProperty.images.length > 0 ? (
-                    <div className="relative">
-                      <img 
-                        src={selectedProperty.images[0]} 
-                        alt={selectedProperty.title}
-                        className="w-full h-64 object-cover rounded-lg"
-                      />
-                      {selectedProperty.images.length > 1 && (
-                        <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded text-sm">
-                          {selectedProperty.images.length} photos
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="w-full h-64 bg-muted rounded-lg flex items-center justify-center">
-                      <span className="text-muted-foreground">No image available</span>
-                    </div>
-                  )}
+                {/* Address */}
+                <div className="flex items-start gap-2 text-muted-foreground">
+                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">{selectedProperty.address}, {selectedProperty.city}, {selectedProperty.state} {selectedProperty.zip_code}</span>
                 </div>
 
-                {/* Price and Location */}
-                <div className="space-y-2">
-                  <div className="text-2xl font-bold text-green-600">
-                    ${selectedProperty.price.toLocaleString()}
-                  </div>
-                  {selectedProperty.square_feet && (
-                    <div className="text-sm text-muted-foreground">
-                      ${Math.round(selectedProperty.price / selectedProperty.square_feet).toLocaleString()}/sq ft
-                    </div>
-                  )}
-                  <div className="flex items-start gap-1 text-muted-foreground">
-                    <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">{selectedProperty.address}, {selectedProperty.city}</span>
-                  </div>
+                {/* Price */}
+                <div className="text-3xl font-bold text-green-600">
+                  ${selectedProperty.price.toLocaleString()}
                 </div>
 
-                {/* Property Details */}
-                <div className="grid grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg">
+                {/* Property Details Grid */}
+                <div className="grid grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
                   <div className="text-center">
                     <div className="text-lg font-bold">{selectedProperty.bedrooms || 'N/A'}</div>
                     <div className="text-xs text-muted-foreground">Bedrooms</div>
@@ -1138,6 +1122,10 @@ const Discover = () => {
                       {selectedProperty.square_feet ? selectedProperty.square_feet.toLocaleString() : 'N/A'}
                     </div>
                     <div className="text-xs text-muted-foreground">Sq Ft</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-lg font-bold capitalize">{selectedProperty.property_type}</div>
+                    <div className="text-xs text-muted-foreground">Type</div>
                   </div>
                 </div>
 
@@ -1153,15 +1141,64 @@ const Discover = () => {
                 {selectedProperty.amenities && selectedProperty.amenities.length > 0 && (
                   <div>
                     <h4 className="font-semibold mb-2">Amenities</h4>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {selectedProperty.amenities.map((amenity, index) => (
-                        <span key={index} className="px-2 py-1 bg-muted text-xs rounded">
+                        <span key={index} className="px-3 py-1 bg-muted text-sm rounded-md">
                           {amenity}
                         </span>
                       ))}
                     </div>
                   </div>
                 )}
+
+                {/* Property Owner */}
+                {selectedProperty.owner && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Property Owner</h4>
+                    <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src={selectedProperty.owner.avatar_url} />
+                        <AvatarFallback>
+                          <User className="w-6 h-6" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="font-medium">{selectedProperty.owner.display_name}</div>
+                        <div className="text-sm text-muted-foreground capitalize">
+                          {selectedProperty.owner.user_type}
+                        </div>
+                        {selectedProperty.owner.phone && (
+                          <div className="text-sm text-muted-foreground">
+                            {selectedProperty.owner.phone}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Timeline */}
+                <div>
+                  <h4 className="font-semibold mb-3">Timeline</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Listed</span>
+                      <span>{new Date(selectedProperty.created_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Last Updated</span>
+                      <span>{new Date(selectedProperty.updated_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}</span>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
