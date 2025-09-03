@@ -849,6 +849,7 @@ const Admin = () => {
                   <TableRow>
                     <TableHead>Property</TableHead>
                     <TableHead>Owner</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Created</TableHead>
@@ -893,6 +894,14 @@ const Admin = () => {
                       </TableCell>
                       <TableCell>
                         <p className="font-medium">{property.owner?.display_name || 'Unknown Owner'}</p>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-muted-foreground">{property.property_type}</span>
+                          <Badge variant={property.listing_type === 'for-sale' ? 'default' : 'secondary'} className="w-fit text-xs">
+                            {property.listing_type === 'for-sale' ? 'For Sale' : 'For Rent'}
+                          </Badge>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <p className="font-semibold">${property.price?.toLocaleString()}</p>

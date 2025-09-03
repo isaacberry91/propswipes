@@ -427,6 +427,12 @@ const Discover = () => {
             phone: property.owner.phone
           } : undefined
         })) || [];
+
+        console.log('🏠 Fetched properties:', filteredData.map(p => ({ 
+          id: p.id, 
+          title: p.title, 
+          listing_type: p.listing_type 
+        })));
         console.log('🔍 Before location filtering:', filteredData.length);
 
         // Location-based radius filtering (client-side) - improved for current location
@@ -910,7 +916,10 @@ const Discover = () => {
                 {/* Listing Type Badge */}
                 <div className="absolute top-4 right-4 z-10">
                   <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-                    {properties[currentIndex].listing_type === 'for-sale' ? 'For Sale' : 'For Rent'}
+                    {(() => {
+                      console.log('🏷️ Property listing type:', properties[currentIndex].listing_type);
+                      return properties[currentIndex].listing_type === 'for-sale' ? 'For Sale' : 'For Rent';
+                    })()}
                   </span>
                 </div>
 
