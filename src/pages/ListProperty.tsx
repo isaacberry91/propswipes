@@ -264,6 +264,7 @@ const ListProperty = () => {
 
   const isResidential = ["house", "condo", "townhouse", "apartment"].includes(formData.propertyType);
   const isCommercial = ["office", "retail", "warehouse", "industrial"].includes(formData.propertyType);
+  const isMixedUse = formData.propertyType === "mixed_use";
   const isRental = formData.listingType === "for-rent";
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -320,7 +321,7 @@ const ListProperty = () => {
     if (!formData.description) missingFields.push("Description");
     
     // Add property type specific validations
-    if (isResidential) {
+    if (isResidential || isMixedUse) {
       if (!formData.bedrooms) missingFields.push("Bedrooms");
       if (!formData.bathrooms) missingFields.push("Bathrooms");
     }
@@ -1159,7 +1160,7 @@ const ListProperty = () => {
       </div>
 
       {/* Residential Properties */}
-      {isResidential && (
+      {(isResidential || isMixedUse) && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
@@ -1237,7 +1238,7 @@ const ListProperty = () => {
       )}
 
       {/* Commercial Properties */}
-      {isCommercial && (
+      {(isCommercial || isMixedUse) && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="space-y-2">
@@ -1364,7 +1365,7 @@ const ListProperty = () => {
       </div>
 
       {/* Residential Features */}
-      {isResidential && (
+      {(isResidential || isMixedUse) && (
         <>
           <div className="space-y-3">
             <Label>Amenities</Label>
@@ -1423,7 +1424,7 @@ const ListProperty = () => {
       )}
 
       {/* Commercial Features */}
-      {isCommercial && (
+      {(isCommercial || isMixedUse) && (
         <>
           <div className="space-y-3">
             <Label>Building Features</Label>
