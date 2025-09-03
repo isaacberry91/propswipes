@@ -343,7 +343,7 @@ const Discover = () => {
       if (likedPropertyIds.length > 0) {
         query = query.not('id', 'in', `(${likedPropertyIds.join(',')})`);
       }
-      query = query.not('owner_id', 'eq', currentUserProfile.id);
+      query = query.not('owner_id', 'eq', currentUserProfile.id)
 
       // Apply sorting and pagination
       switch (searchFilters.sortBy) {
