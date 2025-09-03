@@ -947,6 +947,7 @@ const ListProperty = () => {
               <SelectItem value="condo">Condo</SelectItem>
               <SelectItem value="townhouse">Townhouse</SelectItem>
               <SelectItem value="apartment">Apartment</SelectItem>
+              <SelectItem value="mixed-use">Mixed Use</SelectItem>
               <SelectItem value="office">Office</SelectItem>
               <SelectItem value="retail">Retail</SelectItem>
               <SelectItem value="warehouse">Warehouse</SelectItem>
