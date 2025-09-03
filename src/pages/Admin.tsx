@@ -91,17 +91,35 @@ const Admin = () => {
         console.error('🔧 Admin Debug: Apple users error:', appleUsersError);
       }
 
-      // Load active properties with detailed logging
+      // Load active properties with owner information
       const { data: propertiesData, error: propertiesError } = await supabase
         .from('properties')
-        .select('*')
+        .select(`
+          *,
+          owner:profiles!owner_id (
+            id,
+            display_name,
+            avatar_url,
+            user_type,
+            phone
+          )
+        `)
         .is('deleted_at', null)
         .order('created_at', { ascending: false });
 
-      // Load deleted properties
+      // Load deleted properties with owner information
       const { data: deletedPropertiesData } = await supabase
         .from('properties')
-        .select('*')
+        .select(`
+          *,
+          owner:profiles!owner_id (
+            id,
+            display_name,
+            avatar_url,
+            user_type,
+            phone
+          )
+        `)
         .not('deleted_at', 'is', null)
         .order('deleted_at', { ascending: false });
 
@@ -874,7 +892,7 @@ const Admin = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <p className="font-medium">{property.profiles?.display_name || 'Unknown'}</p>
+                        <p className="font-medium">{property.owner?.display_name || 'Unknown Owner'}</p>
                       </TableCell>
                       <TableCell>
                         <p className="font-semibold">${property.price?.toLocaleString()}</p>
