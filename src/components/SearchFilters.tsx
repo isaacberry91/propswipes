@@ -175,19 +175,34 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
               <DollarSign className="w-5 h-5" />
               Listing Type
             </Label>
+            <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+              <Button
+                type="button"
+                variant={localFilters.listingType === 'for-sale' ? 'default' : 'outline'}
+                className="h-12 text-base font-medium"
+                onClick={() => setLocalFilters(prev => ({ ...prev, listingType: 'for-sale' }))}
+              >
+                💰 For Sale
+              </Button>
+              <Button
+                type="button"
+                variant={localFilters.listingType === 'for-rent' ? 'default' : 'outline'}
+                className="h-12 text-base font-medium"
+                onClick={() => setLocalFilters(prev => ({ ...prev, listingType: 'for-rent' }))}
+              >
+                🏠 For Rent
+              </Button>
+            </div>
             <div className="flex justify-center">
-              <Select value={localFilters.listingType} onValueChange={(value) => setLocalFilters(prev => ({ ...prev, listingType: value }))}>
-                <SelectTrigger className="w-full max-w-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {listingTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs"
+                onClick={() => setLocalFilters(prev => ({ ...prev, listingType: 'any' }))}
+              >
+                Show All
+              </Button>
             </div>
           </div>
 
