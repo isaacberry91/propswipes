@@ -52,6 +52,7 @@ const SearchFilters = ({ filters, onFiltersChange }: SearchFiltersProps) => {
     { value: 'retail', label: '🏪 Retail' },
     { value: 'warehouse', label: '🏭 Warehouse' },
     { value: 'industrial', label: '🏗️ Industrial' },
+    { value: 'mixed-use', label: '🏘️ Mixed Use' },
     { value: 'land', label: '🌿 Land' }
   ];
 

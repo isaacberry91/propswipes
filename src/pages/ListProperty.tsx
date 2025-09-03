@@ -933,6 +933,7 @@ const ListProperty = () => {
               <SelectItem value="retail">Retail</SelectItem>
               <SelectItem value="warehouse">Warehouse</SelectItem>
               <SelectItem value="industrial">Industrial</SelectItem>
+              <SelectItem value="mixed-use">Mixed Use</SelectItem>
               <SelectItem value="land">Land</SelectItem>
             </SelectContent>
           </Select>
