@@ -43,7 +43,7 @@ import { NotificationsList } from "@/components/NotificationsList";
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { userId } = useParams(); // For viewing other users' profiles
+  const { profileId } = useParams(); // For viewing other users' profiles
   const { user, signOut } = useAuth();
   const { subscription, loading, hasUnlimitedLikes, canListProperties, hasAdvancedFilters, hasAnalytics } = useSubscription();
   const [isEditing, setIsEditing] = useState(false);
@@ -135,25 +135,25 @@ const Profile = () => {
   const [appleMapping, setAppleMapping] = useState<{ display_name?: string | null; email?: string | null } | null>(null);
   
   useEffect(() => {
-    if (userId && userId !== user?.id) {
-      // Viewing another user's profile
+    if (profileId && profileId !== user?.id) {
+      // Viewing another user's profile - profileId is the profile ID from admin dashboard
       setIsViewingOtherUser(true);
-      fetchOtherUserProfile(userId);
+      fetchOtherUserProfile(profileId);
     } else if (user) {
       // Viewing own profile
       setIsViewingOtherUser(false);
       fetchUserProfile();
       fetchAppleMapping();
     }
-  }, [user, userId]);
+  }, [user, profileId]);
 
-  const fetchOtherUserProfile = async (targetUserId: string) => {
+  const fetchOtherUserProfile = async (targetProfileId: string) => {
     try {
       // Fetch basic profile info for other users (limited access)
       const { data, error } = await supabase
         .from('profiles')
         .select('id, display_name, avatar_url, user_type, bio, location, created_at')
-        .eq('id', targetUserId)
+        .eq('id', targetProfileId)
         .is('deleted_at', null)
         .maybeSingle();
 

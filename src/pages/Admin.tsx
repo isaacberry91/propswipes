@@ -461,9 +461,9 @@ const Admin = () => {
       });
     }
   };
-  const handleViewProfile = (userId: string) => {
-    // Navigate to the profile page with the user ID
-    window.open(`/profile/${userId}`, '_blank');
+  const handleViewProfile = (profileId: string) => {
+    // Navigate to the profile page with the profile ID
+    window.open(`/profile/${profileId}`, '_blank');
   };
 
   return (
@@ -1133,7 +1133,7 @@ const Admin = () => {
                            <Button 
                              size="sm" 
                              variant="outline"
-                             onClick={() => handleViewProfile(user.user_id)}
+                              onClick={() => handleViewProfile(user.id)}
                            >
                              <Eye className="w-4 h-4 mr-1" />
                              View Profile
@@ -1302,7 +1302,7 @@ const Admin = () => {
                                   <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={() => handleViewProfile(user.user_id)}
+                                    onClick={() => handleViewProfile(user.id)}
                                   >
                                     <Eye className="w-4 h-4 mr-1" />
                                     View Profile
