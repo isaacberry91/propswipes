@@ -533,14 +533,16 @@ const Discover = () => {
     console.log('🚀 Current property:', property?.id, property?.title);
     
     try {
-      console.log('🚀 About to insert swipe to database');
-      // Record the swipe
+      console.log('🚀 About to upsert swipe to database');
+      // Record the swipe (upsert to handle re-swiping)
       const { data, error } = await supabase
         .from('property_swipes')
-        .insert({
+        .upsert({
           user_id: userProfile.id,
           property_id: property.id,
           is_liked: direction === 'right'
+        }, {
+          onConflict: 'user_id,property_id'
         });
       
       console.log('🚀 Swipe insert result:', { data, error });
