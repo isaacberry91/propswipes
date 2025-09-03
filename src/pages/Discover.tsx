@@ -292,7 +292,7 @@ const Discover = () => {
           description,
           created_at,
           updated_at,
-          profiles!owner_id (
+          owner:profiles!owner_id (
             id,
             display_name,
             avatar_url,
@@ -418,12 +418,12 @@ const Discover = () => {
       } else {
         let filteredData = data?.map((property: any) => ({
           ...property,
-          owner: property.profiles ? {
-            id: property.profiles.id,
-            display_name: property.profiles.display_name,
-            avatar_url: property.profiles.avatar_url,
-            user_type: property.profiles.user_type,
-            phone: property.profiles.phone
+          owner: property.owner ? {
+            id: property.owner.id,
+            display_name: property.owner.display_name,
+            avatar_url: property.owner.avatar_url,
+            user_type: property.owner.user_type,
+            phone: property.owner.phone
           } : undefined
         })) || [];
         console.log('🔍 Before location filtering:', filteredData.length);
