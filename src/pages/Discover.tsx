@@ -594,6 +594,32 @@ const Discover = () => {
           .eq('property_id', property.id);
         
         console.log('🚀 Swipe update result:', { data, error });
+        
+        // Check for match creation if this is now a like
+        if (direction === 'right') {
+          console.log('🔗 Creating match between user:', userProfile.id, 'and property owner:', property.owner?.id);
+          
+          // Check if match already exists
+          const { data: existingMatch } = await supabase
+            .from('matches')
+            .select('*')
+            .eq('property_id', property.id)
+            .eq('buyer_id', userProfile.id)
+            .eq('seller_id', property.owner?.id)
+            .maybeSingle();
+
+          if (!existingMatch && property.owner?.id !== userProfile.id) {
+            const { data: matchData, error: matchError } = await supabase
+              .from('matches')
+              .insert({
+                property_id: property.id,
+                buyer_id: userProfile.id,
+                seller_id: property.owner?.id
+              });
+            
+            console.log('🔗 Match creation result:', { matchData, matchError });
+          }
+        }
       } else {
         // Insert new swipe (this will trigger the match creation function)
         const { data, error } = await supabase
