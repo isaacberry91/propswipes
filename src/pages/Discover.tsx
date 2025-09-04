@@ -581,7 +581,7 @@ const Discover = () => {
         .select('*')
         .eq('user_id', userProfile.id)
         .eq('property_id', property.id)
-        .single();
+        .maybeSingle();
 
       if (existingSwipe) {
         // Update existing swipe
