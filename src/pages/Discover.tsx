@@ -135,7 +135,7 @@ const Discover = () => {
         .from('matches')
         .select('*')
         .or(`and(buyer_id.eq.${userId},seller_id.eq.${property.owner.id}),and(buyer_id.eq.${property.owner.id},seller_id.eq.${userId})`)
-        .single();
+        .maybeSingle();
 
       if (!existingMatch) {
         // Create the match - the person liking is the buyer, property owner is the seller
