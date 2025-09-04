@@ -32,6 +32,7 @@ interface Property {
   property_type: string;
   created_at: string;
   updated_at: string;
+  owner_id?: string; // fallback when join is not available due to RLS
   owner?: {
     id: string;
     display_name: string;
@@ -125,25 +126,30 @@ const Discover = () => {
 
   // Function to create a match when someone likes a property
   const createMatch = async (userId: string, property: Property) => {
-    if (!property.owner) return;
+    const ownerId = property.owner?.id || (property as any).owner_id;
+    console.log('🔗 Creating match between user:', userId, 'and property owner:', ownerId);
+    console.log('🔗 Property owner object:', property.owner);
 
-    console.log('🔗 Creating match between user:', userId, 'and property owner:', property.owner.id);
+    if (!ownerId) {
+      console.error('🚫 Cannot create match: property owner ID missing (owner join may be restricted by RLS). Property:', property);
+      return;
+    }
 
     try {
       // Check if a match already exists to avoid duplicates
       const { data: existingMatch } = await supabase
         .from('matches')
         .select('*')
-        .or(`and(buyer_id.eq.${userId},seller_id.eq.${property.owner.id}),and(buyer_id.eq.${property.owner.id},seller_id.eq.${userId})`)
+        .or(`and(buyer_id.eq.${userId},seller_id.eq.${ownerId}),and(buyer_id.eq.${ownerId},seller_id.eq.${userId})`)
         .maybeSingle();
 
-      if (!existingMatch) {
+      if (!existingMatch && ownerId !== userId) {
         // Create the match - the person liking is the buyer, property owner is the seller
         const { data: newMatch, error: matchError } = await supabase
           .from('matches')
           .insert({
             buyer_id: userId,
-            seller_id: property.owner.id,
+            seller_id: ownerId,
             property_id: property.id
           });
 
@@ -155,12 +161,12 @@ const Discover = () => {
           // Show success toast with match notification
           toast({
             title: "It's a Match! 🎉",
-            description: `You can now chat with ${property.owner.display_name || 'the property owner'} about this property!`,
+            description: `You can now chat with ${property.owner?.display_name || 'the property owner'} about this property!`,
             duration: 8000
           });
         }
       } else {
-        console.log('🔗 Match already exists');
+        console.log('🔗 Match already exists or owner equals user.');
       }
     } catch (error) {
       console.error('Error in createMatch:', error);
@@ -317,6 +323,7 @@ const Discover = () => {
         .from('properties')
         .select(`
           id,
+          owner_id,
           title,
           price,
           property_type,
@@ -597,12 +604,12 @@ const Discover = () => {
         
         // Check for match creation if this is now a like
         if (direction === 'right') {
-          const ownerId = property.owner?.id;
+          const ownerId = property.owner?.id || (property as any).owner_id;
           console.log('🔗 Creating match between user:', userProfile.id, 'and property owner:', ownerId);
           console.log('🔗 Property owner object:', property.owner);
           
           if (!ownerId) {
-            console.error('🚫 Cannot create match: property owner ID is undefined', property);
+            console.error('🚫 Cannot create match: property owner ID missing (owner join may be restricted by RLS). Property:', property);
             return;
           }
           
