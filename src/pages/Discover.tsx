@@ -597,7 +597,14 @@ const Discover = () => {
         
         // Check for match creation if this is now a like
         if (direction === 'right') {
-          console.log('🔗 Creating match between user:', userProfile.id, 'and property owner:', property.owner?.id);
+          const ownerId = property.owner?.id;
+          console.log('🔗 Creating match between user:', userProfile.id, 'and property owner:', ownerId);
+          console.log('🔗 Property owner object:', property.owner);
+          
+          if (!ownerId) {
+            console.error('🚫 Cannot create match: property owner ID is undefined', property);
+            return;
+          }
           
           // Check if match already exists
           const { data: existingMatch } = await supabase
@@ -605,16 +612,16 @@ const Discover = () => {
             .select('*')
             .eq('property_id', property.id)
             .eq('buyer_id', userProfile.id)
-            .eq('seller_id', property.owner?.id)
+            .eq('seller_id', ownerId)
             .maybeSingle();
 
-          if (!existingMatch && property.owner?.id !== userProfile.id) {
+          if (!existingMatch && ownerId !== userProfile.id) {
             const { data: matchData, error: matchError } = await supabase
               .from('matches')
               .insert({
                 property_id: property.id,
                 buyer_id: userProfile.id,
-                seller_id: property.owner?.id
+                seller_id: ownerId
               });
             
             console.log('🔗 Match creation result:', { matchData, matchError });
