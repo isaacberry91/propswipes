@@ -957,7 +957,6 @@ const ListProperty = () => {
               <SelectItem value="warehouse">Warehouse</SelectItem>
               <SelectItem value="industrial">Industrial</SelectItem>
               <SelectItem value="land">Land</SelectItem>
-              <SelectItem value="land">Land</SelectItem>
             </SelectContent>
           </Select>
         </div>
