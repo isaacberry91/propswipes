@@ -19,6 +19,9 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  
+  // Platform detection
+  const isAndroid = Capacitor.getPlatform() === 'android';
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
@@ -533,27 +536,31 @@ const Auth = () => {
               </TabsList>
               
               <TabsContent value="signin" className="space-y-4">
-                {/* Social Sign In Buttons - Apple */}
-                <div className="space-y-3">
-                  <Button
-                    type="button"
-                    className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3 bg-black text-white hover:bg-black/90"
-                    onClick={() => handleSocialSignIn('apple')}
-                    disabled={loading}
-                  >
-                    <Apple className="h-5 w-5" />
-                    Continue with Apple
-                  </Button>
-                </div>
+                {/* Social Sign In Buttons - Apple (hidden on Android) */}
+                {!isAndroid && (
+                  <div className="space-y-3">
+                    <Button
+                      type="button"
+                      className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3 bg-black text-white hover:bg-black/90"
+                      onClick={() => handleSocialSignIn('apple')}
+                      disabled={loading}
+                    >
+                      <Apple className="h-5 w-5" />
+                      Continue with Apple
+                    </Button>
+                  </div>
+                )}
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
+                {!isAndroid && (
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
-                  </div>
-                </div>
+                )}
 
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
@@ -608,27 +615,31 @@ const Auth = () => {
               </TabsContent>
               
               <TabsContent value="signup" className="space-y-4">
-                {/* Social Sign Up Buttons - Apple */}
-                <div className="space-y-3">
-                  <Button
-                    type="button"
-                    className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3 bg-black text-white hover:bg-black/90"
-                    onClick={() => handleSocialSignIn('apple')}
-                    disabled={loading}
-                  >
-                    <Apple className="h-5 w-5" />
-                    Sign up with Apple
-                  </Button>
-                </div>
+                {/* Social Sign Up Buttons - Apple (hidden on Android) */}
+                {!isAndroid && (
+                  <div className="space-y-3">
+                    <Button
+                      type="button"
+                      className="w-full h-11 font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3 bg-black text-white hover:bg-black/90"
+                      onClick={() => handleSocialSignIn('apple')}
+                      disabled={loading}
+                    >
+                      <Apple className="h-5 w-5" />
+                      Sign up with Apple
+                    </Button>
+                  </div>
+                )}
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
+                {!isAndroid && (
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">Or sign up with email</span>
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or sign up with email</span>
-                  </div>
-                </div>
+                )}
 
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
