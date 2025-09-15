@@ -335,6 +335,7 @@ const Discover = () => {
           address,
           unit_number,
           city,
+          state,
           zip_code,
           latitude,
           longitude,
