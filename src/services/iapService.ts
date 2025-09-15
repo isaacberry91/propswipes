@@ -126,19 +126,31 @@ class IAPService {
     if (this.nativePurchases && Capacitor.isNativePlatform()) {
       try {
         const productIds = Object.values(getProductIds());
+        console.log('PropSwipes: Requesting products for platform:', Capacitor.getPlatform());
+        console.log('PropSwipes: Product IDs:', productIds);
+        
         const result = await this.nativePurchases.getProducts({ 
           productIdentifiers: productIds 
         });
         
-        return result.products.map((product: any) => ({
-          id: product.productIdentifier,
-          title: product.localizedTitle,
-          description: product.localizedDescription,
-          price: product.localizedPrice,
-          currency: product.currencyCode || 'USD'
-        }));
+        console.log('PropSwipes: Native products result:', result);
+        console.log('PropSwipes: Found products:', result.products?.length || 0);
+        
+        if (!result.products || result.products.length === 0) {
+          console.warn('PropSwipes: No products found. Make sure products are configured in Google Play Console/App Store Connect');
+          // Fall through to mock data for development
+        } else {
+          return result.products.map((product: any) => ({
+            id: product.productIdentifier,
+            title: product.localizedTitle,
+            description: product.localizedDescription,
+            price: product.localizedPrice,
+            currency: product.currencyCode || 'USD'
+          }));
+        }
       } catch (error) {
-        console.error('Native Purchases: Error getting products', error);
+        console.error('PropSwipes: Error getting products from native store:', error);
+        console.error('PropSwipes: This is expected in development. Using mock data.');
         // Fall through to mock data
       }
     }
