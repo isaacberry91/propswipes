@@ -378,6 +378,7 @@ export type Database = {
           state: string
           status: Database["public"]["Enums"]["property_status"] | null
           title: string
+          unit_number: string | null
           updated_at: string
           videos: string[] | null
           zip_code: string
@@ -403,6 +404,7 @@ export type Database = {
           state: string
           status?: Database["public"]["Enums"]["property_status"] | null
           title: string
+          unit_number?: string | null
           updated_at?: string
           videos?: string[] | null
           zip_code: string
@@ -428,6 +430,7 @@ export type Database = {
           state?: string
           status?: Database["public"]["Enums"]["property_status"] | null
           title?: string
+          unit_number?: string | null
           updated_at?: string
           videos?: string[] | null
           zip_code?: string

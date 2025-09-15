@@ -36,6 +36,7 @@ const ListProperty = () => {
     pricePerSqft: "",
     isPricePerSqft: false,
     squareFeet: "",
+    unitNumber: "",
     description: "",
     
     // Residential Specific
@@ -213,6 +214,7 @@ const ListProperty = () => {
         pricePerSqft: "",
         isPricePerSqft: false,
         squareFeet: editingProperty.square_feet?.toString() || "",
+        unitNumber: editingProperty.unit_number || "",
         description: editingProperty.description || "",
         bedrooms: editingProperty.bedrooms ? (editingProperty.bedrooms >= 5 ? "5+" : editingProperty.bedrooms.toString()) : "",
         bathrooms: editingProperty.bathrooms?.toString() || "",
@@ -424,6 +426,7 @@ const ListProperty = () => {
               ? parseFloat(formData.pricePerSqft.replace(/,/g, '')) * parseInt(formData.squareFeet.replace(/,/g, ''))
               : parseFloat(formData.price.replace(/,/g, '')),
           square_feet: formData.squareFeet ? parseInt(formData.squareFeet.replace(/,/g, '')) : null,
+          unit_number: formData.unitNumber || null,
           description: formData.description,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
           bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
@@ -464,6 +467,7 @@ const ListProperty = () => {
               ? parseFloat(formData.pricePerSqft.replace(/,/g, '')) * parseInt(formData.squareFeet.replace(/,/g, ''))
               : parseFloat(formData.price.replace(/,/g, '')),
           square_feet: formData.squareFeet ? parseInt(formData.squareFeet.replace(/,/g, '')) : null,
+          unit_number: formData.unitNumber || null,
           description: formData.description,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
           bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
@@ -514,6 +518,7 @@ const ListProperty = () => {
         pricePerSqft: "",
         isPricePerSqft: false,
         squareFeet: "",
+        unitNumber: "",
         description: "",
         bedrooms: "",
         bathrooms: "",
@@ -1125,6 +1130,15 @@ const ListProperty = () => {
               {isRental ? 'Total Monthly Rent' : 'Total'}: ${(parseFloat(formData.pricePerSqft.replace(/,/g, '') || '0') * parseInt(formData.squareFeet.replace(/,/g, '') || '0')).toLocaleString()}
             </div>
           )}
+        </div>
+        
+        <div className="space-y-2">
+          <Label>Unit Number</Label>
+          <Input
+            placeholder="Unit 101, Apt 2A, Suite B (optional)"
+            value={formData.unitNumber}
+            onChange={(e) => setFormData(prev => ({ ...prev, unitNumber: e.target.value }))}
+          />
         </div>
         
         <div className="space-y-2">

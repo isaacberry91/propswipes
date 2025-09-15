@@ -20,6 +20,7 @@ interface Property {
   bedrooms: number;
   bathrooms: number;
   square_feet: number;
+  unit_number?: string;
   address: string;
   city: string;
   state: string;
@@ -1173,7 +1174,7 @@ const Discover = () => {
                 {/* Address */}
                 <div className="flex items-start gap-2 text-muted-foreground">
                   <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">{selectedProperty.address}, {selectedProperty.city}, {selectedProperty.state} {selectedProperty.zip_code}</span>
+                  <span className="text-sm">{selectedProperty.address}{selectedProperty.unit_number ? `, ${selectedProperty.unit_number}` : ''}, {selectedProperty.city}, {selectedProperty.state} {selectedProperty.zip_code}</span>
                 </div>
 
                 {/* Price */}

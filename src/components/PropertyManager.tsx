@@ -20,6 +20,7 @@ interface Property {
   zip_code: string;
   price: number;
   square_feet: number | null;
+  unit_number?: string | null;
   bedrooms: number | null;
   bathrooms: number | null;
   description: string | null;
@@ -460,7 +461,7 @@ const PropertyManager = ({ onPropertyUpdate, adminMode = false }: PropertyManage
                   <div className="flex items-start gap-2 text-sm text-muted-foreground">
                     <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <span className="line-clamp-2">
-                      {property.address}, {property.city}, {property.state}
+                      {property.address}{property.unit_number ? `, ${property.unit_number}` : ''}, {property.city}, {property.state}
                     </span>
                   </div>
                   

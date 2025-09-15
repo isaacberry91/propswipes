@@ -44,6 +44,7 @@ interface Property {
   bedrooms: number;
   bathrooms: number;
   square_feet: number;
+  unit_number?: string;
   images: string[];
   videos: string[];
   amenities: string[];
@@ -238,7 +239,7 @@ const PropertyDetails = () => {
             <h1 className="text-2xl font-bold text-foreground mb-2">{property.title}</h1>
             <div className="flex items-start gap-1 text-muted-foreground mb-3">
               <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span className="text-sm">{property.address}, {property.city}, {property.state} {property.zip_code}</span>
+              <span className="text-sm">{property.address}{property.unit_number ? `, ${property.unit_number}` : ''}, {property.city}, {property.state} {property.zip_code}</span>
             </div>
             <div className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-green-600" />

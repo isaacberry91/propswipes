@@ -22,6 +22,7 @@ interface MatchDetail {
     bedrooms: number;
     bathrooms: number;
     square_feet: number;
+    unit_number?: string;
     property_type: string;
     amenities: string[];
   };
