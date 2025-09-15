@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Star, Building, Crown, Users, Smartphone, AlertCircle, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Capacitor } from "@capacitor/core";
-import { iapService, PRODUCT_IDS } from "@/services/iapService";
+import { iapService, getProductIds } from "@/services/iapService";
 import { useSubscription } from "@/hooks/useSubscription";
 
 const Subscription = () => {
@@ -29,6 +29,8 @@ const Subscription = () => {
     
     initializeIAP();
   }, []);
+  const PRODUCT_IDS = getProductIds();
+  
   const buyerPlans = [
     {
       id: PRODUCT_IDS.BUYER_PRO,

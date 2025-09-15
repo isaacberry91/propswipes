@@ -9,11 +9,24 @@ declare global {
 }
 
 // PropSwipes App-Specific Product IDs
-export const PRODUCT_IDS = {
+export const PRODUCT_IDS_IOS = {
   BUYER_PRO: 'com.propswipes.subscription.buyer_pro_v2',
   SELLER_BASIC: 'com.propswipes.subscription.seller_basic_v2', 
   SELLER_PROFESSIONAL: 'com.propswipes.subscription.seller_professional_v2',
   SELLER_ENTERPRISE: 'com.propswipes.subscription.seller_enterprise_v2'
+};
+
+export const PRODUCT_IDS_ANDROID = {
+  BUYER_PRO: 'com.propswipes.subscription.buyer_pro_v2',
+  SELLER_BASIC: 'com.propswipes.subscription.seller_basic', 
+  SELLER_PROFESSIONAL: 'com.propswipes.seller_professional_v2',
+  SELLER_ENTERPRISE: 'com.propswipes.seller_enterprise_v2'
+};
+
+// Get platform-specific product IDs
+export const getProductIds = () => {
+  const platform = Capacitor.getPlatform();
+  return platform === 'android' ? PRODUCT_IDS_ANDROID : PRODUCT_IDS_IOS;
 };
 
 export interface IAPProduct {
@@ -112,7 +125,7 @@ class IAPService {
 
     if (this.nativePurchases && Capacitor.isNativePlatform()) {
       try {
-        const productIds = Object.values(PRODUCT_IDS);
+        const productIds = Object.values(getProductIds());
         const result = await this.nativePurchases.getProducts({ 
           productIdentifiers: productIds 
         });
@@ -131,30 +144,31 @@ class IAPService {
     }
 
     // Mock data for development/testing
+    const productIds = getProductIds();
     return [
       {
-        id: PRODUCT_IDS.BUYER_PRO,
+        id: productIds.BUYER_PRO,
         title: 'Buyer Pro Monthly',
         description: 'Unlimited likes and premium features',
         price: '$9.99',
         currency: 'USD'
       },
       {
-        id: PRODUCT_IDS.SELLER_BASIC,
+        id: productIds.SELLER_BASIC,
         title: 'Seller Basic Monthly',
         description: '5 property listings and analytics',
         price: '$29.99',
         currency: 'USD'
       },
       {
-        id: PRODUCT_IDS.SELLER_PROFESSIONAL,
+        id: productIds.SELLER_PROFESSIONAL,
         title: 'Seller Professional Monthly',
         description: '25 property listings and team tools',
         price: '$100.00',
         currency: 'USD'
       },
       {
-        id: PRODUCT_IDS.SELLER_ENTERPRISE,
+        id: productIds.SELLER_ENTERPRISE,
         title: 'Seller Enterprise Monthly',
         description: 'Unlimited listings and full features',
         price: '$250.00',
