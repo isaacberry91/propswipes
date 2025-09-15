@@ -316,8 +316,6 @@ const ListProperty = () => {
         if (!formData.squareFeet) missingFields.push("Square Feet (required for price calculation)");
       }
     }
-    
-    if (!formData.squareFeet) missingFields.push("Square Feet");
     if (!formData.description) missingFields.push("Description");
     
     // Add property type specific validations
@@ -425,7 +423,7 @@ const ListProperty = () => {
             : formData.isPricePerSqft 
               ? parseFloat(formData.pricePerSqft.replace(/,/g, '')) * parseInt(formData.squareFeet.replace(/,/g, ''))
               : parseFloat(formData.price.replace(/,/g, '')),
-          square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
+          square_feet: formData.squareFeet ? parseInt(formData.squareFeet.replace(/,/g, '')) : null,
           description: formData.description,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
           bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
@@ -465,7 +463,7 @@ const ListProperty = () => {
             : formData.isPricePerSqft 
               ? parseFloat(formData.pricePerSqft.replace(/,/g, '')) * parseInt(formData.squareFeet.replace(/,/g, ''))
               : parseFloat(formData.price.replace(/,/g, '')),
-          square_feet: parseInt(formData.squareFeet.replace(/,/g, '')),
+          square_feet: formData.squareFeet ? parseInt(formData.squareFeet.replace(/,/g, '')) : null,
           description: formData.description,
           bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
           bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
@@ -1130,12 +1128,11 @@ const ListProperty = () => {
         </div>
         
         <div className="space-y-2">
-          <Label>Square Feet *</Label>
+          <Label>Square Feet</Label>
           <Input
-            placeholder="1,200"
+            placeholder="1,200 (optional)"
             value={formData.squareFeet}
             onChange={(e) => setFormData(prev => ({ ...prev, squareFeet: e.target.value }))}
-            required
           />
         </div>
       </div>

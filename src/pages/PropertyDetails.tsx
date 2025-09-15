@@ -272,7 +272,7 @@ const PropertyDetails = () => {
                   <Square className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <p className="text-xl font-bold">
-                  {property.square_feet ? property.square_feet.toLocaleString() : 'N/A'}
+                  {property.square_feet ? property.square_feet.toLocaleString() : 'Not specified'}
                 </p>
                 <p className="text-xs text-muted-foreground">Sq Ft</p>
               </div>

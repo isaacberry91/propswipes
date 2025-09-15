@@ -306,7 +306,7 @@ const PropertyMap = ({
             <div class="flex justify-between text-xs text-muted-foreground">
               <span>${property.bedrooms || 0} bed</span>
               <span>${property.bathrooms || 0} bath</span>
-              <span>${property.square_feet || 0} sqft</span>
+              {property.square_feet && <span>${property.square_feet} sqft</span>}
             </div>
           </div>
         `;

@@ -1193,7 +1193,7 @@ const Discover = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-lg font-bold">
-                      {selectedProperty.square_feet ? selectedProperty.square_feet.toLocaleString() : 'N/A'}
+                      {selectedProperty.square_feet ? selectedProperty.square_feet.toLocaleString() : 'Not specified'}
                     </div>
                     <div className="text-xs text-muted-foreground">Sq Ft</div>
                   </div>
