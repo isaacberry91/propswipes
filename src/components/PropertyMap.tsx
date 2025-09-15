@@ -20,6 +20,7 @@ interface Property {
   bedrooms?: number;
   bathrooms?: number;
   square_feet?: number;
+  unit_number?: string;
 }
 
 interface PropertyMapProps {
@@ -298,7 +299,7 @@ const PropertyMap = ({
                    class="w-16 h-16 object-cover rounded">
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-sm mb-1 truncate">${property.title}</h3>
-                <p class="text-muted-foreground text-xs mb-1 truncate">${property.address}</p>
+                <p class="text-muted-foreground text-xs mb-1 truncate">${property.address}${property.unit_number ? `, ${property.unit_number}` : ''}</p>
                 <p class="text-primary font-bold text-sm">$${property.price.toLocaleString()}</p>
                 ${property.square_feet ? `<p class="text-xs text-muted-foreground">$${Math.round(property.price / property.square_feet).toLocaleString()}/sq ft</p>` : ''}
               </div>

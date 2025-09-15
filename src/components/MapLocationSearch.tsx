@@ -20,6 +20,7 @@ interface Property {
   bedrooms?: number;
   bathrooms?: number;
   square_feet?: number;
+  unit_number?: string;
 }
 
 interface MapLocationSearchProps {
