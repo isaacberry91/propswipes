@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock, User, Eye } from "lucide-react"; // Force rebuild to clear cache
+import { Heart, X, MapPin, Bed, Bath, Square, Crown, Lock, User, Eye, Sparkles } from "lucide-react"; // Force rebuild to clear cache
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +11,8 @@ import LocationSearch from "@/components/LocationSearch";
 import PropertyMap from "@/components/PropertyMap";
 import SubscriptionPrompt from "@/components/SubscriptionPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Property {
   id: string;
@@ -90,6 +91,8 @@ const Discover = () => {
   const { toast } = useToast();
   const { subscription, hasUnlimitedLikes } = useSubscription();
   const [mapCenter, setMapCenter] = useState<[number, number]>([-74.006, 40.7128]); // Default NYC
+  const [showAISearch, setShowAISearch] = useState(false);
+  const [aiSearchQuery, setAiSearchQuery] = useState("");
 
   const handleImageTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (isDragging || isAnimating) return;
@@ -830,6 +833,15 @@ const Discover = () => {
                   {10 - dailyLikesUsed} likes left
                 </div>
               )}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowAISearch(true)}
+                className="h-8 w-8"
+                title="AI Search"
+              >
+                <Sparkles className="w-4 h-4" />
+              </Button>
               <SearchFiltersComponent 
                 filters={searchFilters}
                 onFiltersChange={(newFilters) => {
@@ -1297,6 +1309,58 @@ const Discover = () => {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Search Dialog */}
+        <Dialog open={showAISearch} onOpenChange={setShowAISearch}>
+          <DialogContent className="max-w-lg mx-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                AI Property Search
+              </DialogTitle>
+              <DialogDescription>
+                Describe the property you're looking for in natural language
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <Textarea
+                placeholder="E.g., I'm looking for a 3 bedroom apartment with a balcony near downtown, budget around $500k"
+                value={aiSearchQuery}
+                onChange={(e) => setAiSearchQuery(e.target.value)}
+                className="min-h-[120px] resize-none"
+              />
+              
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowAISearch(false);
+                    setAiSearchQuery("");
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    // API call will be added later
+                    toast({
+                      title: "AI Search",
+                      description: "AI search functionality will be implemented soon!",
+                    });
+                    console.log("AI Search Query:", aiSearchQuery);
+                  }}
+                  disabled={!aiSearchQuery.trim()}
+                  className="flex-1"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Search
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
