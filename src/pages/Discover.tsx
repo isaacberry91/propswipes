@@ -13,6 +13,8 @@ import SubscriptionPrompt from "@/components/SubscriptionPrompt";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Property {
   id: string;
@@ -93,6 +95,7 @@ const Discover = () => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([-74.006, 40.7128]); // Default NYC
   const [showAISearch, setShowAISearch] = useState(false);
   const [aiSearchQuery, setAiSearchQuery] = useState("");
+  const isMobile = useIsMobile();
 
   const handleImageTap = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (isDragging || isAnimating) return;
@@ -1312,41 +1315,40 @@ const Discover = () => {
           </DialogContent>
         </Dialog>
 
-        {/* AI Search Dialog */}
-        <Dialog open={showAISearch} onOpenChange={setShowAISearch}>
-          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg mx-4 sm:mx-auto">
-            <DialogHeader className="space-y-3">
-              <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
-                <span>AI Property Search</span>
-              </DialogTitle>
-              <DialogDescription className="text-sm sm:text-base">
-                Describe the property you're looking for in natural language
-              </DialogDescription>
-            </DialogHeader>
-            
-            <div className="space-y-4 pt-2">
-              <Textarea
-                placeholder="E.g., I'm looking for a 3 bedroom apartment with a balcony near downtown, budget around $500k"
-                value={aiSearchQuery}
-                onChange={(e) => setAiSearchQuery(e.target.value)}
-                className="min-h-[140px] sm:min-h-[120px] resize-none text-sm sm:text-base"
-              />
-              
-              <div className="flex flex-col sm:flex-row gap-3">
+        {/* AI Search Modal/Drawer */}
+        {isMobile ? (
+          <Drawer open={showAISearch} onOpenChange={setShowAISearch}>
+            <DrawerContent className="max-h-[85vh]">
+              <DrawerHeader className="space-y-1">
+                <DrawerTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  AI Property Search
+                </DrawerTitle>
+                <DrawerDescription>
+                  Describe the property you're looking for in natural language
+                </DrawerDescription>
+              </DrawerHeader>
+              <div className="px-4 pb-4 space-y-4">
+                <Textarea
+                  placeholder="E.g., I'm looking for a 3 bedroom apartment with a balcony near downtown, budget around $500k"
+                  value={aiSearchQuery}
+                  onChange={(e) => setAiSearchQuery(e.target.value)}
+                  className="min-h-[160px] resize-none text-base"
+                />
+              </div>
+              <DrawerFooter>
                 <Button
                   variant="outline"
                   onClick={() => {
                     setShowAISearch(false);
                     setAiSearchQuery("");
                   }}
-                  className="flex-1 h-11 sm:h-10"
+                  className="h-11"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={() => {
-                    // API call will be added later
                     toast({
                       title: "AI Search",
                       description: "AI search functionality will be implemented soon!",
@@ -1354,15 +1356,65 @@ const Discover = () => {
                     console.log("AI Search Query:", aiSearchQuery);
                   }}
                   disabled={!aiSearchQuery.trim()}
-                  className="flex-1 h-11 sm:h-10"
+                  className="h-11"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   Search
                 </Button>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        ) : (
+          <Dialog open={showAISearch} onOpenChange={setShowAISearch}>
+            <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg mx-4 sm:mx-auto">
+              <DialogHeader className="space-y-3">
+                <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
+                  <span>AI Property Search</span>
+                </DialogTitle>
+                <DialogDescription className="text-sm sm:text-base">
+                  Describe the property you're looking for in natural language
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 pt-2">
+                <Textarea
+                  placeholder="E.g., I'm looking for a 3 bedroom apartment with a balcony near downtown, budget around $500k"
+                  value={aiSearchQuery}
+                  onChange={(e) => setAiSearchQuery(e.target.value)}
+                  className="min-h-[140px] sm:min-h-[120px] resize-none text-sm sm:text-base"
+                />
+                
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowAISearch(false);
+                      setAiSearchQuery("");
+                    }}
+                    className="flex-1 h-11 sm:h-10"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      toast({
+                        title: "AI Search",
+                        description: "AI search functionality will be implemented soon!",
+                      });
+                      console.log("AI Search Query:", aiSearchQuery);
+                    }}
+                    disabled={!aiSearchQuery.trim()}
+                    className="flex-1 h-11 sm:h-10"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Search
+                  </Button>
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
