@@ -1333,7 +1333,7 @@ const Discover = () => {
                   placeholder="E.g., I'm looking for a 3 bedroom apartment with a balcony near downtown, budget around $500k"
                   value={aiSearchQuery}
                   onChange={(e) => setAiSearchQuery(e.target.value)}
-                  className="min-h-[160px] resize-none text-base"
+                  className="min-h-[160px] resize-none text-base border-2 border-border focus-visible:border-primary"
                 />
               </div>
               <DrawerFooter>
