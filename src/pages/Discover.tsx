@@ -1314,33 +1314,33 @@ const Discover = () => {
 
         {/* AI Search Dialog */}
         <Dialog open={showAISearch} onOpenChange={setShowAISearch}>
-          <DialogContent className="max-w-lg mx-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                AI Property Search
+          <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg mx-4 sm:mx-auto">
+            <DialogHeader className="space-y-3">
+              <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0" />
+                <span>AI Property Search</span>
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-sm sm:text-base">
                 Describe the property you're looking for in natural language
               </DialogDescription>
             </DialogHeader>
             
-            <div className="space-y-4">
+            <div className="space-y-4 pt-2">
               <Textarea
                 placeholder="E.g., I'm looking for a 3 bedroom apartment with a balcony near downtown, budget around $500k"
                 value={aiSearchQuery}
                 onChange={(e) => setAiSearchQuery(e.target.value)}
-                className="min-h-[120px] resize-none"
+                className="min-h-[140px] sm:min-h-[120px] resize-none text-sm sm:text-base"
               />
               
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   variant="outline"
                   onClick={() => {
                     setShowAISearch(false);
                     setAiSearchQuery("");
                   }}
-                  className="flex-1"
+                  className="flex-1 h-11 sm:h-10"
                 >
                   Cancel
                 </Button>
@@ -1354,7 +1354,7 @@ const Discover = () => {
                     console.log("AI Search Query:", aiSearchQuery);
                   }}
                   disabled={!aiSearchQuery.trim()}
-                  className="flex-1"
+                  className="flex-1 h-11 sm:h-10"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   Search
