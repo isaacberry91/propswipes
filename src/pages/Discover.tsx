@@ -295,12 +295,13 @@ const Discover = () => {
     }
   };
 
-  const fetchProperties = async () => {
+  const fetchProperties = async (locationCoords?: {lat: number, lng: number} | null) => {
     if (!user) return;
     setLoading(true);
     
     try {
       console.log('🔍 Starting discovery fetch for user:', user.id);
+      console.log('🔍 Using location coordinates:', locationCoords || selectedLocationCoords);
 
       // Get user profile first (or use existing userProfile)
       const currentUserProfile = userProfile || (await supabase
@@ -477,8 +478,13 @@ const Discover = () => {
         if (selectedLocation && selectedLocation !== 'All') {
           let searchCoords: { lat: number; lng: number } | null = null;
           
-          // First check if we have stored coordinates from the location selection
-          if (selectedLocationCoords) {
+          // First check if coordinates were passed directly (to avoid race condition)
+          if (locationCoords) {
+            searchCoords = locationCoords;
+            console.log('🔍 Using passed coordinates:', searchCoords);
+          }
+          // Then check if we have stored coordinates from the location selection
+          else if (selectedLocationCoords) {
             searchCoords = selectedLocationCoords;
             console.log('🔍 Using stored coordinates from location selection:', searchCoords);
           }
@@ -888,9 +894,13 @@ const Discover = () => {
                 setSelectedRadius(radius);
               }
               
-              // Use the new radius immediately, don't wait for state update
-              const radiusToUse = radius !== undefined ? radius : selectedRadius;
-              getPropertiesForLocation(location, radiusToUse);
+              // Update location
+              setSelectedLocation(location);
+              localStorage.setItem('propswipes_selected_location', location);
+              setCurrentIndex(0);
+              
+              // Pass coordinates directly to fetchProperties to avoid race condition
+              fetchProperties(coordinates);
             }}
             placeholder="Search properties anywhere..."
             properties={properties}
@@ -940,7 +950,7 @@ const Discover = () => {
               </p>
             </div>
             
-            <Button onClick={fetchProperties} variant="outline">
+            <Button onClick={() => fetchProperties()} variant="outline">
               Refresh
             </Button>
           </div>
