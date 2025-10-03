@@ -10,7 +10,7 @@ import PropertyMap from "./PropertyMap";
 
 interface LocationSearchProps {
   value: string;
-  onChange: (location: string, radius?: number) => void;
+  onChange: (location: string, radius?: number, coordinates?: {lat: number, lng: number}) => void;
   placeholder?: string;
   onPropertySelect?: (property: any) => void;
   properties?: any[];
@@ -276,8 +276,13 @@ const LocationSearch = ({
     setSearchValue(location);
     setShowSuggestions(false);
     
-    // Call onChange with the location and current radius
-    onChange(location, selectedRadius);
+    // Prepare coordinates if available from suggestion
+    const coordinates = suggestion?.lat && suggestion?.lon 
+      ? { lat: suggestion.lat, lng: suggestion.lon }
+      : undefined;
+    
+    // Call onChange with the location, radius, and coordinates
+    onChange(location, selectedRadius, coordinates);
     
     // If we have coordinates from the suggestion, use them directly
     if (suggestion?.lat && suggestion?.lon) {
@@ -377,7 +382,7 @@ const LocationSearch = ({
     console.log('🔍 LocationSearch: handleRadiusChange called with:', newRadius);
     setSelectedRadius(newRadius);
     // Always trigger onChange with the new radius, even if no location is set
-    onChange(searchValue || '', newRadius);
+    onChange(searchValue || '', newRadius, undefined);
   }, [searchValue, onChange]);
 
   const getCurrentLocation = () => {

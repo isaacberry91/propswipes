@@ -66,6 +66,10 @@ const Discover = () => {
   const [selectedLocation, setSelectedLocation] = useState(() => {
     return localStorage.getItem('propswipes_selected_location') || "";
   });
+  const [selectedLocationCoords, setSelectedLocationCoords] = useState<{lat: number, lng: number} | null>(() => {
+    const stored = localStorage.getItem('propswipes_selected_location_coords');
+    return stored ? JSON.parse(stored) : null;
+  });
   const [selectedRadius, setSelectedRadius] = useState(() => {
     const stored = localStorage.getItem('propswipes_selected_radius');
     return stored ? parseInt(stored) : 10;
@@ -473,8 +477,13 @@ const Discover = () => {
         if (selectedLocation && selectedLocation !== 'All') {
           let searchCoords: { lat: number; lng: number } | null = null;
           
+          // First check if we have stored coordinates from the location selection
+          if (selectedLocationCoords) {
+            searchCoords = selectedLocationCoords;
+            console.log('🔍 Using stored coordinates from location selection:', searchCoords);
+          }
           // Check if this is a current location with embedded coordinates
-          if (selectedLocation.includes('Current Location')) {
+          else if (selectedLocation.includes('Current Location')) {
             const coordMatch = selectedLocation.match(/\(([-\d.]+),\s*([-\d.]+)\)/);
             if (coordMatch) {
               searchCoords = {
@@ -488,7 +497,7 @@ const Discover = () => {
               console.log('🔍 Using stored current location coordinates:', searchCoords);
             }
           } else {
-            // Use geocoding for regular locations
+            // Use geocoding for regular locations as fallback
             searchCoords = await geocodeAddress(selectedLocation);
             console.log('🔍 Geocoding result for', selectedLocation, ':', searchCoords);
           }
@@ -858,9 +867,20 @@ const Discover = () => {
           
           <LocationSearch
             value={selectedLocation}
-            onChange={(location, radius) => {
-              console.log('🔍 Discover: LocationSearch onChange called with:', { location, radius });
+            onChange={(location, radius, coordinates) => {
+              console.log('🔍 Discover: LocationSearch onChange called with:', { location, radius, coordinates });
               console.log('🔍 Discover: Current selectedRadius before update:', selectedRadius);
+              
+              // Store coordinates if provided
+              if (coordinates) {
+                console.log('🔍 Discover: Storing location coordinates:', coordinates);
+                setSelectedLocationCoords(coordinates);
+                localStorage.setItem('propswipes_selected_location_coords', JSON.stringify(coordinates));
+              } else {
+                // Clear stored coordinates if none provided
+                setSelectedLocationCoords(null);
+                localStorage.removeItem('propswipes_selected_location_coords');
+              }
               
               // Always update the radius if it's provided
               if (radius !== undefined && radius !== selectedRadius) {
