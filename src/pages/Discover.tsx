@@ -1429,14 +1429,31 @@ const Discover = () => {
                       try {
                         setLoading(true);
                         
-                        const { data, error } = await supabase.functions.invoke('ai-search', {
+                        const { data, error } = await supabase.functions.invoke('ai-property-search', {
                           body: {
                             query: aiSearchQuery,
                             userId: user.id
                           }
                         });
 
-                        if (error) throw error;
+                        if (error) {
+                          if (error.message?.includes('429')) {
+                            toast({
+                              title: "Rate Limit Exceeded",
+                              description: "Too many requests. Please try again in a moment.",
+                              variant: "destructive"
+                            });
+                          } else if (error.message?.includes('402')) {
+                            toast({
+                              title: "Payment Required",
+                              description: "AI service requires payment. Please contact support.",
+                              variant: "destructive"
+                            });
+                          } else {
+                            throw error;
+                          }
+                          return;
+                        }
 
                         console.log('🤖 AI Search results:', data);
 
@@ -1446,7 +1463,7 @@ const Discover = () => {
                           setCurrentImageIndex(0);
                           toast({
                             title: "Search Complete",
-                            description: `Found ${data.properties.length} properties matching your criteria`,
+                            description: `Found ${data.properties.length} properties matching "${aiSearchQuery}"`,
                           });
                         } else {
                           toast({
@@ -1517,14 +1534,31 @@ const Discover = () => {
                       try {
                         setLoading(true);
                         
-                        const { data, error } = await supabase.functions.invoke('ai-search', {
+                        const { data, error } = await supabase.functions.invoke('ai-property-search', {
                           body: {
                             query: aiSearchQuery,
                             userId: user.id
                           }
                         });
 
-                        if (error) throw error;
+                        if (error) {
+                          if (error.message?.includes('429')) {
+                            toast({
+                              title: "Rate Limit Exceeded",
+                              description: "Too many requests. Please try again in a moment.",
+                              variant: "destructive"
+                            });
+                          } else if (error.message?.includes('402')) {
+                            toast({
+                              title: "Payment Required",
+                              description: "AI service requires payment. Please contact support.",
+                              variant: "destructive"
+                            });
+                          } else {
+                            throw error;
+                          }
+                          return;
+                        }
 
                         console.log('🤖 AI Search results:', data);
 
@@ -1534,7 +1568,7 @@ const Discover = () => {
                           setCurrentImageIndex(0);
                           toast({
                             title: "Search Complete",
-                            description: `Found ${data.properties.length} properties matching your criteria`,
+                            description: `Found ${data.properties.length} properties matching "${aiSearchQuery}"`,
                           });
                         } else {
                           toast({
