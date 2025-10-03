@@ -102,13 +102,13 @@ Deno.serve(async (req) => {
                   },
                   property_type: {
                     type: "string",
-                    enum: ["residential", "commercial", "land", "condo", "apartment"],
+                    enum: ["house", "condo", "townhouse", "apartment", "office", "retail", "warehouse", "industrial", "mixed-use", "land"],
                     description: "Type of property"
                   },
                   listing_type: {
                     type: "string",
-                    enum: ["for-sale", "rental"],
-                    description: "Listing type - for sale or rental"
+                    enum: ["for-sale", "for-rent"],
+                    description: "Listing type - for sale or for rent"
                   },
                   amenities: {
                     type: "array",
