@@ -233,9 +233,21 @@ const PropertyMap = ({
           })
         );
 
+        // Helper function to calculate distance using Haversine formula
+        const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+          const R = 3959; // Earth's radius in miles
+          const dLat = (lat2 - lat1) * Math.PI / 180;
+          const dLon = (lon2 - lon1) * Math.PI / 180;
+          const a = 
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return R * c; // Distance in miles
+        };
+
         // Filter properties within radius
-        const radiusInDegrees = selectedRadius / 69; // Rough conversion: 1 degree ≈ 69 miles
-        console.log(`🗺️ Filtering with radius: ${selectedRadius} miles (${radiusInDegrees} degrees) from center:`, center);
+        console.log(`🗺️ Filtering with radius: ${selectedRadius} miles from center:`, center);
         
         const filteredProperties = processedProperties.filter((property) => {
           // Only include properties with valid coordinates
@@ -243,14 +255,11 @@ const PropertyMap = ({
             return false;
           }
 
-          const distance = Math.sqrt(
-            Math.pow(property.latitude - center[1], 2) + 
-            Math.pow(property.longitude - center[0], 2)
-          );
+          const distance = calculateDistance(center[1], center[0], property.latitude, property.longitude);
           
-          const included = distance <= radiusInDegrees;
+          const included = distance <= selectedRadius;
           if (included) {
-            console.log(`🗺️ Including property: ${property.title} at distance ${distance.toFixed(4)} degrees`);
+            console.log(`🗺️ Including property: ${property.title} at distance ${distance.toFixed(2)} miles`);
           }
           return included;
         });
