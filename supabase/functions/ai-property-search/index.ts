@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a real estate property search assistant. Extract property search filters from natural language queries. When the user specifies an exact number (e.g., 'one bedroom', '3 bedrooms'), set both min and max to that number for exact matching. Only use min without max when they say 'at least' or similar phrases."
+            content: "You are a real estate property search assistant. Extract property search filters from natural language queries. When the user specifies an exact number (e.g., 'one bedroom', '3 bedrooms'), set both min and max to that number for exact matching. Only use min without max when they say 'at least' or similar phrases. For studio apartments, use bedrooms_min: 0 and bedrooms_max: 0. Property types include: house, condo, townhouse, apartment, office, retail, warehouse, industrial, mixed-use, land. Listing types are: for-sale or for-rent."
           },
           {
             role: "user",
@@ -122,6 +122,11 @@ Deno.serve(async (req) => {
                   year_built_min: {
                     type: "number",
                     description: "Minimum year built (for new construction or recent builds)"
+                  },
+                  sort_by: {
+                    type: "string",
+                    enum: ["relevant", "price-low", "price-high", "newest", "sqft-large", "sqft-small"],
+                    description: "How to sort the results"
                   }
                 },
                 additionalProperties: false
@@ -195,7 +200,8 @@ Deno.serve(async (req) => {
       
       // AI-only filters
       amenities: aiFilters.amenities || [],
-      location: aiFilters.location
+      location: aiFilters.location,
+      sort_by: aiFilters.sort_by ?? currentFilters.sortBy
     };
 
     console.log('📊 Merged filters:', filters);
@@ -258,7 +264,29 @@ Deno.serve(async (req) => {
     if (filters.bathrooms_max) query = query.lte("bathrooms", filters.bathrooms_max);
     if (filters.year_built_min) query = query.gte("year_built", filters.year_built_min);
 
-    query = query.order('created_at', { ascending: false }).limit(50);
+    // Apply sorting
+    const sortBy = filters.sort_by || 'newest';
+    switch (sortBy) {
+      case 'price-low':
+        query = query.order('price', { ascending: true });
+        break;
+      case 'price-high':
+        query = query.order('price', { ascending: false });
+        break;
+      case 'newest':
+        query = query.order('created_at', { ascending: false });
+        break;
+      case 'sqft-large':
+        query = query.order('square_feet', { ascending: false, nullsFirst: false });
+        break;
+      case 'sqft-small':
+        query = query.order('square_feet', { ascending: true, nullsFirst: false });
+        break;
+      default: // 'relevant' or fallback
+        query = query.order('created_at', { ascending: false });
+    }
+    
+    query = query.limit(50);
 
     const { data: properties, error } = await query;
 
