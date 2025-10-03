@@ -300,8 +300,12 @@ const Discover = () => {
     setLoading(true);
     
     try {
+      // Use passed coordinates or fall back to stored coordinates
+      const coordsToUse = locationCoords !== undefined ? locationCoords : selectedLocationCoords;
       console.log('🔍 Starting discovery fetch for user:', user.id);
-      console.log('🔍 Using location coordinates:', locationCoords || selectedLocationCoords);
+      console.log('🔍 Location:', selectedLocation);
+      console.log('🔍 Radius:', selectedRadius, 'miles');
+      console.log('🔍 Using location coordinates:', coordsToUse);
 
       // Get user profile first (or use existing userProfile)
       const currentUserProfile = userProfile || (await supabase
@@ -476,37 +480,12 @@ const Discover = () => {
 
         // Location-based radius filtering (client-side) - improved for current location
         if (selectedLocation && selectedLocation !== 'All') {
-          let searchCoords: { lat: number; lng: number } | null = null;
+          // Use the coordinates determined at the start of this function
+          const searchCoords = coordsToUse;
           
-          // First check if coordinates were passed directly (to avoid race condition)
-          if (locationCoords) {
-            searchCoords = locationCoords;
-            console.log('🔍 Using passed coordinates:', searchCoords);
-          }
-          // Then check if we have stored coordinates from the location selection
-          else if (selectedLocationCoords) {
-            searchCoords = selectedLocationCoords;
-            console.log('🔍 Using stored coordinates from location selection:', searchCoords);
-          }
-          // Check if this is a current location with embedded coordinates
-          else if (selectedLocation.includes('Current Location')) {
-            const coordMatch = selectedLocation.match(/\(([-\d.]+),\s*([-\d.]+)\)/);
-            if (coordMatch) {
-              searchCoords = {
-                lat: parseFloat(coordMatch[1]),
-                lng: parseFloat(coordMatch[2])
-              };
-              console.log('🔍 Using embedded coordinates from Current Location:', searchCoords);
-            } else if ((window as any).currentLocationCoords) {
-              // Fallback to stored coordinates
-              searchCoords = (window as any).currentLocationCoords;
-              console.log('🔍 Using stored current location coordinates:', searchCoords);
-            }
-          } else {
-            // Use geocoding for regular locations as fallback
-            searchCoords = await geocodeAddress(selectedLocation);
-            console.log('🔍 Geocoding result for', selectedLocation, ':', searchCoords);
-          }
+          console.log('🔍 Filtering properties by location:', selectedLocation);
+          console.log('🔍 Search coordinates:', searchCoords);
+          console.log('🔍 Search radius:', selectedRadius, 'miles');
           
           if (searchCoords) {
             // Filter properties within radius, but include fallbacks
