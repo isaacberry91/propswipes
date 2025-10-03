@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: "You are a real estate property search assistant. Extract property search filters from natural language queries."
+            content: "You are a real estate property search assistant. Extract property search filters from natural language queries. When the user specifies an exact number (e.g., 'one bedroom', '3 bedrooms'), set both min and max to that number for exact matching. Only use min without max when they say 'at least' or similar phrases."
           },
           {
             role: "user",
@@ -69,11 +69,19 @@ Deno.serve(async (req) => {
                 properties: {
                   bedrooms_min: {
                     type: "number",
-                    description: "Minimum number of bedrooms"
+                    description: "Minimum number of bedrooms (use with bedrooms_max for exact match)"
+                  },
+                  bedrooms_max: {
+                    type: "number",
+                    description: "Maximum number of bedrooms (set same as min for exact match)"
                   },
                   bathrooms_min: {
                     type: "number",
-                    description: "Minimum number of bathrooms"
+                    description: "Minimum number of bathrooms (use with bathrooms_max for exact match)"
+                  },
+                  bathrooms_max: {
+                    type: "number",
+                    description: "Maximum number of bathrooms (set same as min for exact match)"
                   },
                   price_min: {
                     type: "number",
@@ -213,7 +221,9 @@ Deno.serve(async (req) => {
     if (filters.square_feet_min) query = query.gte("square_feet", filters.square_feet_min);
     if (filters.square_feet_max) query = query.lte("square_feet", filters.square_feet_max);
     if (filters.bedrooms_min) query = query.gte("bedrooms", filters.bedrooms_min);
+    if (filters.bedrooms_max) query = query.lte("bedrooms", filters.bedrooms_max);
     if (filters.bathrooms_min) query = query.gte("bathrooms", filters.bathrooms_min);
+    if (filters.bathrooms_max) query = query.lte("bathrooms", filters.bathrooms_max);
     if (filters.year_built_min) query = query.gte("year_built", filters.year_built_min);
 
     query = query.order('created_at', { ascending: false }).limit(50);
