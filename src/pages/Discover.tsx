@@ -1432,7 +1432,16 @@ const Discover = () => {
                         const { data, error } = await supabase.functions.invoke('ai-property-search', {
                           body: {
                             query: aiSearchQuery,
-                            userId: user.id
+                            userId: user.id,
+                            currentFilters: {
+                              priceRange: searchFilters.priceRange,
+                              bedrooms: searchFilters.bedrooms !== 'any' ? searchFilters.bedrooms : undefined,
+                              bathrooms: searchFilters.bathrooms !== 'any' ? searchFilters.bathrooms : undefined,
+                              propertyType: searchFilters.propertyType !== 'any' ? searchFilters.propertyType : undefined,
+                              listingType: searchFilters.listingType !== 'any' ? searchFilters.listingType : undefined,
+                              sqftRange: searchFilters.sqftRange,
+                              yearBuilt: searchFilters.yearBuilt,
+                            }
                           }
                         });
 
@@ -1537,7 +1546,16 @@ const Discover = () => {
                         const { data, error } = await supabase.functions.invoke('ai-property-search', {
                           body: {
                             query: aiSearchQuery,
-                            userId: user.id
+                            userId: user.id,
+                            currentFilters: {
+                              priceRange: searchFilters.priceRange,
+                              bedrooms: searchFilters.bedrooms !== 'any' ? searchFilters.bedrooms : undefined,
+                              bathrooms: searchFilters.bathrooms !== 'any' ? searchFilters.bathrooms : undefined,
+                              propertyType: searchFilters.propertyType !== 'any' ? searchFilters.propertyType : undefined,
+                              listingType: searchFilters.listingType !== 'any' ? searchFilters.listingType : undefined,
+                              sqftRange: searchFilters.sqftRange,
+                              yearBuilt: searchFilters.yearBuilt,
+                            }
                           }
                         });
 

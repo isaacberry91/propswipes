@@ -21,8 +21,9 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const userQuery = body.query as string;
     const userId = body.userId as string;
+    const currentFilters = body.currentFilters || {};
 
-    console.log('🔍 AI Property Search started:', { query: userQuery, userId });
+    console.log('🔍 AI Property Search started:', { query: userQuery, userId, currentFilters });
 
     if (!userQuery) {
       return new Response(
@@ -165,10 +166,41 @@ Deno.serve(async (req) => {
       );
     }
 
-    const filters = JSON.parse(toolCall.function.arguments);
-    console.log('📊 Extracted filters:', filters);
+    const aiFilters = JSON.parse(toolCall.function.arguments);
+    console.log('📊 AI extracted filters:', aiFilters);
+    console.log('📊 Current UI filters:', currentFilters);
 
-    // Build database query with extracted filters
+    // Merge AI filters with current UI filters (AI filters take priority where they exist)
+    const filters = {
+      // Price: Use AI filters if present, otherwise use UI filters
+      price_min: aiFilters.price_min ?? (currentFilters.priceRange?.[0] !== 200000 ? currentFilters.priceRange?.[0] : undefined),
+      price_max: aiFilters.price_max ?? (currentFilters.priceRange?.[1] !== 2000000 ? currentFilters.priceRange?.[1] : undefined),
+      
+      // Property/Listing type: AI overrides UI
+      property_type: aiFilters.property_type ?? currentFilters.propertyType,
+      listing_type: aiFilters.listing_type ?? currentFilters.listingType,
+      
+      // Bedrooms/Bathrooms: AI overrides UI
+      bedrooms_min: aiFilters.bedrooms_min ?? (currentFilters.bedrooms === 'studio' ? 0 : parseInt(currentFilters.bedrooms) || undefined),
+      bedrooms_max: aiFilters.bedrooms_max,
+      bathrooms_min: aiFilters.bathrooms_min ?? parseFloat(currentFilters.bathrooms) || undefined,
+      bathrooms_max: aiFilters.bathrooms_max,
+      
+      // Square feet: AI overrides UI
+      square_feet_min: aiFilters.square_feet_min ?? (currentFilters.sqftRange?.[0] !== 500 ? currentFilters.sqftRange?.[0] : undefined),
+      square_feet_max: aiFilters.square_feet_max ?? (currentFilters.sqftRange?.[1] !== 15000 ? currentFilters.sqftRange?.[1] : undefined),
+      
+      // Year built: AI overrides UI
+      year_built_min: aiFilters.year_built_min ?? (currentFilters.yearBuilt?.[0] !== 1950 ? currentFilters.yearBuilt?.[0] : undefined),
+      
+      // AI-only filters
+      amenities: aiFilters.amenities || [],
+      location: aiFilters.location
+    };
+
+    console.log('📊 Merged filters:', filters);
+
+    // Build database query with merged filters
     let query = supabase
       .from("properties")
       .select(`
