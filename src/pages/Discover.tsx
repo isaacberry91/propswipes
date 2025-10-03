@@ -1422,20 +1422,59 @@ const Discover = () => {
                 >
                   Cancel
                 </Button>
-                <Button
-                  onClick={() => {
-                    toast({
-                      title: "AI Search",
-                      description: "AI search functionality will be implemented soon!",
-                    });
-                    console.log("AI Search Query:", aiSearchQuery);
-                  }}
-                  disabled={!aiSearchQuery.trim()}
-                  className="h-11"
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Search
-                </Button>
+                  <Button
+                    onClick={async () => {
+                      if (!user || !aiSearchQuery.trim()) return;
+                      
+                      try {
+                        setLoading(true);
+                        
+                        const { data, error } = await supabase.functions.invoke('ai-search', {
+                          body: {
+                            query: aiSearchQuery,
+                            userId: user.id
+                          }
+                        });
+
+                        if (error) throw error;
+
+                        console.log('🤖 AI Search results:', data);
+
+                        if (data.properties && data.properties.length > 0) {
+                          setProperties(data.properties);
+                          setCurrentIndex(0);
+                          setCurrentImageIndex(0);
+                          toast({
+                            title: "Search Complete",
+                            description: `Found ${data.properties.length} properties matching your criteria`,
+                          });
+                        } else {
+                          toast({
+                            title: "No Results",
+                            description: "No properties found matching your search. Try adjusting your criteria.",
+                            variant: "destructive"
+                          });
+                        }
+
+                        setShowAISearch(false);
+                        setAiSearchQuery("");
+                      } catch (error) {
+                        console.error('AI Search error:', error);
+                        toast({
+                          title: "Search Failed",
+                          description: "There was an error processing your search. Please try again.",
+                          variant: "destructive"
+                        });
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                    disabled={!aiSearchQuery.trim()}
+                    className="h-11"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Search
+                  </Button>
               </DrawerFooter>
             </DrawerContent>
           </Drawer>
@@ -1472,12 +1511,51 @@ const Discover = () => {
                     Cancel
                   </Button>
                   <Button
-                    onClick={() => {
-                      toast({
-                        title: "AI Search",
-                        description: "AI search functionality will be implemented soon!",
-                      });
-                      console.log("AI Search Query:", aiSearchQuery);
+                    onClick={async () => {
+                      if (!user || !aiSearchQuery.trim()) return;
+                      
+                      try {
+                        setLoading(true);
+                        
+                        const { data, error } = await supabase.functions.invoke('ai-search', {
+                          body: {
+                            query: aiSearchQuery,
+                            userId: user.id
+                          }
+                        });
+
+                        if (error) throw error;
+
+                        console.log('🤖 AI Search results:', data);
+
+                        if (data.properties && data.properties.length > 0) {
+                          setProperties(data.properties);
+                          setCurrentIndex(0);
+                          setCurrentImageIndex(0);
+                          toast({
+                            title: "Search Complete",
+                            description: `Found ${data.properties.length} properties matching your criteria`,
+                          });
+                        } else {
+                          toast({
+                            title: "No Results",
+                            description: "No properties found matching your search. Try adjusting your criteria.",
+                            variant: "destructive"
+                          });
+                        }
+
+                        setShowAISearch(false);
+                        setAiSearchQuery("");
+                      } catch (error) {
+                        console.error('AI Search error:', error);
+                        toast({
+                          title: "Search Failed",
+                          description: "There was an error processing your search. Please try again.",
+                          variant: "destructive"
+                        });
+                      } finally {
+                        setLoading(false);
+                      }
                     }}
                     disabled={!aiSearchQuery.trim()}
                     className="flex-1 h-11 sm:h-10"
