@@ -24,7 +24,7 @@ interface Property {
 }
 
 interface MapLocationSearchProps {
-  onLocationChange?: (location: string, radius: number, coordinates?: [number, number]) => void;
+  onLocationChange?: (location: string, radius: number, coordinates?: { lat: number; lng: number }) => void;
   onPropertySelect?: (property: Property) => void;
   defaultLocation?: string;
   defaultRadius?: number;
@@ -66,21 +66,32 @@ const MapLocationSearch = ({
   }, []);
 
   const handleLocationChange = useCallback(async (location: string, radius: number) => {
+    console.log('🔍 MapLocationSearch: Location changed to:', location, 'radius:', radius);
     setSelectedLocation(location);
     setSelectedRadius(radius);
     
     const coordinates = await geocodeLocation(location);
+    console.log('🔍 MapLocationSearch: Geocoded coordinates [lon, lat]:', coordinates);
+    
     if (coordinates) {
       setMapCenter(coordinates);
+      // Convert [longitude, latitude] to {lat, lng} format for parent
+      const coordsObject = coordinates ? { lat: coordinates[1], lng: coordinates[0] } : undefined;
+      console.log('🔍 MapLocationSearch: Converted to {lat, lng}:', coordsObject);
+      onLocationChange?.(location, radius, coordsObject);
+    } else {
+      console.warn('🔍 MapLocationSearch: Failed to geocode location');
+      // Still notify parent even if geocoding failed
+      onLocationChange?.(location, radius, undefined);
     }
-    
-    onLocationChange?.(location, radius, coordinates || undefined);
   }, [onLocationChange, geocodeLocation]);
 
   const handleRadiusChange = useCallback((radius: number) => {
     setSelectedRadius(radius);
-    if (selectedLocation) {
-      onLocationChange?.(selectedLocation, radius, mapCenter);
+    if (selectedLocation && mapCenter) {
+      // Convert [lon, lat] to {lat, lng} for parent
+      const coordsObject = { lat: mapCenter[1], lng: mapCenter[0] };
+      onLocationChange?.(selectedLocation, radius, coordsObject);
     }
   }, [selectedLocation, mapCenter, onLocationChange]);
 
