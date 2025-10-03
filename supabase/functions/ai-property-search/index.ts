@@ -181,9 +181,9 @@ Deno.serve(async (req) => {
       listing_type: aiFilters.listing_type ?? currentFilters.listingType,
       
       // Bedrooms/Bathrooms: AI overrides UI
-      bedrooms_min: aiFilters.bedrooms_min ?? (currentFilters.bedrooms === 'studio' ? 0 : parseInt(currentFilters.bedrooms) || undefined),
+      bedrooms_min: aiFilters.bedrooms_min ?? (currentFilters.bedrooms === 'studio' ? 0 : (parseInt(currentFilters.bedrooms) || undefined)),
       bedrooms_max: aiFilters.bedrooms_max,
-      bathrooms_min: aiFilters.bathrooms_min ?? parseFloat(currentFilters.bathrooms) || undefined,
+      bathrooms_min: aiFilters.bathrooms_min ?? (parseFloat(currentFilters.bathrooms) || undefined),
       bathrooms_max: aiFilters.bathrooms_max,
       
       // Square feet: AI overrides UI
