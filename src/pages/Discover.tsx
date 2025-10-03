@@ -515,16 +515,26 @@ const Discover = () => {
                         : stateLower.includes('new jersey') ? 'NJ'
                         : rawState.toUpperCase()));
                 
-                const locInput = selectedLocation.trim();
-                const isStateCode = /^[a-z]{2}$/i.test(locInput);
-                const locLower = locInput.toLowerCase();
-                const wantedStateCode = isStateCode
-                  ? locInput.toUpperCase()
-                  : (locLower.includes('new york') ? 'NY'
-                    : locLower.includes('new jersey') ? 'NJ'
-                    : '');
-                
-                const wantedCity = isStateCode ? '' : (selectedLocation.split(',')[0] || '').trim().toLowerCase();
+                const parts = selectedLocation.split(',').map((p) => p.trim());
+                const stateFullToCode: Record<string, string> = { 'louisiana': 'LA', 'new york': 'NY', 'new jersey': 'NJ' };
+                let wantedStateCode = '';
+                for (const p of parts) {
+                  if (/^[A-Za-z]{2}$/.test(p)) { wantedStateCode = p.toUpperCase(); break; }
+                  const lower = p.toLowerCase();
+                  for (const [name, code] of Object.entries(stateFullToCode)) {
+                    if (lower.includes(name)) { wantedStateCode = code; break; }
+                  }
+                  if (wantedStateCode) break;
+                }
+                let wantedCity = '';
+                if (parts.length >= 2) {
+                  const first = parts[0];
+                  const second = parts[1];
+                  const firstLooksLikeStreet = /\d/.test(first) || /(street|st\.?|avenue|ave\.?|road|rd\.?|boulevard|blvd\.?|drive|dr\.?|lane|ln\.?|court|ct\.?|highway|hwy\.?)/i.test(first);
+                  wantedCity = (firstLooksLikeStreet ? second : first).toLowerCase();
+                } else if (parts[0]) {
+                  wantedCity = parts[0].toLowerCase();
+                }
                 const cityLower = (property.city || '').toLowerCase().trim();
                 
                 // Matching rules:
@@ -557,16 +567,26 @@ const Discover = () => {
                       : stateLower.includes('new jersey') ? 'NJ'
                       : rawState.toUpperCase()));
               
-              const locInput = selectedLocation.trim();
-              const isStateCode = /^[a-z]{2}$/i.test(locInput);
-              const locLower = locInput.toLowerCase();
-              const wantedStateCode = isStateCode
-                ? locInput.toUpperCase()
-                : (locLower.includes('new york') ? 'NY'
-                  : locLower.includes('new jersey') ? 'NJ'
-                  : '');
-              
-              const wantedCity = isStateCode ? '' : (selectedLocation.split(',')[0] || '').trim().toLowerCase();
+              const parts = selectedLocation.split(',').map((p) => p.trim());
+              const stateFullToCode: Record<string, string> = { 'louisiana': 'LA', 'new york': 'NY', 'new jersey': 'NJ' };
+              let wantedStateCode = '';
+              for (const p of parts) {
+                if (/^[A-Za-z]{2}$/.test(p)) { wantedStateCode = p.toUpperCase(); break; }
+                const lower = p.toLowerCase();
+                for (const [name, code] of Object.entries(stateFullToCode)) {
+                  if (lower.includes(name)) { wantedStateCode = code; break; }
+                }
+                if (wantedStateCode) break;
+              }
+              let wantedCity = '';
+              if (parts.length >= 2) {
+                const first = parts[0];
+                const second = parts[1];
+                const firstLooksLikeStreet = /\d/.test(first) || /(street|st\.?|avenue|ave\.?|road|rd\.?|boulevard|blvd\.?|drive|dr\.?|lane|ln\.?|court|ct\.?|highway|hwy\.?)/i.test(first);
+                wantedCity = (firstLooksLikeStreet ? second : first).toLowerCase();
+              } else if (parts[0]) {
+                wantedCity = parts[0].toLowerCase();
+              }
               const cityLower = (property.city || '').toLowerCase().trim();
               
               let matches = false;
@@ -906,6 +926,8 @@ const Discover = () => {
                 console.log('🔍 Discover: Storing location coordinates:', coordinates);
                 setSelectedLocationCoords(coordinates);
                 localStorage.setItem('propswipes_selected_location_coords', JSON.stringify(coordinates));
+                // Update map center for map-based components
+                setMapCenter([coordinates.lng, coordinates.lat]);
               } else {
                 // Clear stored coordinates if none provided
                 setSelectedLocationCoords(null);
