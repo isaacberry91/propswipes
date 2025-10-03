@@ -525,19 +525,42 @@ const Discover = () => {
                 }
               }
               
-              // For non-current location searches, include text-based matches as fallback
               if (!selectedLocation.includes('Current Location')) {
-                const searchTerm = selectedLocation.toLowerCase();
-                const searchParts = searchTerm.split(',').map(part => part.trim());
+                const rawState = (property.state || '').toString().trim();
+                const stateLower = rawState.toLowerCase();
+                const propertyStateCode = stateLower.startsWith('us-')
+                  ? rawState.slice(3).toUpperCase()
+                  : (rawState.length === 2
+                      ? rawState.toUpperCase()
+                      : (stateLower.includes('new york') ? 'NY'
+                        : stateLower.includes('new jersey') ? 'NJ'
+                        : rawState.toUpperCase()));
                 
-                const addressMatch = property.address?.toLowerCase().includes(searchTerm);
-                const cityMatch = property.city?.toLowerCase().includes(searchParts[0]);
-                const stateMatch = searchParts[1] ? 
-                  property.state?.toLowerCase().includes(searchParts[1]) : 
-                  property.state?.toLowerCase().includes(searchParts[0]);
+                const locInput = selectedLocation.trim();
+                const isStateCode = /^[a-z]{2}$/i.test(locInput);
+                const locLower = locInput.toLowerCase();
+                const wantedStateCode = isStateCode
+                  ? locInput.toUpperCase()
+                  : (locLower.includes('new york') ? 'NY'
+                    : locLower.includes('new jersey') ? 'NJ'
+                    : '');
                 
-                // Include if any part matches
-                return addressMatch || cityMatch || stateMatch;
+                const wantedCity = isStateCode ? '' : (selectedLocation.split(',')[0] || '').trim().toLowerCase();
+                const cityLower = (property.city || '').toLowerCase().trim();
+                
+                // Matching rules:
+                // - If only state provided (e.g., "NY"), match by normalized state code
+                // - If city and state provided (e.g., "New York, NY"), require both city and state
+                let matches = false;
+                if (wantedStateCode && !wantedCity) {
+                  matches = propertyStateCode === wantedStateCode;
+                } else if (wantedStateCode && wantedCity) {
+                  matches = propertyStateCode === wantedStateCode && cityLower.includes(wantedCity);
+                } else if (!wantedStateCode && wantedCity) {
+                  matches = cityLower.includes(wantedCity);
+                }
+                
+                return matches;
               }
               
               return false;
@@ -545,16 +568,38 @@ const Discover = () => {
           } else {
             // More generous text-based search if geocoding fails
             filteredData = filteredData.filter((property: any) => {
-              const searchTerm = selectedLocation.toLowerCase();
-              const searchParts = searchTerm.split(',').map(part => part.trim());
+              const rawState = (property.state || '').toString().trim();
+              const stateLower = rawState.toLowerCase();
+              const propertyStateCode = stateLower.startsWith('us-')
+                ? rawState.slice(3).toUpperCase()
+                : (rawState.length === 2
+                    ? rawState.toUpperCase()
+                    : (stateLower.includes('new york') ? 'NY'
+                      : stateLower.includes('new jersey') ? 'NJ'
+                      : rawState.toUpperCase()));
               
-              const addressMatch = property.address?.toLowerCase().includes(searchTerm);
-              const cityMatch = property.city?.toLowerCase().includes(searchParts[0]);
-              const stateMatch = searchParts.length > 1 ? 
-                property.state?.toLowerCase().includes(searchParts[1]) : 
-                property.state?.toLowerCase().includes(searchParts[0]);
+              const locInput = selectedLocation.trim();
+              const isStateCode = /^[a-z]{2}$/i.test(locInput);
+              const locLower = locInput.toLowerCase();
+              const wantedStateCode = isStateCode
+                ? locInput.toUpperCase()
+                : (locLower.includes('new york') ? 'NY'
+                  : locLower.includes('new jersey') ? 'NJ'
+                  : '');
               
-              return addressMatch || cityMatch || stateMatch;
+              const wantedCity = isStateCode ? '' : (selectedLocation.split(',')[0] || '').trim().toLowerCase();
+              const cityLower = (property.city || '').toLowerCase().trim();
+              
+              let matches = false;
+              if (wantedStateCode && !wantedCity) {
+                matches = propertyStateCode === wantedStateCode;
+              } else if (wantedStateCode && wantedCity) {
+                matches = propertyStateCode === wantedStateCode && cityLower.includes(wantedCity);
+              } else if (!wantedStateCode && wantedCity) {
+                matches = cityLower.includes(wantedCity);
+              }
+              
+              return matches;
             });
           }
           console.log('🔍 After location filtering:', filteredData.length);
