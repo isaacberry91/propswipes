@@ -371,42 +371,9 @@ const Discover = () => {
         .eq('status', 'approved')
         .is('deleted_at', null);
 
-      // Apply all server-side filters for better performance
-      if (searchFilters.priceRange[0] > 200000 || searchFilters.priceRange[1] < 2000000) {
-        query = query.gte('price', searchFilters.priceRange[0]).lte('price', searchFilters.priceRange[1]);
-      }
-
-      if (searchFilters.propertyType !== 'any') {
-        query = query.eq('property_type', searchFilters.propertyType as any);
-      }
-
-      if (searchFilters.listingType !== 'any') {
-        console.log('🔍 Applying listing type filter:', searchFilters.listingType);
-        query = query.eq('listing_type', searchFilters.listingType);
-      }
-
-      if (searchFilters.bedrooms !== 'any') {
-        if (searchFilters.bedrooms === 'studio') {
-          query = query.or('bedrooms.is.null,bedrooms.eq.0');
-        } else {
-          const bedroomCount = parseInt(searchFilters.bedrooms);
-          if (!isNaN(bedroomCount)) {
-            query = query.gte('bedrooms', bedroomCount);
-          }
-        }
-      }
-
-      if (searchFilters.bathrooms !== 'any') {
-        const bathroomCount = parseFloat(searchFilters.bathrooms);
-        if (!isNaN(bathroomCount)) {
-          query = query.gte('bathrooms', bathroomCount);
-        }
-      }
-
-      if (searchFilters.sqftRange[0] !== 500 || searchFilters.sqftRange[1] !== 15000) {
-        query = query.gte('square_feet', searchFilters.sqftRange[0]).lte('square_feet', searchFilters.sqftRange[1]);
-      }
-
+      // Apply only basic filters - NO price/bedrooms/bathrooms/property type filters
+      // Only location/radius filtering will be applied below
+      
       // Exclude liked properties and user's own properties
       if (likedPropertyIds.length > 0) {
         query = query.not('id', 'in', `(${likedPropertyIds.join(',')})`);
