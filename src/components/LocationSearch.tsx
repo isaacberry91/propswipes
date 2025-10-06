@@ -191,6 +191,13 @@ const LocationSearch = ({
         )
         .slice(0, 8);
 
+      console.log('📊 SEARCH API RESULTS:', uniqueSuggestions.length, 'unique suggestions returned');
+      console.log('📍 RESULTS DETAILS:', uniqueSuggestions.map(s => ({
+        location: s.full_location,
+        hasCoords: !!(s.lat && s.lon),
+        coords: s.lat && s.lon ? { lat: s.lat, lng: s.lon } : null
+      })));
+      
       setDatabaseSuggestions(uniqueSuggestions);
       console.log('🔍 Final suggestions:', uniqueSuggestions);
     } catch (error) {
@@ -281,14 +288,18 @@ const LocationSearch = ({
       ? { lat: suggestion.lat, lng: suggestion.lon }
       : undefined;
     
+    console.log('📍 COORDINATES BEING PASSED TO PARENT:', coordinates);
+    
     // Call onChange with the location, radius, and coordinates
     onChange(location, selectedRadius, coordinates);
     
     // If we have coordinates from the suggestion, use them directly
     if (suggestion?.lat && suggestion?.lon) {
       console.log('🗺️ Using coordinates from suggestion:', [suggestion.lon, suggestion.lat]);
+      console.log('📍 SETTING MAP CENTER:', [suggestion.lon, suggestion.lat]);
       setMapCenter([suggestion.lon, suggestion.lat]);
     } else {
+      console.log('🗺️ No coordinates in suggestion, falling back to geocoding');
       // Fallback to geocoding
       geocodeLocationForMap(location);
     }
@@ -311,6 +322,7 @@ const LocationSearch = ({
         .limit(1);
 
       console.log('🗺️ Database geocoding results:', dbProperties);
+      console.log('📊 DATABASE GEOCODING: Found', dbProperties?.length || 0, 'properties with coordinates');
 
       if (dbProperties && dbProperties.length > 0) {
         const property = dbProperties[0];
@@ -318,6 +330,7 @@ const LocationSearch = ({
         const lon = property.longitude;
         
         console.log('🗺️ Using database coordinates:', { lat, lon });
+        console.log('📍 COORDINATES FROM DATABASE:', { lat, lng: lon });
         
         // Adjust radius based on location specificity
         let newRadius = selectedRadius;
@@ -335,9 +348,11 @@ const LocationSearch = ({
           console.log('🔍 Adjusting radius based on location specificity:', newRadius);
           setSelectedRadius(newRadius);
           // Also inform parent with coords so radius filtering works
+          console.log('📍 PASSING COORDS TO PARENT WITH ADJUSTED RADIUS:', { lat, lng: lon }, 'radius:', newRadius);
           onChange(location, newRadius, { lat, lng: lon });
         } else {
           // Inform parent with coords even if radius unchanged
+          console.log('📍 PASSING COORDS TO PARENT:', { lat, lng: lon }, 'radius:', selectedRadius);
           onChange(location, selectedRadius, { lat, lng: lon });
         }
         

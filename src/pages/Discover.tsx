@@ -601,6 +601,13 @@ const Discover = () => {
             });
           }
           console.log('🔍 After location filtering:', filteredData.length);
+          console.log('═══════════════════════════════════════════');
+          console.log('📊 FILTERING RESULTS:');
+          console.log('📍 Search location:', selectedLocation);
+          console.log('📍 Search coordinates:', searchCoords);
+          console.log('📏 Search radius:', selectedRadius, 'miles');
+          console.log('✅ PROPERTIES FOUND:', filteredData.length);
+          console.log('═══════════════════════════════════════════');
         }
 
 
@@ -917,17 +924,25 @@ const Discover = () => {
           <LocationSearch
             value={selectedLocation}
             onChange={(location, radius, coordinates) => {
-              console.log('🔍 Discover: LocationSearch onChange called with:', { location, radius, coordinates });
+              console.log('═══════════════════════════════════════════');
+              console.log('🔍 DISCOVER: LocationSearch onChange triggered');
+              console.log('📍 RECEIVED LOCATION:', location);
+              console.log('📏 RECEIVED RADIUS:', radius);
+              console.log('📍 RECEIVED COORDINATES:', coordinates);
               console.log('🔍 Discover: Current selectedRadius before update:', selectedRadius);
+              console.log('═══════════════════════════════════════════');
               
               // Store coordinates if provided
               if (coordinates) {
-                console.log('🔍 Discover: Storing location coordinates:', coordinates);
+                console.log('✅ COORDINATES PROVIDED - Storing:', coordinates);
+                console.log('📍 Storing location coordinates:', coordinates);
                 setSelectedLocationCoords(coordinates);
                 localStorage.setItem('propswipes_selected_location_coords', JSON.stringify(coordinates));
                 // Update map center for map-based components
                 setMapCenter([coordinates.lng, coordinates.lat]);
+                console.log('🗺️ Map center updated to:', [coordinates.lng, coordinates.lat]);
               } else {
+                console.log('❌ NO COORDINATES PROVIDED - Clearing stored coords');
                 // Clear stored coordinates if none provided
                 setSelectedLocationCoords(null);
                 localStorage.removeItem('propswipes_selected_location_coords');
