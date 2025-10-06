@@ -361,7 +361,36 @@ const LocationSearch = ({
         return;
       }
 
-      // Fallback to default coordinates for major cities if no database match
+      // Try Mapbox Geocoding as a fallback if DB didn't help
+      try {
+        const { data: tokenData } = await supabase.functions.invoke('get-mapbox-token');
+        const mapboxToken = tokenData?.token;
+        if (mapboxToken) {
+          const resp = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${mapboxToken}&country=US&limit=1`
+          );
+          if (resp.ok) {
+            const json = await resp.json();
+            const feat = json.features?.[0];
+            const coords = feat?.geometry?.coordinates;
+            if (coords && coords.length >= 2) {
+              const [lng, lat] = coords;
+              console.log('🗺️ Mapbox fallback coords:', { lat, lng });
+              setMapCenter([lng, lat]);
+              onChange(location, selectedRadius, { lat, lng });
+              return;
+            }
+          } else {
+            console.warn('⚠️ Mapbox fallback failed:', resp.status);
+          }
+        } else {
+          console.warn('⚠️ No Mapbox token available for fallback geocoding');
+        }
+      } catch (e) {
+        console.error('⚠️ Mapbox geocoding fallback error:', e);
+      }
+
+      // Fallback to default coordinates for major cities if no database or Mapbox match
       const cityDefaults: { [key: string]: [number, number] } = {
         'new york': [-74.006, 40.7128],
         'nyc': [-74.006, 40.7128],
@@ -378,6 +407,7 @@ const LocationSearch = ({
         'san jose': [-121.8863, 37.3382],
         'austin': [-97.7431, 30.2672],
         'woodmere': [-73.7118, 40.6323],
+        'hempstead': [-73.6187, 40.7062],
       };
 
       const locationKey = location.toLowerCase().trim();
