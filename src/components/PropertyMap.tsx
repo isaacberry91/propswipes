@@ -107,6 +107,18 @@ const PropertyMap = ({
       map.current.on('load', () => {
         setMapLoaded(true);
         setLoading(false);
+        
+        // Fetch properties for initial view
+        fetchPropertiesInBounds();
+      });
+
+      // Add listeners for map movement
+      map.current.on('moveend', () => {
+        fetchPropertiesInBounds();
+      });
+
+      map.current.on('zoomend', () => {
+        fetchPropertiesInBounds();
       });
 
       map.current.on('error', () => {
@@ -138,143 +150,57 @@ const PropertyMap = ({
   }, [visible, mapLoaded]);
 
   useEffect(() => {
-    setProperties(propProperties);
-  }, [propProperties]);
+    if (propProperties.length > 0) {
+      setProperties(propProperties);
+    } else if (mapLoaded) {
+      fetchPropertiesInBounds();
+    }
+  }, [propProperties, mapLoaded]);
 
-  // Helper function to geocode an address
-  const geocodeAddress = async (address: string): Promise<{ lat: number; lng: number } | null> => {
+  // Fetch properties within current map bounds
+  const fetchPropertiesInBounds = async () => {
+    if (!map.current || propProperties.length > 0) return;
+    
+    setLoading(true);
     try {
-      // Simple geocoding using a free service
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
-      );
-      const data = await response.json();
+      const bounds = map.current.getBounds();
+      const sw = bounds.getSouthWest();
+      const ne = bounds.getNorthEast();
       
-      if (data && data[0]) {
-        return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
-        };
+      console.log('🗺️ Fetching properties in bounds:', {
+        south: sw.lat,
+        west: sw.lng,
+        north: ne.lat,
+        east: ne.lng
+      });
+
+      // Fetch properties within bounds
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('status', 'approved')
+        .is('deleted_at', null)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+        .gte('latitude', sw.lat)
+        .lte('latitude', ne.lat)
+        .gte('longitude', sw.lng)
+        .lte('longitude', ne.lng)
+        .limit(500);
+
+      if (error) {
+        console.error('Error fetching properties:', error);
+        return;
       }
-      return null;
+
+      console.log(`🗺️ Loaded ${data?.length || 0} properties in current view`);
+      setProperties(data || []);
     } catch (error) {
-      console.error('Geocoding error:', error);
-      return null;
+      console.error('Error fetching properties:', error);
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Fetch properties near the location (only if no properties passed)
-  useEffect(() => {
-    console.log('🗺️ PropertyMap: Properties effect - propProperties.length:', propProperties.length);
-    if (propProperties.length > 0) {
-      console.log('🗺️ PropertyMap: Using passed properties:', propProperties);
-      setLoading(false);
-      return;
-    }
-    
-    console.log('🗺️ PropertyMap: No properties passed, fetching from database');
-    
-    const fetchProperties = async () => {
-      if (!center) return;
-      
-      setLoading(true);
-      try {
-        // First get all approved properties
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('status', 'approved')
-          .is('deleted_at', null);
-
-        if (error) {
-          console.error('Error fetching properties:', error);
-          return;
-        }
-
-        if (!data || data.length === 0) {
-          setProperties([]);
-          return;
-        }
-
-        // Process properties and add coordinates if missing
-        const processedProperties = await Promise.all(
-          data.map(async (property) => {
-            // If property already has coordinates, use them
-            if (property.latitude && property.longitude) {
-              return property;
-            }
-
-            // Otherwise, try to geocode the address
-            try {
-              const fullAddress = `${property.address}, ${property.city}, ${property.state}`;
-              const coords = await geocodeAddress(fullAddress);
-              
-              if (coords) {
-                // Update the property in the database with the coordinates
-                await supabase
-                  .from('properties')
-                  .update({
-                    latitude: coords.lat,
-                    longitude: coords.lng
-                  })
-                  .eq('id', property.id);
-
-                return {
-                  ...property,
-                  latitude: coords.lat,
-                  longitude: coords.lng
-                };
-              }
-            } catch (geocodeError) {
-              console.error('Geocoding error for property:', property.id, geocodeError);
-            }
-
-            return property;
-          })
-        );
-
-        // Helper function to calculate distance using Haversine formula
-        const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-          const R = 3959; // Earth's radius in miles
-          const dLat = (lat2 - lat1) * Math.PI / 180;
-          const dLon = (lon2 - lon1) * Math.PI / 180;
-          const a = 
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          return R * c; // Distance in miles
-        };
-
-        // Filter properties within radius
-        console.log(`🗺️ Filtering with radius: ${selectedRadius} miles from center:`, center);
-        
-        const filteredProperties = processedProperties.filter((property) => {
-          // Only include properties with valid coordinates
-          if (!property.latitude || !property.longitude) {
-            return false;
-          }
-
-          const distance = calculateDistance(center[1], center[0], property.latitude, property.longitude);
-          
-          const included = distance <= selectedRadius;
-          if (included) {
-            console.log(`🗺️ Including property: ${property.title} at distance ${distance.toFixed(2)} miles`);
-          }
-          return included;
-        });
-
-        setProperties(filteredProperties);
-        console.log(`🗺️ Loaded ${filteredProperties.length} properties with coordinates for search area`);
-      } catch (error) {
-        console.error('Error fetching properties:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, [center, selectedRadius, propProperties]);
 
   // Add property markers to map
   useEffect(() => {
@@ -339,76 +265,7 @@ const PropertyMap = ({
     });
   }, [properties, onPropertySelect, mapLoaded]);
 
-  // Update radius circle
-  useEffect(() => {
-    if (!map.current || !center || !mapLoaded || !map.current.isStyleLoaded()) return;
-
-    // Remove existing radius source and layers
-    try {
-      if (map.current.getSource('radius-circle')) {
-        map.current.removeLayer('radius-circle-fill');
-        map.current.removeLayer('radius-circle-stroke');
-        map.current.removeSource('radius-circle');
-      }
-    } catch (_e) {
-      // ignore if style isn't ready yet
-    }
-
-    // Create circle geometry
-    const radiusInMeters = selectedRadius * 1609.34; // Convert miles to meters
-    const centerCoords = center;
-    
-    // Simple circle approximation
-    const points = 64;
-    const coords = [];
-    for (let i = 0; i < points; i++) {
-      const angle = (i / points) * 2 * Math.PI;
-      const dx = radiusInMeters * Math.cos(angle);
-      const dy = radiusInMeters * Math.sin(angle);
-      
-      // Rough conversion - not perfect but sufficient for visualization
-      const deltaLat = dy / 111320;
-      const deltaLng = dx / (111320 * Math.cos(center[1] * Math.PI / 180));
-      
-      coords.push([center[0] + deltaLng, center[1] + deltaLat]);
-    }
-    coords.push(coords[0]); // Close the circle
-
-    map.current.addSource('radius-circle', {
-      type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'Polygon',
-          coordinates: [coords]
-        }
-      }
-    });
-
-    map.current.addLayer({
-      id: 'radius-circle-fill',
-      type: 'fill',
-      source: 'radius-circle',
-      layout: {},
-      paint: {
-        'fill-color': '#3b82f6',
-        'fill-opacity': 0.1
-      }
-    });
-
-    map.current.addLayer({
-      id: 'radius-circle-stroke',
-      type: 'line',
-      source: 'radius-circle',
-      layout: {},
-      paint: {
-        'line-color': '#3b82f6',
-        'line-width': 2,
-        'line-opacity': 0.5
-      }
-    });
-  }, [center, selectedRadius, mapLoaded]);
+  // Update radius circle - removed since we now use viewport bounds
 
   // Update map center when search location changes
   useEffect(() => {
@@ -434,28 +291,11 @@ const PropertyMap = ({
 
   return (
     <div className="relative w-full h-full">
-      {/* Map Controls */}
+      {/* Map Controls - Updated for viewport-based loading */}
       <Card className="absolute top-4 left-4 z-10 p-3 bg-background/95 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium">Search Radius</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              min="1"
-              max="200"
-              value={selectedRadius}
-              onChange={(e) => {
-                const newRadius = parseInt(e.target.value) || 10;
-                handleRadiusChange(newRadius);
-              }}
-              className="w-20 text-center"
-              placeholder="10"
-            />
-            <span className="text-sm text-muted-foreground">mi</span>
-          </div>
+        <div className="flex items-center gap-2">
+          <Layers className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium">Zoom to see properties</span>
         </div>
       </Card>
 
@@ -464,7 +304,7 @@ const PropertyMap = ({
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium">
-            {loading ? 'Loading...' : `${properties.length} properties`}
+            {loading ? 'Loading...' : `${properties.length} properties in view`}
           </span>
         </div>
       </Card>
