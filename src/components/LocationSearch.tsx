@@ -334,7 +334,11 @@ const LocationSearch = ({
         if (newRadius !== selectedRadius) {
           console.log('🔍 Adjusting radius based on location specificity:', newRadius);
           setSelectedRadius(newRadius);
-          onChange(location, newRadius);
+          // Also inform parent with coords so radius filtering works
+          onChange(location, newRadius, { lat, lng: lon });
+        } else {
+          // Inform parent with coords even if radius unchanged
+          onChange(location, selectedRadius, { lat, lng: lon });
         }
         
         console.log('🗺️ Setting map center to database coordinates:', [lon, lat]);
@@ -366,6 +370,8 @@ const LocationSearch = ({
         if (locationKey.includes(city)) {
           console.log('🗺️ Using default coordinates for city:', city, coords);
           setMapCenter(coords);
+          // Inform parent so radius filtering gets coordinates
+          onChange(location, selectedRadius, { lat: coords[1], lng: coords[0] });
           return;
         }
       }
