@@ -435,8 +435,9 @@ const Discover = () => {
       }
 
 
-      // Limit results for performance - use pagination instead of loading 500 at once
-      query = query.limit(50);
+      // Limit results based on radius - larger radius = more properties
+      const limit = selectedRadius >= 1000 ? 500 : selectedRadius >= 500 ? 200 : selectedRadius >= 100 ? 100 : 50;
+      query = query.limit(limit);
 
       console.log('🔍 About to execute property query with filters:', {
         selectedLocation,
