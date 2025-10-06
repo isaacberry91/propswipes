@@ -291,11 +291,28 @@ const PropertyMap = ({
 
   return (
     <div className="relative w-full h-full">
-      {/* Map Controls - Updated for viewport-based loading */}
+      {/* Map Controls */}
       <Card className="absolute top-4 left-4 z-10 p-3 bg-background/95 backdrop-blur" onPointerDown={(e) => e.stopPropagation()}>
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium">Zoom to see properties</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium">Search Radius</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              min="1"
+              max="5000"
+              value={selectedRadius}
+              onChange={(e) => {
+                const newRadius = parseInt(e.target.value) || 10;
+                handleRadiusChange(newRadius);
+              }}
+              className="w-24 text-center"
+              placeholder="10"
+            />
+            <span className="text-sm text-muted-foreground">mi</span>
+          </div>
         </div>
       </Card>
 
