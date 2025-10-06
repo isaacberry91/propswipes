@@ -181,9 +181,9 @@ Deno.serve(async (req) => {
       price_min: aiFilters.price_min ?? (currentFilters.priceRange?.[0] !== 200000 ? currentFilters.priceRange?.[0] : undefined),
       price_max: aiFilters.price_max ?? (currentFilters.priceRange?.[1] !== 2000000 ? currentFilters.priceRange?.[1] : undefined),
       
-      // Property/Listing type: AI overrides UI
-      property_type: aiFilters.property_type ?? currentFilters.propertyType,
-      listing_type: aiFilters.listing_type ?? currentFilters.listingType,
+      // Property/Listing type: AI overrides UI (skip if "any")
+      property_type: aiFilters.property_type ?? (currentFilters.propertyType !== 'any' ? currentFilters.propertyType : undefined),
+      listing_type: aiFilters.listing_type ?? (currentFilters.listingType !== 'any' ? currentFilters.listingType : undefined),
       
       // Bedrooms/Bathrooms: AI overrides UI
       bedrooms_min: aiFilters.bedrooms_min ?? (currentFilters.bedrooms === 'studio' ? 0 : (parseInt(currentFilters.bedrooms) || undefined)),
