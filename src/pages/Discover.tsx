@@ -371,6 +371,27 @@ const Discover = () => {
         .eq('status', 'approved')
         .is('deleted_at', null);
 
+      // If we have coordinates, constrain the DB query to a bounding box around the point
+      if (coordsToUse) {
+        const radiusMiles = selectedRadius || 25;
+        const lat = coordsToUse.lat;
+        const lng = coordsToUse.lng;
+        const latDelta = radiusMiles / 69; // ~69 miles per degree latitude
+        const lonDelta = radiusMiles / (Math.cos(lat * Math.PI / 180) * 69);
+        const minLat = lat - latDelta;
+        const maxLat = lat + latDelta;
+        const minLng = lng - lonDelta;
+        const maxLng = lng + lonDelta;
+
+        query = query
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .gte('latitude', minLat)
+          .lte('latitude', maxLat)
+          .gte('longitude', minLng)
+          .lte('longitude', maxLng);
+      }
+
       // Apply only basic filters - NO price/bedrooms/bathrooms/property type filters
       // Only location/radius filtering will be applied below
       
@@ -445,8 +466,8 @@ const Discover = () => {
         console.log('🔍 Before location filtering:', filteredData.length);
 
         // Location-based filtering using coordinates and radius
-        if (selectedLocation && selectedLocationCoords && selectedLocation !== 'All') {
-          console.log('🔍 Filtering properties by coordinates:', selectedLocationCoords);
+        if (selectedLocation && coordsToUse && selectedLocation !== 'All') {
+          console.log('🔍 Filtering properties by coordinates:', coordsToUse);
           console.log('🔍 Search radius:', selectedRadius, 'miles');
           
           // Calculate distance between two coordinates using Haversine formula
@@ -467,8 +488,8 @@ const Discover = () => {
           filteredData = filteredData.filter((property: any) => {
             if (property.latitude && property.longitude) {
               const distance = calculateDistance(
-                selectedLocationCoords.lat,
-                selectedLocationCoords.lng,
+                coordsToUse.lat,
+                coordsToUse.lng,
                 Number(property.latitude),
                 Number(property.longitude)
               );
@@ -481,7 +502,7 @@ const Discover = () => {
           console.log('═══════════════════════════════════════════');
           console.log('📊 FILTERING RESULTS:');
           console.log('📍 Search location:', selectedLocation);
-          console.log('📍 Coordinates:', selectedLocationCoords);
+          console.log('📍 Coordinates:', coordsToUse);
           console.log('📏 Radius:', radiusMiles, 'miles');
           console.log('✅ PROPERTIES FOUND:', filteredData.length);
           console.log('═══════════════════════════════════════════');
