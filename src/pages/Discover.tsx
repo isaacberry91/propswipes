@@ -444,66 +444,45 @@ const Discover = () => {
 
         console.log('🔍 Before location filtering:', filteredData.length);
 
-        // Location-based filtering (NO radius check - just city/state match)
-        if (selectedLocation && selectedLocation !== 'All') {
-          console.log('🔍 Filtering properties by location:', selectedLocation);
-          console.log('🔍 Skipping radius check - matching by city/state only');
+        // Location-based filtering using coordinates and radius
+        if (selectedLocation && selectedLocationCoords && selectedLocation !== 'All') {
+          console.log('🔍 Filtering properties by coordinates:', selectedLocationCoords);
+          console.log('🔍 Search radius:', selectedRadius, 'miles');
+          
+          // Calculate distance between two coordinates using Haversine formula
+          const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+            const R = 3959; // Radius of Earth in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+              Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+          };
+
+          const radiusMiles = selectedRadius || 25; // Default to 25 miles if not set
           
           filteredData = filteredData.filter((property: any) => {
-            if (!selectedLocation.includes('Current Location')) {
-              const rawState = (property.state || '').toString().trim();
-              const stateLower = rawState.toLowerCase();
-              const propertyStateCode = stateLower.startsWith('us-')
-                ? rawState.slice(3).toUpperCase()
-                : (rawState.length === 2
-                    ? rawState.toUpperCase()
-                    : (stateLower.includes('new york') ? 'NY'
-                      : stateLower.includes('new jersey') ? 'NJ'
-                      : rawState.toUpperCase()));
-              
-              const parts = selectedLocation.split(',').map((p) => p.trim());
-              const stateFullToCode: Record<string, string> = { 'louisiana': 'LA', 'new york': 'NY', 'new jersey': 'NJ' };
-              let wantedStateCode = '';
-              for (const p of parts) {
-                if (/^[A-Za-z]{2}$/.test(p)) { wantedStateCode = p.toUpperCase(); break; }
-                const lower = p.toLowerCase();
-                for (const [name, code] of Object.entries(stateFullToCode)) {
-                  if (lower.includes(name)) { wantedStateCode = code; break; }
-                }
-                if (wantedStateCode) break;
-              }
-              let wantedCity = '';
-              if (parts.length >= 2) {
-                const first = parts[0];
-                const second = parts[1];
-                const firstLooksLikeStreet = /\d/.test(first) || /(street|st\.?|avenue|ave\.?|road|rd\.?|boulevard|blvd\.?|drive|dr\.?|lane|ln\.?|court|ct\.?|highway|hwy\.?)/i.test(first);
-                wantedCity = (firstLooksLikeStreet ? second : first).toLowerCase();
-              } else if (parts[0]) {
-                wantedCity = parts[0].toLowerCase();
-              }
-              const cityLower = (property.city || '').toLowerCase().trim();
-              
-              // Matching rules:
-              // - If only state provided (e.g., "NY"), match by normalized state code
-              // - If city and state provided (e.g., "New York, NY"), require both city and state
-              let matches = false;
-              if (wantedStateCode && !wantedCity) {
-                matches = propertyStateCode === wantedStateCode;
-              } else if (wantedStateCode && wantedCity) {
-                matches = propertyStateCode === wantedStateCode && cityLower.includes(wantedCity);
-              } else if (!wantedStateCode && wantedCity) {
-                matches = cityLower.includes(wantedCity);
-              }
-              
-              return matches;
+            if (property.latitude && property.longitude) {
+              const distance = calculateDistance(
+                selectedLocationCoords.lat,
+                selectedLocationCoords.lng,
+                Number(property.latitude),
+                Number(property.longitude)
+              );
+              return distance <= radiusMiles;
             }
-            
             return false;
           });
-          console.log('🔍 After location filtering (no radius):', filteredData.length);
+          
+          console.log('🔍 After coordinate-based filtering:', filteredData.length);
           console.log('═══════════════════════════════════════════');
           console.log('📊 FILTERING RESULTS:');
           console.log('📍 Search location:', selectedLocation);
+          console.log('📍 Coordinates:', selectedLocationCoords);
+          console.log('📏 Radius:', radiusMiles, 'miles');
           console.log('✅ PROPERTIES FOUND:', filteredData.length);
           console.log('═══════════════════════════════════════════');
         }
